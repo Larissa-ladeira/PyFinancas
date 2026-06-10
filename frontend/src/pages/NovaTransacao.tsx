@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { CATEGORIAS_RECEITA, CATEGORIAS_DESPESA } from '../types'
 import { useNavigate } from 'react-router-dom'
-import { Save, CheckCircle } from 'lucide-react'
+import { Save, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function NovaTransacao() {
   const navigate = useNavigate()
@@ -13,16 +13,28 @@ export default function NovaTransacao() {
   const [data, setData] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [usuarioId, setUsuarioId] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUsuarioId(data.user.id)
+    })
+  }, [])
 
   const categorias = tipo === 'Receita' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMsg('')
     setLoading(true)
     const { error } = await supabase.from('transacoes').insert({
+      usuario_id: usuarioId,
       descricao, valor: parseFloat(valor), tipo, categoria, data_transacao: data,
     })
-    if (!error) {
+    if (error) {
+      setErrorMsg(error.message)
+    } else {
       setSuccess(true)
       setTimeout(() => navigate('/'), 1500)
     }
@@ -76,6 +88,12 @@ export default function NovaTransacao() {
           </div>
         </div>
 
+        {errorMsg && (
+          <div className="flex items-center gap-2 bg-rose-500/15 border border-rose-500/25 text-rose-300 text-sm rounded-xl p-3">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {errorMsg}
+          </div>
+        )}
         {success && (
           <div className="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-sm rounded-xl p-3">
             <CheckCircle className="w-4 h-4 shrink-0" />

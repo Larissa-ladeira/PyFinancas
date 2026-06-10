@@ -20,14 +20,21 @@ export default function Dividas() {
   const [pagamentoMinimo, setPagamentoMinimo] = useState('')
   const [dataVenc, setDataVenc] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [pagandoId, setPagandoId] = useState<number | null>(null)
   const [valorPagamento, setValorPagamento] = useState('')
   const [estrategia, setEstrategia] = useState<Estrategia>('snowball')
   const [aporteExtra, setAporteExtra] = useState('')
   const [simulando, setSimulando] = useState(false)
+  const [usuarioId, setUsuarioId] = useState<string | null>(null)
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUsuarioId(data.user.id)
+    })
+    carregar()
+  }, [])
 
   async function carregar() {
     const { data } = await supabase.from('dividas').select('*')
@@ -38,15 +45,19 @@ export default function Dividas() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
+    setErrorMsg('')
     setLoading(true)
     const { error } = await supabase.from('dividas').insert({
+      usuario_id: usuarioId,
       descricao,
       valor_total: parseFloat(valorTotal),
       taxa_juros: parseFloat(taxaJuros) || 0,
       pagamento_minimo: parseFloat(pagamentoMinimo) || 0,
       data_vencimento: dataVenc || null,
     })
-    if (!error) {
+    if (error) {
+      setErrorMsg(error.message)
+    } else {
       setDescricao(''); setValorTotal(''); setTaxaJuros('')
       setPagamentoMinimo(''); setDataVenc('')
       setShowForm(false)
@@ -187,6 +198,11 @@ export default function Dividas() {
       {showForm && (
         <form onSubmit={handleAdd} className="glass-card p-5 space-y-4">
           <h3 className="font-semibold text-white/70 text-sm">Nova Dívida</h3>
+          {errorMsg && (
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3">
+              {errorMsg}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <input type="text" required placeholder="Descrição"
               className="input-glass" value={descricao} onChange={e => setDescricao(e.target.value)} />

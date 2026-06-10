@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao, Divida } from '../types'
+import type { Transacao, Divida, Lembrete } from '../types'
 import { MESES_PT } from '../types'
 import {
   TrendingUp, TrendingDown, Wallet, PieChart, BarChart3, ArrowUpRight,
-  PiggyBank, Target
+  PiggyBank, Target, Bell, Check
 } from 'lucide-react'
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer,
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [ano, setAno] = useState(new Date().getFullYear())
   const [dividas, setDividas] = useState<Divida[]>([])
   const [salario, setSalario] = useState(0)
+  const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
 
   useEffect(() => { carregar() }, [mes, ano])
   useEffect(() => {
@@ -33,6 +34,29 @@ export default function Dashboard() {
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
   }, [])
+
+  useEffect(() => {
+    const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
+    const fim = mes === 12
+      ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
+      : new Date(ano, mes, 1).toISOString().split('T')[0]
+    supabase.from('lembretes').select('*')
+      .gte('data_vencimento', inicio).lt('data_vencimento', fim)
+      .order('data_vencimento', { ascending: false })
+      .then(({ data }) => setLembretesMes(data || []))
+  }, [mes, ano])
+
+  async function togglePago(id: number, pago: boolean) {
+    await supabase.from('lembretes').update({ pago: !pago }).eq('id', id)
+    const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
+    const fim = mes === 12
+      ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
+      : new Date(ano, mes, 1).toISOString().split('T')[0]
+    const { data } = await supabase.from('lembretes').select('*')
+      .gte('data_vencimento', inicio).lt('data_vencimento', fim)
+      .order('data_vencimento', { ascending: false })
+    setLembretesMes(data || [])
+  }
 
   async function carregar() {
     const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
@@ -161,6 +185,103 @@ export default function Dashboard() {
           </div>
           <p className={`metric-value ${saldo >= 0 ? 'text-cyan-300' : 'text-rose-300'}`}>{formatar(saldo)}</p>
         </div>
+      </div>
+
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-2 text-white/70 mb-4">
+          <Bell className="w-4 h-4" />
+          <h2 className="font-semibold text-sm">Compromissos do Mês</h2>
+        </div>
+
+        {(() => {
+          const pendentes = lembretesMes.filter(l => !l.pago)
+          const totalPendente = pendentes.reduce((s, l) => s + Number(l.valor), 0)
+          const totalPago = lembretesMes.filter(l => l.pago).reduce((s, l) => s + Number(l.valor), 0)
+          const gastoMes = despesas
+          const compromissoTotal = totalPendente + gastoMes
+          const salarioLiquido = salario - compromissoTotal
+          const percComprometido = salario > 0 ? (compromissoTotal / salario) * 100 : 0
+
+          return (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <span className="text-xs text-white/40">A pagar (lembretes)</span>
+                  <p className="text-lg font-bold text-amber-300">{formatar(totalPendente)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-white/40">Já gasto (transações)</span>
+                  <p className="text-lg font-bold text-rose-300">{formatar(gastoMes)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-white/40">Total comprometido</span>
+                  <p className="text-lg font-bold text-white">{formatar(compromissoTotal)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-white/40">% do salário</span>
+                  <p className={`text-lg font-bold ${percComprometido > 70 ? 'text-rose-300' : 'text-emerald-300'}`}>
+                    {percComprometido.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+
+              {salario > 0 && (
+                <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden mb-4">
+                  <div className={`h-full rounded-full transition-all duration-500 ${percComprometido > 70 ? 'bg-rose-500' : 'bg-amber-500'}`}
+                    style={{ width: `${Math.min(percComprometido, 100)}%` }} />
+                </div>
+              )}
+
+              {salarioLiquido > 0 && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-4">
+                  <p className="text-sm text-emerald-200">
+                    Saldo livre após compromissos: <strong>{formatar(salarioLiquido)}</strong>
+                  </p>
+                </div>
+              )}
+              {salarioLiquido <= 0 && salario > 0 && (
+                <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 mb-4">
+                  <p className="text-sm text-rose-200">
+                    Seus compromissos excedem seu salário em <strong>{formatar(Math.abs(salarioLiquido))}</strong>
+                  </p>
+                </div>
+              )}
+
+              {pendentes.length > 0 && (
+                <details className="group">
+                  <summary className="cursor-pointer text-sm text-white/50 hover:text-white/70 transition-colors
+                    [&::-webkit-details-marker]:hidden">
+                    {pendentes.length} lembrete(s) pendente(s) — clique para ver ▼
+                  </summary>
+                  <div className="mt-3 space-y-2">
+                    {pendentes.map(l => (
+                      <div key={l.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/5">
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => togglePago(l.id, l.pago)}
+                            className="w-5 h-5 rounded border border-amber-500/50 flex items-center justify-center
+                              hover:bg-emerald-500/20 hover:border-emerald-500 transition-all">
+                          </button>
+                          <div>
+                            <p className="text-sm text-white/80 font-medium">{l.descricao}</p>
+                            <p className="text-xs text-white/30">
+                              Vence {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-semibold text-amber-300">{formatar(Number(l.valor))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+              {pendentes.length === 0 && (
+                <p className="text-sm text-emerald-300/70 flex items-center gap-2">
+                  <Check className="w-4 h-4" /> Nenhum lembrete pendente neste mês
+                </p>
+              )}
+            </>
+          )
+        })()}
       </div>
 
       {(totalRestante > 0 || excedente > 0) && (
