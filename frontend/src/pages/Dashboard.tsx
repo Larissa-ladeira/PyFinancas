@@ -196,7 +196,6 @@ export default function Dashboard() {
         {(() => {
           const pendentes = lembretesMes.filter(l => !l.pago)
           const totalPendente = pendentes.reduce((s, l) => s + Number(l.valor), 0)
-          const totalPago = lembretesMes.filter(l => l.pago).reduce((s, l) => s + Number(l.valor), 0)
           const gastoMes = despesas
           const compromissoTotal = totalPendente + gastoMes
           const salarioLiquido = salario - compromissoTotal
