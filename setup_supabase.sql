@@ -95,3 +95,32 @@ CREATE POLICY "Usuários atualizam apenas suas dívidas"
 CREATE POLICY "Usuários deletam apenas suas dívidas"
   ON dividas FOR DELETE
   USING (auth.uid() = usuario_id);
+
+-- 7. Tabela de notificações por email
+CREATE TABLE IF NOT EXISTS notificacoes (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  usuario_id UUID NOT NULL DEFAULT auth.uid(),
+  ativo BOOLEAN NOT NULL DEFAULT false,
+  email_notificacao TEXT,
+  dias_antes INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE notificacoes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Usuários veem apenas suas notificações"
+  ON notificacoes FOR SELECT
+  USING (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários inserem apenas suas notificações"
+  ON notificacoes FOR INSERT
+  WITH CHECK (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários atualizam apenas suas notificações"
+  ON notificacoes FOR UPDATE
+  USING (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários deletam apenas suas notificações"
+  ON notificacoes FOR DELETE
+  USING (auth.uid() = usuario_id);

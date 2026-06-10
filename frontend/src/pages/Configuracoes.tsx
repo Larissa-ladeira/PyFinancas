@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
-import { Save } from 'lucide-react'
+import { Save, Bell } from 'lucide-react'
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -13,11 +13,25 @@ export default function Configuracoes() {
   const [todas, setTodas] = useState<Transacao[]>([])
   const [saved, setSaved] = useState(false)
 
+  const [notifAtivo, setNotifAtivo] = useState(false)
+  const [notifEmail, setNotifEmail] = useState('')
+  const [notifDias, setNotifDias] = useState(1)
+  const [notifId, setNotifId] = useState<number | null>(null)
+  const [notifSaved, setNotifSaved] = useState(false)
+
   useEffect(() => {
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
       if (data) { setSalario(String(data.salario_base)); setConfigId(data.id) }
     })
     supabase.from('transacoes').select('*').then(({ data }) => setTodas(data || []))
+    supabase.from('notificacoes').select('*').single().then(({ data }) => {
+      if (data) {
+        setNotifAtivo(data.ativo)
+        setNotifEmail(data.email_notificacao || '')
+        setNotifDias(data.dias_antes)
+        setNotifId(data.id)
+      }
+    })
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
@@ -27,6 +41,19 @@ export default function Configuracoes() {
     else await supabase.from('configuracoes').insert({ salario_base: valor })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleNotifSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const payload = {
+      ativo: notifAtivo,
+      email_notificacao: notifEmail || null,
+      dias_antes: notifDias,
+    }
+    if (notifId) await supabase.from('notificacoes').update(payload).eq('id', notifId)
+    else await supabase.from('notificacoes').insert(payload)
+    setNotifSaved(true)
+    setTimeout(() => setNotifSaved(false), 2000)
   }
 
   const totalRec = todas.filter(t => t.tipo === 'Receita').reduce((s, t) => s + Number(t.valor), 0)
@@ -48,6 +75,41 @@ export default function Configuracoes() {
         <button type="submit" className="btn-primary flex items-center justify-center gap-2">
           <Save className="w-4 h-4" />
           {saved ? 'Salvo!' : 'Salvar'}
+        </button>
+      </form>
+
+      <form onSubmit={handleNotifSave} className="glass-card p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <Bell className="w-5 h-5" /> Notificações por Email
+        </h2>
+
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" checked={notifAtivo} onChange={e => setNotifAtivo(e.target.checked)}
+            className="w-5 h-5 accent-emerald-500" />
+          <span className="text-sm text-white/70">Ativar notificações de lembretes</span>
+        </label>
+
+        {notifAtivo && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Email para notificações</label>
+              <input type="email" placeholder="seu@email.com"
+                className="input-glass" value={notifEmail}
+                onChange={e => setNotifEmail(e.target.value)} />
+              <p className="text-xs text-white/30 mt-1">Deixe em branco para usar o email da conta</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Notificar dias antes do vencimento</label>
+              <input type="number" min="1" max="30"
+                className="input-glass" value={notifDias}
+                onChange={e => setNotifDias(Math.max(1, Number(e.target.value)))} />
+            </div>
+          </>
+        )}
+
+        <button type="submit" className="btn-primary flex items-center justify-center gap-2">
+          <Bell className="w-4 h-4" />
+          {notifSaved ? 'Salvo!' : 'Salvar Notificações'}
         </button>
       </form>
 

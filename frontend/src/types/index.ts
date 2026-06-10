@@ -24,6 +24,16 @@ export interface Lembrete {
   created_at: string
 }
 
+export interface Notificacao {
+  id: number
+  usuario_id: string
+  ativo: boolean
+  email_notificacao: string | null
+  dias_antes: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Divida {
   id: number
   usuario_id: string
