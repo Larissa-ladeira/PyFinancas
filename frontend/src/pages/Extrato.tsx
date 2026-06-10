@@ -31,9 +31,9 @@ export default function Extrato() {
   if (filtroTipo !== 'todos') filtradas = filtradas.filter(t => t.tipo === filtroTipo)
   if (filtroCat !== 'todas') filtradas = filtradas.filter(t => t.categoria === filtroCat)
 
-  const total = filtradas.reduce((s, t) => s + Number(t.valor) * (t.tipo === 'Receita' ? 1 : -1), 0)
-  const qtdRec = filtradas.filter(t => t.tipo === 'Receita').length
-  const qtdDesp = filtradas.filter(t => t.tipo === 'Despesa').length
+  const total = filtradas.reduce((s, t) => s + Number(t.valor) * (t.tipo === 'receita' ? 1 : -1), 0)
+  const qtdRec = filtradas.filter(t => t.tipo === 'receita').length
+  const qtdDesp = filtradas.filter(t => t.tipo === 'despesa').length
 
   return (
     <div className="space-y-6">
@@ -63,8 +63,8 @@ export default function Extrato() {
           </select>
           <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)} className="select-glass">
             <option value="todos">Todos os tipos</option>
-            <option value="Receita">Receita</option>
-            <option value="Despesa">Despesa</option>
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
           </select>
           <select value={filtroCat} onChange={e => setFiltroCat(e.target.value)} className="select-glass">
             <option value="todas">Todas as categorias</option>
@@ -87,13 +87,13 @@ export default function Extrato() {
                     <td className="text-white/80 font-medium">{t.descricao}</td>
                     <td className="text-white/50">{t.categoria}</td>
                     <td>
-                      <span className={`badge ${t.tipo === 'Receita' ? 'badge-receita' : 'badge-despesa'}`}>
-                        {t.tipo}
+                      <span className={`badge ${t.tipo === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
+                        {t.tipo === 'receita' ? 'Receita' : 'Despesa'}
                       </span>
                     </td>
                     <td className={`text-right font-semibold whitespace-nowrap
-                      ${t.tipo === 'Receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
-                      {t.tipo === 'Receita' ? '+' : '-'}{formatar(Number(t.valor))}
+                      ${t.tipo === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {t.tipo === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                     </td>
                   </tr>
                 ))}

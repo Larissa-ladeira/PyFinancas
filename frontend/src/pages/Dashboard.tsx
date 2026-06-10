@@ -77,8 +77,8 @@ export default function Dashboard() {
     return (data || []) as Transacao[]
   }
 
-  const receitas = transacoes.filter(t => t.tipo === 'Receita').reduce((s, t) => s + Number(t.valor), 0)
-  const despesas = transacoes.filter(t => t.tipo === 'Despesa').reduce((s, t) => s + Number(t.valor), 0)
+  const receitas = transacoes.filter(t => t.tipo === 'receita').reduce((s, t) => s + Number(t.valor), 0)
+  const despesas = transacoes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const saldo = receitas - despesas
 
   const ativas = dividas.filter(d => !d.quitada)
@@ -115,7 +115,7 @@ export default function Dashboard() {
 
   const mesesLiberdade = calcularLiberdade()
 
-  const despCat = transacoes.filter(t => t.tipo === 'Despesa')
+  const despCat = transacoes.filter(t => t.tipo === 'despesa')
     .reduce<Record<string, number>>((acc, t) => {
       acc[t.categoria] = (acc[t.categoria] || 0) + Number(t.valor); return acc
     }, {})
@@ -128,7 +128,7 @@ export default function Dashboard() {
       for (let i = 1; i <= 12; i++) agrupado[i] = { Receitas: 0, Despesas: 0 }
       for (const t of lista) {
         const m = new Date(t.data_transacao).getMonth() + 1
-        if (t.tipo === 'Receita') agrupado[m].Receitas += Number(t.valor)
+        if (t.tipo === 'receita') agrupado[m].Receitas += Number(t.valor)
         else agrupado[m].Despesas += Number(t.valor)
       }
       setDadosAno(Object.entries(agrupado).map(([m, v]) => ({ mes: Number(m), ...v })))
@@ -414,13 +414,13 @@ export default function Dashboard() {
                       <td className="text-white/80 font-medium">{t.descricao}</td>
                       <td className="text-white/50">{t.categoria}</td>
                       <td>
-                        <span className={`badge ${t.tipo === 'Receita' ? 'badge-receita' : 'badge-despesa'}`}>
+                        <span className={`badge ${t.tipo === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
                           {t.tipo}
                         </span>
                       </td>
                       <td className={`text-right font-semibold whitespace-nowrap
-                        ${t.tipo === 'Receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
-                        {t.tipo === 'Receita' ? '+' : '-'}{formatar(Number(t.valor))}
+                        ${t.tipo === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                        {t.tipo === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                       </td>
                     </tr>
                   ))}

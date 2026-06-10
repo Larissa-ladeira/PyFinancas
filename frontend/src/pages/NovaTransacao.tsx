@@ -6,7 +6,7 @@ import { Save, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function NovaTransacao() {
   const navigate = useNavigate()
-  const [tipo, setTipo] = useState<'Receita' | 'Despesa'>('Despesa')
+  const [tipo, setTipo] = useState<'receita' | 'despesa'>('despesa')
   const [categoria, setCategoria] = useState(CATEGORIAS_DESPESA[0])
   const [descricao, setDescricao] = useState('')
   const [valor, setValor] = useState('')
@@ -22,7 +22,7 @@ export default function NovaTransacao() {
     })
   }, [])
 
-  const categorias = tipo === 'Receita' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA
+  const categorias = tipo === 'receita' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,15 +48,15 @@ export default function NovaTransacao() {
         <div>
           <label className="block text-sm font-medium text-white/60 mb-2">Tipo</label>
           <div className="flex gap-2">
-            {(['Despesa', 'Receita'] as const).map(t => (
-              <button key={t} type="button" onClick={() => { setTipo(t); setCategoria(t === 'Receita' ? CATEGORIAS_RECEITA[0] : CATEGORIAS_DESPESA[0]) }}
+            {(['despesa', 'receita'] as const).map(t => (
+              <button key={t} type="button" onClick={() => { setTipo(t); setCategoria(t === 'receita' ? CATEGORIAS_RECEITA[0] : CATEGORIAS_DESPESA[0]) }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all duration-200
                   ${tipo === t
-                    ? t === 'Receita'
+                    ? t === 'receita'
                       ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
                       : 'bg-rose-500/20 border-rose-500/40 text-rose-300'
                     : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'}`}>
-                {t}
+                {t === 'receita' ? 'Receita' : 'Despesa'}
               </button>
             ))}
           </div>
