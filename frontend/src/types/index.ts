@@ -3,7 +3,7 @@ export interface Transacao {
   usuario_id: string
   descricao: string
   valor: number
-  tipo: 'Receita' | 'Despesa'
+  tipo: 'receita' | 'despesa'
   categoria: string
   data_transacao: string
 }
@@ -50,7 +50,7 @@ export interface Divida {
 export interface TransacaoForm {
   descricao: string
   valor: number
-  tipo: 'Receita' | 'Despesa'
+  tipo: 'receita' | 'despesa'
   categoria: string
   data_transacao: string
 }
