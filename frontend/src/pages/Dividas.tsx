@@ -28,6 +28,7 @@ export default function Dividas() {
   const [aporteExtra, setAporteExtra] = useState('')
   const [simulando, setSimulando] = useState(false)
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
+  const [tipoPagamento, setTipoPagamento] = useState<'total' | 'parcial'>('total')
   const [editandoId, setEditandoId] = useState<number | null>(null)
   const [editDescricao, setEditDescricao] = useState('')
   const [editValorTotal, setEditValorTotal] = useState('')
@@ -73,16 +74,22 @@ export default function Dividas() {
   }
 
   async function handlePagar(divida: Divida) {
-    const valorPago = parseFloat(valorPagamento) || 0
-    if (valorPago <= 0) return
     const restante = Number(divida.valor_total) - Number(divida.valor_pago)
+    const valorPago = tipoPagamento === 'total' ? restante : (parseFloat(valorPagamento) || 0)
+    if (valorPago <= 0) return
     const pagamentoFinal = Math.min(valorPago, restante)
     const novoPago = Number(divida.valor_pago) + pagamentoFinal
     const quitada = novoPago >= Number(divida.valor_total)
-    const { error } = await supabase.from('dividas').update({
+    const updateData: Record<string, any> = {
       valor_pago: quitada ? divida.valor_total : novoPago,
       quitada,
-    }).eq('id', divida.id)
+    }
+    if (!quitada) {
+      const dataAtual = divida.data_vencimento ? new Date(divida.data_vencimento) : new Date()
+      dataAtual.setMonth(dataAtual.getMonth() + 1)
+      updateData.data_vencimento = dataAtual.toISOString().split('T')[0]
+    }
+    const { error } = await supabase.from('dividas').update(updateData).eq('id', divida.id)
     if (error) setErrorMsg(error.message)
     setPagandoId(null)
     setValorPagamento('')
@@ -441,15 +448,44 @@ export default function Dividas() {
                     </div>
                     {pagandoId === d.id && (
                       <form onSubmit={(e) => { e.preventDefault(); handlePagar(d) }}
-                        className="mt-3 flex gap-2 items-end pt-3 border-t border-white/10">
-                        <div className="flex-1">
-                          <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
-                          <input type="number" required min="0.01" step="0.01" placeholder="0,00"
-                            className="input-glass" value={valorPagamento}
-                            onChange={e => setValorPagamento(e.target.value)} autoFocus />
+                        className="mt-3 space-y-3 pt-3 border-t border-white/10">
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagamento('') }}
+                            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all
+                              ${tipoPagamento === 'total'
+                                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'}`}>
+                            Pagar Total
+                          </button>
+                          <button type="button" onClick={() => setTipoPagamento('parcial')}
+                            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all
+                              ${tipoPagamento === 'parcial'
+                                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'}`}>
+                            Pagar Parcial
+                          </button>
                         </div>
-                        <button type="submit" className="btn-primary">
-                          Confirmar
+                        {tipoPagamento === 'total' ? (
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-white/60">Valor restante:</span>
+                            <span className="text-lg font-bold text-emerald-300">
+                              {formatar(Number(d.valor_total) - Number(d.valor_pago))}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 items-end">
+                            <div className="flex-1">
+                              <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
+                              <input type="number" required min="0.01" step="0.01" placeholder="0,00"
+                                className="input-glass" value={valorPagamento}
+                                onChange={e => setValorPagamento(e.target.value)} autoFocus />
+                            </div>
+                          </div>
+                        )}
+                        <button type="submit" className="btn-primary w-full">
+                          {tipoPagamento === 'total'
+                            ? `Quitar Dívida — ${formatar(Number(d.valor_total) - Number(d.valor_pago))}`
+                            : 'Confirmar Pagamento'}
                         </button>
                       </form>
                     )}
