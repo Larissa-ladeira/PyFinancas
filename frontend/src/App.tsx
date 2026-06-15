@@ -4,12 +4,12 @@ import { supabase } from './lib/supabase'
 import Login from './pages/Login'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
-import NovaTransacao from './pages/NovaTransacao'
 import Extrato from './pages/Extrato'
 import Configuracoes from './pages/Configuracoes'
 import Lembretes from './pages/Lembretes'
 import Dividas from './pages/Dividas'
 import DespesasMensais from './pages/DespesasMensais'
+import RendaExtra from './pages/RendaExtra'
 
 export default function App() {
   const [authed, setAuthed] = useState<boolean | null>(null)
@@ -36,12 +36,12 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/nova-transacao" element={<NovaTransacao />} />
         <Route path="/extrato" element={<Extrato />} />
         <Route path="/configuracoes" element={<Configuracoes />} />
         <Route path="/lembretes" element={<Lembretes />} />
         <Route path="/dividas" element={<Dividas />} />
         <Route path="/despesas" element={<DespesasMensais />} />
+        <Route path="/renda-extra" element={<RendaExtra />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

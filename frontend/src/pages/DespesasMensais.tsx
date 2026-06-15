@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
-  TrendingDown, Wallet, Trash2, PieChart, Pencil, X, Save
+  TrendingDown, Wallet, Trash2, PieChart, Pencil, X, Save, Plus, CheckCircle, AlertCircle
 } from 'lucide-react'
 
 const COLORS = ['#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#10b981']
@@ -24,6 +24,14 @@ export default function DespesasMensais() {
   const [editData, setEditData] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [formDescricao, setFormDescricao] = useState('')
+  const [formValor, setFormValor] = useState('')
+  const [formCategoria, setFormCategoria] = useState(CATEGORIAS_DESPESA[0])
+  const [formData, setFormData] = useState(new Date().toISOString().split('T')[0])
+  const [formLoading, setFormLoading] = useState(false)
+  const [formSuccess, setFormSuccess] = useState(false)
+  const [formErrorMsg, setFormErrorMsg] = useState('')
+  const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
@@ -42,6 +50,33 @@ export default function DespesasMensais() {
       .gte('data_transacao', inicio).lt('data_transacao', fim)
       .order('data_transacao', { ascending: false })
     setTransacoes(data || [])
+  }
+
+  async function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setFormErrorMsg('')
+    setFormLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error } = await supabase.from('transacoes').insert({
+      usuario_id: user?.id,
+      descricao: formDescricao,
+      valor: parseFloat(formValor),
+      tipo: 'despesa',
+      categoria: formCategoria,
+      data_transacao: formData,
+    })
+    if (error) {
+      setFormErrorMsg(error.message)
+    } else {
+      setFormSuccess(true)
+      setFormDescricao('')
+      setFormValor('')
+      setFormData(new Date().toISOString().split('T')[0])
+      setFormCategoria(CATEGORIAS_DESPESA[0])
+      carregar()
+      setTimeout(() => setFormSuccess(false), 2000)
+    }
+    setFormLoading(false)
   }
 
   const totalDespesas = transacoes.reduce((s, t) => s + Number(t.valor), 0)
@@ -103,6 +138,61 @@ export default function DespesasMensais() {
             {Array.from({ length: 11 }, (_, i) => 2020 + i).map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
+      </div>
+
+      <div className="glass-card p-5">
+        <button onClick={() => setShowForm(!showForm)}
+          className="flex items-center justify-between w-full text-left">
+          <div className="flex items-center gap-2 text-white/70">
+            <Plus className="w-4 h-4" />
+            <span className="font-semibold text-sm">Nova Despesa</span>
+          </div>
+          <span className={`text-xs text-white/30 transition-transform ${showForm ? 'rotate-180' : ''}`}>▼</span>
+        </button>
+        {showForm && (
+          <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Categoria</label>
+              <select value={formCategoria} onChange={e => setFormCategoria(e.target.value)} className="select-glass">
+                {CATEGORIAS_DESPESA.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Descrição</label>
+              <input type="text" required placeholder="Ex: Almoço, Mercado, etc."
+                className="input-glass" value={formDescricao} onChange={e => setFormDescricao(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-2">Valor (R$)</label>
+                <input type="number" required min="0.01" step="0.01" placeholder="0,00"
+                  className="input-glass" value={formValor} onChange={e => setFormValor(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-2">Data</label>
+                <input type="date" required className="input-glass"
+                  value={formData} onChange={e => setFormData(e.target.value)} />
+              </div>
+            </div>
+            {formErrorMsg && (
+              <div className="flex items-center gap-2 bg-rose-500/15 border border-rose-500/25 text-rose-300 text-sm rounded-xl p-3">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {formErrorMsg}
+              </div>
+            )}
+            {formSuccess && (
+              <div className="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-sm rounded-xl p-3">
+                <CheckCircle className="w-4 h-4 shrink-0" />
+                Despesa salva com sucesso!
+              </div>
+            )}
+            <button type="submit" disabled={formLoading || formSuccess}
+              className="btn-primary w-full flex items-center justify-center gap-2">
+              <Save className="w-4 h-4" />
+              {formLoading ? 'Salvando...' : formSuccess ? 'Salvo!' : 'Salvar Despesa'}
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="metric-card metric-card-despesa">

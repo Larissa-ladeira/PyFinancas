@@ -3,15 +3,15 @@ import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, PlusCircle, ListOrdered, Settings,
-  LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown
+  LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown, TrendingUp
 } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/nova-transacao', label: 'Nova Transação', icon: PlusCircle },
+  { to: '/despesas', label: 'Despesas', icon: TrendingDown },
+  { to: '/renda-extra', label: 'Renda Extra', icon: TrendingUp },
   { to: '/lembretes', label: 'Lembretes', icon: Bell },
   { to: '/dividas', label: 'Desfudência', icon: PiggyBank },
-  { to: '/despesas', label: 'Despesas', icon: TrendingDown },
   { to: '/extrato', label: 'Extrato', icon: ListOrdered },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
