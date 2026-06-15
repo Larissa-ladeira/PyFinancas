@@ -281,7 +281,7 @@ export default function DespesasMensais() {
                 {transacoes.map(t => (
                   editandoId === t.id ? (
                     <tr key={t.id}>
-                      <td colSpan={5} className="p-3">
+                      <td colSpan={6} className="p-3">
                         <form onSubmit={handleEditSave} className="flex flex-wrap gap-2 items-end">
                           <div className="flex-1 min-w-[120px]">
                             <label className="block text-xs text-white/40 mb-1">Descrição</label>
@@ -322,88 +322,90 @@ export default function DespesasMensais() {
                       </td>
                     </tr>
                   ) : (
-                    <tr key={t.id}>
-                      <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
-                      <td className="text-white/80 font-medium">{t.descricao}</td>
-                      <td><span className="badge badge-despesa">{t.categoria}</span></td>
-                      <td className="text-right font-semibold text-rose-300 whitespace-nowrap">
-                        -{formatar(Number(t.valor))}
-                      </td>
-                      <td className="text-center whitespace-nowrap">
-                        <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
-                          className={`p-1.5 rounded-lg transition-all align-middle ${
-                            pagandoId === t.id
-                              ? 'bg-emerald-500/20 text-emerald-300'
-                              : 'hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300'
-                          }`}>
-                          <DollarSign className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                      <td className="text-right whitespace-nowrap">
-                        <button onClick={() => iniciarEdicao(t)}
-                          className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300 transition-all align-middle">
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(t.id)}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all align-middle ml-0.5">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  )}
-                  {pagandoId === t.id && (
-                    <tr key={`pag-${t.id}`}>
-                      <td colSpan={6} className="p-3 bg-white/5">
-                        <div className="space-y-3">
-                          <div className="flex gap-2">
-                            <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagar(''); setPagarError('') }}
-                              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                                tipoPagamento === 'total'
-                                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                                  : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
-                              }`}>
-                              Pagar Total
-                            </button>
-                            <button type="button" onClick={() => setTipoPagamento('parcial')}
-                              className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                                tipoPagamento === 'parcial'
-                                  ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                                  : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
-                              }`}>
-                              Pagar Parcial
-                            </button>
-                          </div>
-                          {tipoPagamento === 'total' ? (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-white/60">Valor a quitar:</span>
-                              <span className="text-lg font-bold text-emerald-300">
-                                {formatar(Number(t.valor))}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2 items-end">
-                              <div className="flex-1">
-                                <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
-                                <input type="number" min="0.01" step="0.01" required placeholder="0,00"
-                                  className="input-glass" value={valorPagar}
-                                  onChange={e => setValorPagar(e.target.value)} autoFocus />
+                    <>
+                      <tr key={t.id}>
+                        <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
+                        <td className="text-white/80 font-medium">{t.descricao}</td>
+                        <td><span className="badge badge-despesa">{t.categoria}</span></td>
+                        <td className="text-right font-semibold text-rose-300 whitespace-nowrap">
+                          -{formatar(Number(t.valor))}
+                        </td>
+                        <td className="text-center whitespace-nowrap">
+                          <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
+                            className={`p-1.5 rounded-lg transition-all align-middle ${
+                              pagandoId === t.id
+                                ? 'bg-emerald-500/20 text-emerald-300'
+                                : 'hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300'
+                            }`}>
+                            <DollarSign className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                        <td className="text-right whitespace-nowrap">
+                          <button onClick={() => iniciarEdicao(t)}
+                            className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300 transition-all align-middle">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDelete(t.id)}
+                            className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all align-middle ml-0.5">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                      {pagandoId === t.id && (
+                        <tr key={`pag-${t.id}`}>
+                          <td colSpan={6} className="p-3 bg-white/5">
+                            <div className="space-y-3">
+                              <div className="flex gap-2">
+                                <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagar(''); setPagarError('') }}
+                                  className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
+                                    tipoPagamento === 'total'
+                                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                                  }`}>
+                                  Pagar Total
+                                </button>
+                                <button type="button" onClick={() => setTipoPagamento('parcial')}
+                                  className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
+                                    tipoPagamento === 'parcial'
+                                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                                  }`}>
+                                  Pagar Parcial
+                                </button>
+                              </div>
+                              {tipoPagamento === 'total' ? (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-white/60">Valor a quitar:</span>
+                                  <span className="text-lg font-bold text-emerald-300">
+                                    {formatar(Number(t.valor))}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex gap-2 items-end">
+                                  <div className="flex-1">
+                                    <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
+                                    <input type="number" min="0.01" step="0.01" required placeholder="0,00"
+                                      className="input-glass" value={valorPagar}
+                                      onChange={e => setValorPagar(e.target.value)} autoFocus />
+                                  </div>
+                                </div>
+                              )}
+                              {pagarError && (
+                                <p className="text-xs text-rose-300">{pagarError}</p>
+                              )}
+                              <div className="flex gap-2">
+                                <button onClick={() => handlePagarDespesa(t)}
+                                  className="btn-primary flex-1">
+                                  {tipoPagamento === 'total' ? `Quitar — ${formatar(Number(t.valor))}` : 'Confirmar Pagamento'}
+                                </button>
+                                <button onClick={() => { setPagandoId(null); setPagarError('') }}
+                                  className="btn-outline">Cancelar</button>
                               </div>
                             </div>
-                          )}
-                          {pagarError && (
-                            <p className="text-xs text-rose-300">{pagarError}</p>
-                          )}
-                          <div className="flex gap-2">
-                            <button onClick={() => handlePagarDespesa(t)}
-                              className="btn-primary flex-1">
-                              {tipoPagamento === 'total' ? `Quitar — ${formatar(Number(t.valor))}` : 'Confirmar Pagamento'}
-                            </button>
-                            <button onClick={() => { setPagandoId(null); setPagarError('') }}
-                              className="btn-outline">Cancelar</button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )
                 ))}
               </tbody>
