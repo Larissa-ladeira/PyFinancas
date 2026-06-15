@@ -60,8 +60,8 @@ export default function Configuracoes() {
     setTimeout(() => setNotifSaved(false), 2000)
   }
 
-  const totalRec = todas.filter(t => t.tipo === 'receita').reduce((s, t) => s + Number(t.valor), 0)
-  const totalDesp = todas.filter(t => t.tipo === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
+  const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
+  const totalDesp = todas.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const economia = totalRec - totalDesp
   const salarioNum = parseFloat(salario) || 0
   const percGasto = salarioNum > 0 ? (totalDesp / salarioNum) * 100 : 0

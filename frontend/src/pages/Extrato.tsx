@@ -28,12 +28,12 @@ export default function Extrato() {
   )
   if (filtroMes !== 'todos') filtradas = filtradas.filter(t => new Date(t.data_transacao).getMonth() + 1 === filtroMes)
   if (filtroAno !== 'todos') filtradas = filtradas.filter(t => new Date(t.data_transacao).getFullYear() === filtroAno)
-  if (filtroTipo !== 'todos') filtradas = filtradas.filter(t => t.tipo === filtroTipo)
+  if (filtroTipo !== 'todos') filtradas = filtradas.filter(t => t.tipo.toLowerCase() === filtroTipo)
   if (filtroCat !== 'todas') filtradas = filtradas.filter(t => t.categoria === filtroCat)
 
-  const total = filtradas.reduce((s, t) => s + Number(t.valor) * (t.tipo === 'receita' ? 1 : -1), 0)
-  const qtdRec = filtradas.filter(t => t.tipo === 'receita').length
-  const qtdDesp = filtradas.filter(t => t.tipo === 'despesa').length
+  const total = filtradas.reduce((s, t) => s + Number(t.valor) * (t.tipo.toLowerCase() === 'receita' ? 1 : -1), 0)
+  const qtdRec = filtradas.filter(t => t.tipo.toLowerCase() === 'receita').length
+  const qtdDesp = filtradas.filter(t => t.tipo.toLowerCase() === 'despesa').length
 
   return (
     <div className="space-y-6">
@@ -87,13 +87,13 @@ export default function Extrato() {
                     <td className="text-white/80 font-medium">{t.descricao}</td>
                     <td className="text-white/50">{t.categoria}</td>
                     <td>
-                      <span className={`badge ${t.tipo === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
-                        {t.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                      <span className={`badge ${t.tipo.toLowerCase() === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
+                        {t.tipo.toLowerCase() === 'receita' ? 'Receita' : 'Despesa'}
                       </span>
                     </td>
                     <td className={`text-right font-semibold whitespace-nowrap
-                      ${t.tipo === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
-                      {t.tipo === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
+                      ${t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                     </td>
                   </tr>
                 ))}

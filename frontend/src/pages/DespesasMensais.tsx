@@ -46,7 +46,7 @@ export default function DespesasMensais() {
       ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
       : new Date(ano, mes, 1).toISOString().split('T')[0]
     const { data } = await supabase.from('transacoes').select('*')
-      .eq('tipo', 'despesa')
+      .eq('tipo', 'Despesa')
       .gte('data_transacao', inicio).lt('data_transacao', fim)
       .order('data_transacao', { ascending: false })
     setTransacoes(data || [])
@@ -61,7 +61,7 @@ export default function DespesasMensais() {
       usuario_id: user?.id,
       descricao: formDescricao,
       valor: parseFloat(formValor),
-      tipo: 'despesa',
+      tipo: 'Despesa',
       categoria: formCategoria,
       data_transacao: formData,
     })
