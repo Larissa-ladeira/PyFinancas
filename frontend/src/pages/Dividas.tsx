@@ -75,12 +75,15 @@ export default function Dividas() {
   async function handlePagar(divida: Divida) {
     const valorPago = parseFloat(valorPagamento) || 0
     if (valorPago <= 0) return
-    const novoPago = Number(divida.valor_pago) + valorPago
+    const restante = Number(divida.valor_total) - Number(divida.valor_pago)
+    const pagamentoFinal = Math.min(valorPago, restante)
+    const novoPago = Number(divida.valor_pago) + pagamentoFinal
     const quitada = novoPago >= Number(divida.valor_total)
-    await supabase.from('dividas').update({
+    const { error } = await supabase.from('dividas').update({
       valor_pago: quitada ? divida.valor_total : novoPago,
       quitada,
     }).eq('id', divida.id)
+    if (error) setErrorMsg(error.message)
     setPagandoId(null)
     setValorPagamento('')
     carregar()
@@ -423,7 +426,7 @@ export default function Dividas() {
                           style={{ width: `${Math.min(progresso, 100)}%` }} />
                       </div>
                       <span className="text-xs text-white/30 w-10 text-right">{progresso.toFixed(0)}%</span>
-                      <button onClick={() => setPagandoId(pagandoId === d.id ? null : d.id)}
+                      <button onClick={() => { setPagandoId(pagandoId === d.id ? null : d.id); setValorPagamento('') }}
                         className="btn-primary text-xs px-3 py-1.5">
                         Pagar
                       </button>

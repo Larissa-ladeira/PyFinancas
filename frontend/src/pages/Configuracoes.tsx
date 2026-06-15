@@ -12,6 +12,7 @@ export default function Configuracoes() {
   const [configId, setConfigId] = useState<number | null>(null)
   const [todas, setTodas] = useState<Transacao[]>([])
   const [saved, setSaved] = useState(false)
+  const [usuarioId, setUsuarioId] = useState<string | null>(null)
 
   const [notifAtivo, setNotifAtivo] = useState(false)
   const [notifEmail, setNotifEmail] = useState('')
@@ -20,9 +21,12 @@ export default function Configuracoes() {
   const [notifSaved, setNotifSaved] = useState(false)
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUsuarioId(data.user.id)
+    })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
       if (data) { setSalario(String(data.salario_base)); setConfigId(data.id) }
-    })
+    }).catch(() => {})
     supabase.from('transacoes').select('*').then(({ data }) => setTodas(data || []))
     supabase.from('notificacoes').select('*').single().then(({ data }) => {
       if (data) {
@@ -31,14 +35,14 @@ export default function Configuracoes() {
         setNotifDias(data.dias_antes)
         setNotifId(data.id)
       }
-    })
+    }).catch(() => {})
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     const valor = parseFloat(salario) || 0
     if (configId) await supabase.from('configuracoes').update({ salario_base: valor }).eq('id', configId)
-    else await supabase.from('configuracoes').insert({ salario_base: valor })
+    else await supabase.from('configuracoes').insert({ salario_base: valor, usuario_id: usuarioId })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -51,7 +55,7 @@ export default function Configuracoes() {
       dias_antes: notifDias,
     }
     if (notifId) await supabase.from('notificacoes').update(payload).eq('id', notifId)
-    else await supabase.from('notificacoes').insert(payload)
+    else await supabase.from('notificacoes').insert({ ...payload, usuario_id: usuarioId })
     setNotifSaved(true)
     setTimeout(() => setNotifSaved(false), 2000)
   }
