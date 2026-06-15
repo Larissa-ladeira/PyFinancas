@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { LogIn, UserPlus, DollarSign, ArrowLeft } from 'lucide-react'
+import { LogIn, UserPlus, Sparkles, ArrowLeft } from 'lucide-react'
 
 interface LoginProps {
   onAuth: () => void
@@ -36,16 +36,18 @@ export default function Login({ onAuth }: LoginProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="glass-card p-8 w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(108,92,231,0.15),transparent_70%),radial-gradient(ellipse_at_bottom,rgba(162,155,254,0.08),transparent_70%)]" />
+      <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl
-            bg-emerald-500/20 border border-emerald-500/30 mb-4">
-            <DollarSign className="w-7 h-7 text-emerald-300" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
+            bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 border border-violet-500/30 mb-5 shadow-lg shadow-violet-500/10">
+            <Sparkles className="w-8 h-8 text-violet-300" />
           </div>
-          <h1 className="text-2xl font-bold text-white">PyFinanças</h1>
-          <p className="text-white/40 text-sm mt-1">Controle suas finanças de forma simples</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">PyFinanças</h1>
+          <p className="text-white/40 text-sm mt-2">Controle suas finanças de forma simples</p>
         </div>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
 
         {error && (
           <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3 mb-4">
@@ -67,7 +69,10 @@ export default function Login({ onAuth }: LoginProps) {
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2">
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
+                bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white
+                hover:from-violet-400 hover:to-fuchsia-400 transition-all duration-200
+                disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <LogIn className="w-4 h-4" />
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
@@ -80,7 +85,8 @@ export default function Login({ onAuth }: LoginProps) {
             </div>
 
             <button type="button" onClick={() => { setView('signup'); setError(''); setSuccess('') }}
-              className="btn-outline w-full flex items-center justify-center gap-2">
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
+                bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
               <UserPlus className="w-4 h-4" />
               Criar nova conta
             </button>
@@ -97,13 +103,17 @@ export default function Login({ onAuth }: LoginProps) {
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2">
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
+                bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white
+                hover:from-violet-400 hover:to-fuchsia-400 transition-all duration-200
+                disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <UserPlus className="w-4 h-4" />
               {loading ? 'Cadastrando...' : 'Criar conta'}
             </button>
 
             <button type="button" onClick={() => { setView('login'); setError(''); setSuccess('') }}
-              className="btn-outline w-full flex items-center justify-center gap-2">
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
+                bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
               <ArrowLeft className="w-4 h-4" />
               Voltar para login
             </button>
