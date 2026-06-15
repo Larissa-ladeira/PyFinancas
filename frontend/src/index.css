@@ -14,9 +14,13 @@
 @layer base {
   * { @apply border-white/10; }
 
+  html { min-height: 100vh; }
+
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    background: linear-gradient(rgba(13, 0, 26, 0.7), rgba(13, 0, 26, 0.7)),
+                url('./assets/Fundo-PyFinancas.jpg') center / cover fixed;
   }
 
   ::selection { background: rgba(16, 185, 129, 0.3); }
