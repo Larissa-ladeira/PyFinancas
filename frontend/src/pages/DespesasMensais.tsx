@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
-  TrendingDown, Wallet, Trash2, PieChart, Pencil, X, Save, Plus, CheckCircle, AlertCircle, DollarSign
+  TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
 } from 'lucide-react'
 
 const COLORS = ['#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#10b981']
