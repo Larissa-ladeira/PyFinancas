@@ -33,7 +33,6 @@ export default function Dashboard() {
       .then(({ data }) => setDividas(data || []))
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
-      .catch(() => {})
   }, [])
 
   useEffect(() => {

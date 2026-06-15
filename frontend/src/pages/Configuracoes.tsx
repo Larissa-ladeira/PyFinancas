@@ -26,7 +26,7 @@ export default function Configuracoes() {
     })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
       if (data) { setSalario(String(data.salario_base)); setConfigId(data.id) }
-    }).catch(() => {})
+    })
     supabase.from('transacoes').select('*').then(({ data }) => setTodas(data || []))
     supabase.from('notificacoes').select('*').single().then(({ data }) => {
       if (data) {
@@ -35,7 +35,7 @@ export default function Configuracoes() {
         setNotifDias(data.dias_antes)
         setNotifId(data.id)
       }
-    }).catch(() => {})
+    })
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {

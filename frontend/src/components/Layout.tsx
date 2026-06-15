@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
 import {
-  LayoutDashboard, PlusCircle, ListOrdered, Settings,
+  LayoutDashboard, ListOrdered, Settings,
   LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown, TrendingUp
 } from 'lucide-react'
 

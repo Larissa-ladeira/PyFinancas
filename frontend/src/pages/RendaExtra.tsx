@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
 import { MESES_PT } from '../types'
 import {
-  TrendingUp, Trash2, Plus, Save, CheckCircle, AlertCircle, Wallet, Search
+  TrendingUp, Trash2, Plus, Save, CheckCircle, AlertCircle
 } from 'lucide-react'
 
 const CATEGORIAS_EXTRA = ['Freelance', 'Investimentos', 'Presente', 'Renda Extra', 'Outros']
