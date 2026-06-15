@@ -401,31 +401,31 @@ export default function Dashboard() {
             </div>
             <span className="text-xs text-white/30 group-open:rotate-180 transition-transform">▼</span>
           </summary>
-          <div className="px-5 pb-5 overflow-x-auto scrollbar-hide">
+          <div className="px-5 pb-5">
             {transacoes.length > 0 ? (
-              <table className="table-glass">
-                <thead>
-                  <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th className="text-right">Valor</th></tr>
-                </thead>
-                <tbody>
-                  {transacoes.slice(0, 10).map(t => (
-                    <tr key={t.id}>
-                      <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
-                      <td className="text-white/80 font-medium">{t.descricao}</td>
-                      <td className="text-white/50">{t.categoria}</td>
-                      <td>
-                        <span className={`badge ${t.tipo.toLowerCase() === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
-                          {t.tipo}
-                        </span>
-                      </td>
-                      <td className={`text-right font-semibold whitespace-nowrap
-                        ${t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
+              <div className="space-y-3">
+                {transacoes.slice(0, 10).map(t => (
+                  <div key={t.id} className="glass-card p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">{t.descricao}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-white/40">{t.data_transacao}</span>
+                          <span className={`badge ${t.tipo.toLowerCase() === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
+                            {t.tipo.toLowerCase() === 'receita' ? 'Receita' : 'Despesa'}
+                          </span>
+                          <span className="text-xs text-white/30">{t.categoria}</span>
+                        </div>
+                      </div>
+                      <p className={`text-lg font-bold shrink-0 -mt-0.5 ${
+                        t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'
+                      }`}>
                         {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p className="text-white/30 text-sm py-4 text-center">Nenhuma transação neste período</p>
             )}

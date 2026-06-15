@@ -144,30 +144,30 @@ export default function RendaExtra() {
           Lançamentos ({transacoes.length})
         </h2>
         {transacoes.length > 0 ? (
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="table-glass">
-              <thead>
-                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th className="text-right">Valor</th><th className="text-right w-20">Ações</th></tr>
-              </thead>
-              <tbody>
-                {transacoes.map(t => (
-                  <tr key={t.id}>
-                    <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
-                    <td className="text-white/80 font-medium">{t.descricao}</td>
-                    <td><span className="badge badge-receita">{t.categoria}</span></td>
-                    <td className="text-right font-semibold text-emerald-300 whitespace-nowrap">
-                      +{formatar(Number(t.valor))}
-                    </td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => handleDelete(t.id)}
-                        className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all align-middle">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {transacoes.map(t => (
+              <div key={t.id} className="glass-card p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{t.descricao}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-white/40">{t.data_transacao}</span>
+                      <span className="badge badge-receita">{t.categoria}</span>
+                    </div>
+                  </div>
+                  <p className="text-lg font-bold text-emerald-300 shrink-0 -mt-0.5">
+                    +{formatar(Number(t.valor))}
+                  </p>
+                </div>
+                <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                  <button onClick={() => handleDelete(t.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-white/30 text-sm py-4 text-center">Nenhuma renda extra neste mês</p>

@@ -272,144 +272,135 @@ export default function DespesasMensais() {
           Transações ({transacoes.length})
         </h2>
         {transacoes.length > 0 ? (
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="table-glass">
-              <thead>
-                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th className="text-right">Valor</th><th className="text-center w-16">Pagar</th><th className="text-right w-20">Ações</th></tr>
-              </thead>
-              <tbody>
-                {transacoes.map(t => (
-                  editandoId === t.id ? (
-                    <tr key={t.id}>
-                      <td colSpan={6} className="p-3">
-                        <form onSubmit={handleEditSave} className="flex flex-wrap gap-2 items-end">
-                          <div className="flex-1 min-w-[120px]">
-                            <label className="block text-xs text-white/40 mb-1">Descrição</label>
-                            <input type="text" required className="input-glass" value={editDescricao}
-                              onChange={e => setEditDescricao(e.target.value)} />
-                          </div>
-                          <div className="w-28">
-                            <label className="block text-xs text-white/40 mb-1">Valor</label>
-                            <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValor}
-                              onChange={e => setEditValor(e.target.value)} />
-                          </div>
-                          <div className="w-36">
-                            <label className="block text-xs text-white/40 mb-1">Categoria</label>
-                            <select className="select-glass" value={editCategoria}
-                              onChange={e => setEditCategoria(e.target.value)}>
-                              {CATEGORIAS_DESPESA.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                          </div>
-                          <div className="w-36">
-                            <label className="block text-xs text-white/40 mb-1">Data</label>
-                            <input type="date" required className="input-glass" value={editData}
-                              onChange={e => setEditData(e.target.value)} />
-                          </div>
-                          <div className="flex gap-1 pb-0.5">
-                            <button type="submit" disabled={loading}
-                              className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-emerald-300 transition-all">
-                              <Save className="w-4 h-4" />
-                            </button>
-                            <button type="button" onClick={cancelarEdicao}
-                              className="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-300 transition-all">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                          {errorMsg && (
-                            <p className="text-xs text-rose-300 w-full">{errorMsg}</p>
-                          )}
-                        </form>
-                      </td>
-                    </tr>
-                  ) : (
-                    <>
-                      <tr key={t.id}>
-                        <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
-                        <td className="text-white/80 font-medium">{t.descricao}</td>
-                        <td><span className="badge badge-despesa">{t.categoria}</span></td>
-                        <td className="text-right font-semibold text-rose-300 whitespace-nowrap">
-                          -{formatar(Number(t.valor))}
-                        </td>
-                        <td className="text-center whitespace-nowrap">
-                          <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
-                            className={`p-1.5 rounded-lg transition-all align-middle ${
-                              pagandoId === t.id
-                                ? 'bg-emerald-500/20 text-emerald-300'
-                                : 'hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300'
-                            }`}>
-                            <DollarSign className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                        <td className="text-right whitespace-nowrap">
-                          <button onClick={() => iniciarEdicao(t)}
-                            className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300 transition-all align-middle">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => handleDelete(t.id)}
-                            className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all align-middle ml-0.5">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                      {pagandoId === t.id && (
-                        <tr key={`pag-${t.id}`}>
-                          <td colSpan={6} className="p-3 bg-white/5">
-                            <div className="space-y-3">
-                              <div className="flex gap-2">
-                                <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagar(''); setPagarError('') }}
-                                  className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                                    tipoPagamento === 'total'
-                                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
-                                  }`}>
-                                  Pagar Total
-                                </button>
-                                <button type="button" onClick={() => setTipoPagamento('parcial')}
-                                  className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                                    tipoPagamento === 'parcial'
-                                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
-                                  }`}>
-                                  Pagar Parcial
-                                </button>
-                              </div>
-                              {tipoPagamento === 'total' ? (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-white/60">Valor a quitar:</span>
-                                  <span className="text-lg font-bold text-emerald-300">
-                                    {formatar(Number(t.valor))}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="flex gap-2 items-end">
-                                  <div className="flex-1">
-                                    <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
-                                    <input type="number" min="0.01" step="0.01" required placeholder="0,00"
-                                      className="input-glass" value={valorPagar}
-                                      onChange={e => setValorPagar(e.target.value)} autoFocus />
-                                  </div>
-                                </div>
-                              )}
-                              {pagarError && (
-                                <p className="text-xs text-rose-300">{pagarError}</p>
-                              )}
-                              <div className="flex gap-2">
-                                <button onClick={() => handlePagarDespesa(t)}
-                                  className="btn-primary flex-1">
-                                  {tipoPagamento === 'total' ? `Quitar — ${formatar(Number(t.valor))}` : 'Confirmar Pagamento'}
-                                </button>
-                                <button onClick={() => { setPagandoId(null); setPagarError('') }}
-                                  className="btn-outline">Cancelar</button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
+          <div className="space-y-3">
+            {transacoes.map(t => (
+              editandoId === t.id ? (
+                <div key={t.id} className="glass-card p-4">
+                  <form onSubmit={handleEditSave} className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">Descrição</label>
+                      <input type="text" required className="input-glass" value={editDescricao}
+                        onChange={e => setEditDescricao(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Valor</label>
+                        <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValor}
+                          onChange={e => setEditValor(e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Data</label>
+                        <input type="date" required className="input-glass" value={editData}
+                          onChange={e => setEditData(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">Categoria</label>
+                      <select className="select-glass" value={editCategoria}
+                        onChange={e => setEditCategoria(e.target.value)}>
+                        {CATEGORIAS_DESPESA.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    {errorMsg && (
+                      <p className="text-xs text-rose-300">{errorMsg}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button type="submit" disabled={loading}
+                        className="btn-primary flex-1">
+                        <Save className="w-4 h-4" />
+                        Salvar
+                      </button>
+                      <button type="button" onClick={cancelarEdicao}
+                        className="btn-outline flex-1">Cancelar</button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div key={t.id} className="glass-card p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium truncate">{t.descricao}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-white/40">{t.data_transacao}</span>
+                        <span className="badge badge-despesa">{t.categoria}</span>
+                      </div>
+                    </div>
+                    <p className="text-lg font-bold text-rose-300 shrink-0 -mt-0.5">
+                      -{formatar(Number(t.valor))}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                    <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                        pagandoId === t.id
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300'
+                      }`}>
+                      <DollarSign className="w-3.5 h-3.5" />
+                      Pagar
+                    </button>
+                    <button onClick={() => iniciarEdicao(t)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all">
+                      <Pencil className="w-3.5 h-3.5" />
+                      Editar
+                    </button>
+                    <button onClick={() => handleDelete(t.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Excluir
+                    </button>
+                  </div>
+                  {pagandoId === t.id && (
+                    <div className="mt-3 pt-3 border-t border-white/5 space-y-3">
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagar(''); setPagarError('') }}
+                          className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
+                            tipoPagamento === 'total'
+                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                              : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                          }`}>
+                          Pagar Total
+                        </button>
+                        <button type="button" onClick={() => setTipoPagamento('parcial')}
+                          className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
+                            tipoPagamento === 'parcial'
+                              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                              : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                          }`}>
+                          Pagar Parcial
+                        </button>
+                      </div>
+                      {tipoPagamento === 'total' ? (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-white/60">Valor a quitar:</span>
+                          <span className="text-lg font-bold text-emerald-300">
+                            {formatar(Number(t.valor))}
+                          </span>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Valor do pagamento</label>
+                          <input type="number" min="0.01" step="0.01" required placeholder="0,00"
+                            className="input-glass" value={valorPagar}
+                            onChange={e => setValorPagar(e.target.value)} autoFocus />
+                        </div>
                       )}
-                    </>
-                  )
-                ))}
-              </tbody>
-            </table>
+                      {pagarError && (
+                        <p className="text-xs text-rose-300">{pagarError}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <button onClick={() => handlePagarDespesa(t)}
+                          className="btn-primary flex-1">
+                          {tipoPagamento === 'total' ? `Quitar — ${formatar(Number(t.valor))}` : 'Confirmar Pagamento'}
+                        </button>
+                        <button onClick={() => { setPagandoId(null); setPagarError('') }}
+                          className="btn-outline flex-1">Cancelar</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            ))}
           </div>
         ) : (
           <p className="text-white/30 text-sm py-4 text-center">Nenhuma despesa neste mês</p>

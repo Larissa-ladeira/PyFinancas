@@ -142,44 +142,46 @@ export default function Lembretes() {
         </form>
       )}
 
-      <div className="glass-card overflow-hidden">
+      <div className="glass-card p-5">
         {lembretes.length > 0 ? (
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="table-glass">
-              <thead>
-                <tr><th>Vencimento</th><th>Descrição</th><th className="text-right">Valor</th><th>Status</th><th className="text-right">Ações</th></tr>
-              </thead>
-              <tbody>
-                {lembretes.map(l => {
-                  const vencida = !l.pago && new Date(l.data_vencimento) < new Date()
-                  return (
-                    <tr key={l.id} className={vencida ? 'bg-rose-500/5' : ''}>
-                      <td className={`whitespace-nowrap ${vencida ? 'text-rose-300 font-medium' : 'text-white/40'}`}>
-                        {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
-                        {vencida && <span className="ml-2 text-rose-400 text-xs">(vencido)</span>}
-                      </td>
-                      <td className="text-white/80 font-medium">{l.descricao}</td>
-                      <td className="text-right font-semibold whitespace-nowrap text-white">{formatar(Number(l.valor))}</td>
-                      <td>
-                        <button onClick={() => togglePago(l.id, l.pago)}
-                          className={`badge cursor-pointer border transition-all
-                            ${l.pago
-                              ? 'badge-receita'
-                              : 'badge-despesa hover:bg-emerald-500/20 hover:text-emerald-300 hover:border-emerald-500/30'}`}>
-                          {l.pago ? 'Pago' : 'Pendente'}
-                        </button>
-                      </td>
-                      <td className="text-right">
-                        <button onClick={() => handleDelete(l.id)}
-                          className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {lembretes.map(l => {
+              const vencida = !l.pago && new Date(l.data_vencimento) < new Date()
+              return (
+                <div key={l.id} className="glass-card p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium truncate">{l.descricao}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs ${vencida ? 'text-rose-300 font-medium' : 'text-white/40'}`}>
+                          {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
+                          {vencida && <span className="ml-1 text-rose-400">(vencido)</span>}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-lg font-bold text-white shrink-0 -mt-0.5">
+                      {formatar(Number(l.valor))}
+                    </p>
+                  </div>
+                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                    <button onClick={() => togglePago(l.id, l.pago)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                        l.pago
+                          ? 'bg-emerald-500/20 text-emerald-300'
+                          : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300'
+                      }`}>
+                      <Check className="w-3.5 h-3.5" />
+                      {l.pago ? 'Pago' : 'Pendente'}
+                    </button>
+                    <button onClick={() => handleDelete(l.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         ) : (
           <div className="text-center py-12">

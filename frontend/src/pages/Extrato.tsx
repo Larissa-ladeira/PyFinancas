@@ -73,39 +73,37 @@ export default function Extrato() {
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto scrollbar-hide">
-          {filtradas.length > 0 ? (
-            <table className="table-glass">
-              <thead>
-                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th className="text-right">Valor</th></tr>
-              </thead>
-              <tbody>
-                {filtradas.map(t => (
-                  <tr key={t.id}>
-                    <td className="text-white/40 whitespace-nowrap">{t.data_transacao}</td>
-                    <td className="text-white/80 font-medium">{t.descricao}</td>
-                    <td className="text-white/50">{t.categoria}</td>
-                    <td>
+      <div className="glass-card p-5">
+        {filtradas.length > 0 ? (
+          <div className="space-y-3">
+            {filtradas.map(t => (
+              <div key={t.id} className="glass-card p-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{t.descricao}</p>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-xs text-white/40">{t.data_transacao}</span>
                       <span className={`badge ${t.tipo.toLowerCase() === 'receita' ? 'badge-receita' : 'badge-despesa'}`}>
                         {t.tipo.toLowerCase() === 'receita' ? 'Receita' : 'Despesa'}
                       </span>
-                    </td>
-                    <td className={`text-right font-semibold whitespace-nowrap
-                      ${t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'}`}>
-                      {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-12">
-              <Search className="w-8 h-8 mx-auto mb-2 text-white/20" />
-              <p className="text-white/30 text-sm">Nenhuma transação encontrada</p>
-            </div>
-          )}
-        </div>
+                      <span className="text-xs text-white/30">{t.categoria}</span>
+                    </div>
+                  </div>
+                  <p className={`text-lg font-bold shrink-0 -mt-0.5 ${
+                    t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'
+                  }`}>
+                    {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <Search className="w-8 h-8 mx-auto mb-2 text-white/20" />
+            <p className="text-white/30 text-sm">Nenhuma transação encontrada</p>
+          </div>
+        )}
       </div>
 
       {filtradas.length > 0 && (
