@@ -36,8 +36,14 @@ export default function Login({ onAuth }: LoginProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(108,92,231,0.15),transparent_70%),radial-gradient(ellipse_at_bottom,rgba(162,155,254,0.08),transparent_70%)]" />
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden" style={{ backgroundColor: '#0d001a' }}>
+      <div className="absolute inset-0" style={{
+        backgroundImage: `
+          radial-gradient(circle at 80% 20%, rgba(74,0,128,0.6), transparent 40%),
+          radial-gradient(circle at 20% 80%, rgba(46,0,79,0.6), transparent 40%),
+          linear-gradient(135deg, #0d001a 0%, #1a0033 50%, #0d001a 100%)
+        `
+      }} />
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
