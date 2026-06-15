@@ -32,7 +32,7 @@ export default function RendaExtra() {
       ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
       : new Date(ano, mes, 1).toISOString().split('T')[0]
     const { data } = await supabase.from('transacoes').select('*')
-      .eq('tipo', 'Receita')
+      .eq('tipo', 'receita')
       .gte('data_transacao', inicio).lt('data_transacao', fim)
       .order('data_transacao', { ascending: false })
     setTransacoes(data || [])
@@ -45,7 +45,7 @@ export default function RendaExtra() {
     const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('transacoes').insert({
       usuario_id: user?.id,
-      descricao, valor: parseFloat(valor), tipo: 'Receita', categoria, data_transacao: data,
+      descricao, valor: parseFloat(valor), tipo: 'receita', categoria, data_transacao: data,
     })
     if (error) {
       setErrorMsg(error.message)
