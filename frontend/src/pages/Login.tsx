@@ -53,7 +53,7 @@ export default function Login({ onAuth }: LoginProps) {
           <h1 className="text-3xl font-bold text-white tracking-tight">PyFinanças</h1>
           <p className="text-white/40 text-sm mt-2">Controle suas finanças de forma simples</p>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
 
         {error && (
           <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3 mb-4">

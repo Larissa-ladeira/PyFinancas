@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+:root {
+  --deep-violet: #0d001a;
+  --royal-purple: #390066;
+  --electric-purple: #7f00ff;
+  --glass-background: rgba(255, 255, 255, 0.05);
+  --button-gradient-start: #a366ff;
+  --button-gradient-end: #7f00ff;
+  --text-white: #ffffff;
+  --border-light: rgba(255, 255, 255, 0.2);
+}
+
 @layer base {
   * { @apply border-white/10; }
 
