@@ -121,5 +121,6 @@ export default function Login({ onAuth }: LoginProps) {
         )}
       </div>
     </div>
+    </div>
   )
 }
