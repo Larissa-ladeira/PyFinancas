@@ -9,6 +9,7 @@ import Extrato from './pages/Extrato'
 import Configuracoes from './pages/Configuracoes'
 import Lembretes from './pages/Lembretes'
 import Dividas from './pages/Dividas'
+import DespesasMensais from './pages/DespesasMensais'
 
 export default function App() {
   const [authed, setAuthed] = useState<boolean | null>(null)
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/configuracoes" element={<Configuracoes />} />
         <Route path="/lembretes" element={<Lembretes />} />
         <Route path="/dividas" element={<Dividas />} />
+        <Route path="/despesas" element={<DespesasMensais />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

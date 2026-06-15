@@ -14,9 +14,17 @@ export default function Lembretes() {
   const [valor, setValor] = useState('')
   const [dataVenc, setDataVenc] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const [filtroMes, setFiltroMes] = useState<number>(new Date().getMonth() + 1)
   const [filtroAno, setFiltroAno] = useState(new Date().getFullYear())
   const [showForm, setShowForm] = useState(false)
+  const [usuarioId, setUsuarioId] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUsuarioId(data.user.id)
+    })
+  }, [])
 
   useEffect(() => { carregar() }, [filtroMes, filtroAno])
 
@@ -33,11 +41,15 @@ export default function Lembretes() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
+    setErrorMsg('')
     setLoading(true)
     const { error } = await supabase.from('lembretes').insert({
+      usuario_id: usuarioId,
       descricao, valor: parseFloat(valor), data_vencimento: dataVenc,
     })
-    if (!error) {
+    if (error) {
+      setErrorMsg(error.message)
+    } else {
       setDescricao(''); setValor(''); setDataVenc('')
       setShowForm(false)
       carregar()
@@ -108,6 +120,11 @@ export default function Lembretes() {
       {showForm && (
         <form onSubmit={handleAdd} className="glass-card p-5 space-y-4">
           <h3 className="font-semibold text-white/70 text-sm">Novo Lembrete</h3>
+          {errorMsg && (
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3">
+              {errorMsg}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input type="text" required placeholder="Descrição"
               className="input-glass" value={descricao} onChange={e => setDescricao(e.target.value)} />

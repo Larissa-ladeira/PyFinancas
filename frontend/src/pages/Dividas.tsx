@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Divida } from '../types'
 import {
   PiggyBank, Plus, Trash2, TrendingDown, CheckCircle,
-  Brain, Calculator, Calendar
+  Brain, Calculator, Calendar, Pencil, X
 } from 'lucide-react'
 
 function formatar(val: number) {
@@ -28,6 +28,12 @@ export default function Dividas() {
   const [aporteExtra, setAporteExtra] = useState('')
   const [simulando, setSimulando] = useState(false)
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editDescricao, setEditDescricao] = useState('')
+  const [editValorTotal, setEditValorTotal] = useState('')
+  const [editTaxaJuros, setEditTaxaJuros] = useState('')
+  const [editPagamentoMinimo, setEditPagamentoMinimo] = useState('')
+  const [editDataVenc, setEditDataVenc] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -78,6 +84,39 @@ export default function Dividas() {
     setPagandoId(null)
     setValorPagamento('')
     carregar()
+  }
+
+  function iniciarEdicao(d: Divida) {
+    setEditandoId(d.id)
+    setEditDescricao(d.descricao)
+    setEditValorTotal(String(d.valor_total))
+    setEditTaxaJuros(String(d.taxa_juros))
+    setEditPagamentoMinimo(String(d.pagamento_minimo))
+    setEditDataVenc(d.data_vencimento || '')
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoId) return
+    setLoading(true)
+    const { error } = await supabase.from('dividas').update({
+      descricao: editDescricao,
+      valor_total: parseFloat(editValorTotal),
+      taxa_juros: parseFloat(editTaxaJuros) || 0,
+      pagamento_minimo: parseFloat(editPagamentoMinimo) || 0,
+      data_vencimento: editDataVenc || null,
+    }).eq('id', editandoId)
+    if (error) {
+      setErrorMsg(error.message)
+    } else {
+      setEditandoId(null)
+      carregar()
+    }
+    setLoading(false)
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
   }
 
   async function handleDelete(id: number) {
@@ -305,6 +344,46 @@ export default function Dividas() {
                 const progresso = (Number(d.valor_pago) / Number(d.valor_total)) * 100
                 return (
                   <div key={d.id} className="glass-card p-5">
+                    {editandoId === d.id ? (
+                      <form onSubmit={handleEditSave} className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-white/70 text-sm">Editar Dívida</h3>
+                          <button type="button" onClick={cancelarEdicao}
+                            className="p-1 rounded-lg hover:bg-white/10 text-white/30 hover:text-white transition-all">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {errorMsg && (
+                          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3">
+                            {errorMsg}
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                          <input type="text" required placeholder="Descrição"
+                            className="input-glass" value={editDescricao}
+                            onChange={e => setEditDescricao(e.target.value)} />
+                          <input type="number" required min="0.01" step="0.01" placeholder="Valor total"
+                            className="input-glass" value={editValorTotal}
+                            onChange={e => setEditValorTotal(e.target.value)} />
+                          <input type="number" min="0" step="0.1" placeholder="Juros % a.m."
+                            className="input-glass" value={editTaxaJuros}
+                            onChange={e => setEditTaxaJuros(e.target.value)} />
+                          <input type="number" min="0" step="0.01" placeholder="Pgto mínimo"
+                            className="input-glass" value={editPagamentoMinimo}
+                            onChange={e => setEditPagamentoMinimo(e.target.value)} />
+                          <input type="date" placeholder="Vencimento"
+                            className="input-glass" value={editDataVenc}
+                            onChange={e => setEditDataVenc(e.target.value)} />
+                        </div>
+                        <div className="flex gap-2">
+                          <button type="submit" disabled={loading} className="btn-primary">
+                            {loading ? 'Salvando...' : 'Salvar'}
+                          </button>
+                          <button type="button" onClick={cancelarEdicao} className="btn-outline">Cancelar</button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/10 text-xs font-bold text-white/50">
                         {idx + 1}
@@ -348,6 +427,10 @@ export default function Dividas() {
                         className="btn-primary text-xs px-3 py-1.5">
                         Pagar
                       </button>
+                      <button onClick={() => iniciarEdicao(d)}
+                        className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-white/30 hover:text-emerald-300 transition-all">
+                        <Pencil className="w-4 h-4" />
+                      </button>
                       <button onClick={() => handleDelete(d.id)}
                         className="p-1.5 rounded-lg hover:bg-rose-500/20 text-white/30 hover:text-rose-300 transition-all">
                         <Trash2 className="w-4 h-4" />
@@ -366,6 +449,8 @@ export default function Dividas() {
                           Confirmar
                         </button>
                       </form>
+                    )}
+                      </>
                     )}
                   </div>
                 )
