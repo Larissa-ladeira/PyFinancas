@@ -16,8 +16,6 @@
 
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(rgba(13, 0, 26, 0.7), rgba(13, 0, 26, 0.7)),
-                url('/Fundo-PyFinancas.jpg') center / cover fixed;
     min-height: 100vh;
   }
 
