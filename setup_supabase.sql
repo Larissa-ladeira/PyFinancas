@@ -124,3 +124,36 @@ CREATE POLICY "Usuários atualizam apenas suas notificações"
 CREATE POLICY "Usuários deletam apenas suas notificações"
   ON notificacoes FOR DELETE
   USING (auth.uid() = usuario_id);
+
+-- 8. Tabela de acordos (negociações de dívidas)
+CREATE TABLE IF NOT EXISTS acordos (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  usuario_id UUID NOT NULL DEFAULT auth.uid(),
+  credor TEXT NOT NULL,
+  descricao TEXT,
+  valor_total DECIMAL(12,2) NOT NULL,
+  valor_parcela DECIMAL(12,2) NOT NULL,
+  parcelas INTEGER NOT NULL DEFAULT 1,
+  parcelas_pagas INTEGER NOT NULL DEFAULT 0,
+  data_inicio DATE,
+  quitada BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE acordos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Usuários veem apenas seus acordos"
+  ON acordos FOR SELECT
+  USING (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários inserem apenas seus acordos"
+  ON acordos FOR INSERT
+  WITH CHECK (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários atualizam apenas seus acordos"
+  ON acordos FOR UPDATE
+  USING (auth.uid() = usuario_id);
+
+CREATE POLICY "Usuários deletam apenas seus acordos"
+  ON acordos FOR DELETE
+  USING (auth.uid() = usuario_id);

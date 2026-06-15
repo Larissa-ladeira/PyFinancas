@@ -55,6 +55,20 @@ export interface TransacaoForm {
   data_transacao: string
 }
 
+export interface Acordo {
+  id: number
+  usuario_id: string
+  credor: string
+  descricao: string | null
+  valor_total: number
+  valor_parcela: number
+  parcelas: number
+  parcelas_pagas: number
+  data_inicio: string | null
+  quitada: boolean
+  created_at: string
+}
+
 export const CATEGORIAS_RECEITA = [
   'Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'
 ]
