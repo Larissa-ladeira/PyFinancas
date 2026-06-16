@@ -231,22 +231,17 @@ export default function Dashboard() {
 
         {(() => {
           const pendentes = lembretesMes.filter(l => !l.pago)
-          const totalPendente = pendentes.reduce((s, l) => s + Number(l.valor), 0)
-          const gastoMes = despesas
-          const compromissoTotal = totalPendente + gastoMes
+          const totalPendente = despesas + pendentes.reduce((s, l) => s + Number(l.valor), 0)
+          const compromissoTotal = totalPendente
           const salarioLiquido = salario - compromissoTotal
           const percComprometido = salario > 0 ? (compromissoTotal / salario) * 100 : 0
 
           return (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <span className="text-xs text-white/40">A pagar (lembretes)</span>
+                  <span className="text-xs text-white/40">A pagar</span>
                   <p className="text-lg font-bold text-amber-300">{formatar(totalPendente)}</p>
-                </div>
-                <div>
-                  <span className="text-xs text-white/40">Já gasto (transações)</span>
-                  <p className="text-lg font-bold text-accent-pink">{formatar(gastoMes)}</p>
                 </div>
                 <div>
                   <span className="text-xs text-white/40">Total comprometido</span>
