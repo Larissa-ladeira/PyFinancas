@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
 import {
@@ -22,7 +22,10 @@ const bottomLinks = links.slice(0, 5)
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const [userDisplay, setUserDisplay] = useState('')
+
+  const pageTitle = links.find(l => l.to === location.pathname)?.label || 'PyFinanças'
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -99,12 +102,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <button onClick={() => setOpen(true)} className="p-1.5 -ml-1.5 rounded-xl hover:bg-white/10 text-white/70">
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#763EC0]/20 border border-[#9966DC]/30 flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-[#B894E2]" />
-              </div>
-              <span className="font-semibold text-white">$PyFinanças</span>
-            </div>
+            <span className="font-semibold text-white">{pageTitle}</span>
           </div>
         </header>
 
