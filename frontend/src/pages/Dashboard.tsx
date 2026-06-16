@@ -11,7 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
 } from 'recharts'
 
-const COLORS = ['#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1']
+const COLORS = ['#10b981', '#f59e0b', '#f43f5e', '#9966DC', '#06b6d4', '#B894E2', '#572B99', '#704FA6', '#763EC0']
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

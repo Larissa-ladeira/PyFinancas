@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
-import { Save, Bell } from 'lucide-react'
+import { Save, Bell, User } from 'lucide-react'
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -20,9 +20,17 @@ export default function Configuracoes() {
   const [notifId, setNotifId] = useState<number | null>(null)
   const [notifSaved, setNotifSaved] = useState(false)
 
+  const [profileNome, setProfileNome] = useState('')
+  const [profileEmail, setProfileEmail] = useState('')
+  const [profileSaved, setProfileSaved] = useState(false)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUsuarioId(data.user.id)
+      if (data.user) {
+        setUsuarioId(data.user.id)
+        setProfileNome((data.user.user_metadata?.nome as string) || '')
+        setProfileEmail(data.user.email || '')
+      }
     })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
       if (data) { setSalario(String(data.salario_base)); setConfigId(data.id) }
@@ -47,6 +55,17 @@ export default function Configuracoes() {
     setTimeout(() => setSaved(false), 2000)
   }
 
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const { error } = await supabase.auth.updateUser({
+      data: { nome: profileNome.trim() }
+    })
+    if (!error) {
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2000)
+    }
+  }
+
   const handleNotifSave = async (e: React.FormEvent) => {
     e.preventDefault()
     const payload = {
@@ -69,6 +88,27 @@ export default function Configuracoes() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-white">Configurações</h1>
+
+      <form onSubmit={handleProfileSave} className="glass-card p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <User className="w-5 h-5" /> Perfil
+        </h2>
+        <div>
+          <label className="block text-sm font-medium text-white/60 mb-2">Nome</label>
+          <input type="text" placeholder="Seu nome"
+            className="input-glass" value={profileNome}
+            onChange={e => setProfileNome(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
+          <input type="email" disabled
+            className="input-glass opacity-60" value={profileEmail} />
+        </div>
+        <button type="submit" className="btn-primary flex items-center justify-center gap-2">
+          <User className="w-4 h-4" />
+          {profileSaved ? 'Salvo!' : 'Salvar Perfil'}
+        </button>
+      </form>
 
       <form onSubmit={handleSave} className="glass-card p-6 space-y-4">
         <div>

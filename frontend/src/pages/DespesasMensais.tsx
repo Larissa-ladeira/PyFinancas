@@ -6,7 +6,7 @@ import {
   TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
 } from 'lucide-react'
 
-const COLORS = ['#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#10b981']
+const COLORS = ['#f43f5e', '#f59e0b', '#9966DC', '#06b6d4', '#B894E2', '#572B99', '#704FA6', '#763EC0', '#10b981']
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
