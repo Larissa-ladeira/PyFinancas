@@ -24,6 +24,12 @@ export default function Login({ onAuth }: LoginProps) {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [emailAlreadyExists, setEmailAlreadyExists] = useState('')
+
+  const switchToLogin = (emailToUse?: string) => {
+    if (emailToUse) setEmail(emailToUse)
+    setView('login'); setError(''); setSuccess(''); setEmailAlreadyExists('')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,7 +47,16 @@ export default function Login({ onAuth }: LoginProps) {
       email, password,
       options: { data: { nome: nome.trim() } },
     })
-    if (error) setError(error.message); else setSuccess('Conta criada! Verifique seu email.')
+    if (error) {
+      if (/already.*registered|already.*exists|email.*taken/i.test(error.message)) {
+        setError('')
+        setEmailAlreadyExists(email)
+      } else {
+        setError(error.message)
+      }
+    } else {
+      setSuccess('Conta criada! Verifique seu email.')
+    }
     setLoading(false)
   }
 
@@ -83,6 +98,16 @@ export default function Login({ onAuth }: LoginProps) {
         {success && (
           <div className="bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm rounded-xl p-3 mb-4">
             {success}
+          </div>
+        )}
+        {emailAlreadyExists && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-4">
+            <p className="text-amber-300 text-sm font-medium mb-1">Email já cadastrado</p>
+            <p className="text-white/50 text-xs mb-3">Este email já possui uma conta. Faça login ou entre com Google.</p>
+            <button onClick={() => switchToLogin(emailAlreadyExists)}
+              className="text-sm text-accent-blue hover:text-accent-blue/80 underline transition-colors">
+              Ir para login →
+            </button>
           </div>
         )}
 
