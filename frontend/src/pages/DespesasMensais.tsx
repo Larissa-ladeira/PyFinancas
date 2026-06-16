@@ -5,6 +5,9 @@ import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
   TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
 } from 'lucide-react'
+import {
+  PieChart as RePieChart, Pie, Cell, ResponsiveContainer
+} from 'recharts'
 
 const COLORS = ['#FF2E9A', '#f59e0b', '#00D4FF', '#A855F7', '#ffffff', '#A855F7', '#FF2E9A', '#A855F7', '#00D4FF', '#FF2E9A', '#00D4FF']
 
@@ -407,35 +410,75 @@ export default function DespesasMensais() {
         )}
       </div>
 
-      <div className="metric-card">
-        <div className="flex items-center gap-2 text-white/70 mb-3">
+      <div className="p-5 rounded-2xl"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,46,154,0.18), rgba(168,85,247,0.18), rgba(0,212,255,0.18))',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+        }}>
+        <div className="flex items-center gap-2 text-white/70 mb-4">
           <Wallet className="w-4 h-4" />
-          <span className="metric-label">Salário vs Gastos</span>
+          <span className="font-semibold text-sm">Progresso de Gastos</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <span className="text-xs text-white/40">Salário</span>
-            <p className="text-lg font-bold text-accent-blue">{formatar(salario)}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-[200px]">
+              <ResponsiveContainer width="100%" height={190}>
+                <RePieChart>
+                  <Pie data={[
+                    { name: 'Gasto', value: totalDespesas },
+                    { name: 'Disponível', value: Math.max(saldoLivre, 0) },
+                  ]} dataKey="value" innerRadius={55} outerRadius={80}
+                    startAngle={90} endAngle={-270}>
+                    <Cell fill="#FF2E9A" />
+                    <Cell fill="rgba(255,255,255,0.08)" />
+                  </Pie>
+                </RePieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center -mt-2">
+                <p className="text-2xl font-bold text-white">{percGasto.toFixed(0)}%</p>
+                <p className="text-xs text-white/50">gasto</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="text-xs text-white/40">% Comprometido</span>
-            <p className={`text-lg font-bold ${percGasto > 70 ? 'text-accent-pink' : 'text-white'}`}>
-              {percGasto.toFixed(1)}%
-            </p>
-          </div>
-          <div>
-            <span className="text-xs text-white/40">Saldo livre</span>
-            <p className={`text-lg font-bold ${saldoLivre >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>
-              {formatar(saldoLivre)}
-            </p>
+          <div className="space-y-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-white/50">Gasto / Salário</span>
+              <span className="text-sm font-semibold text-white">
+                {formatar(totalDespesas)} / {formatar(salario)}
+              </span>
+            </div>
+            {salario > 0 && (
+              <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                <div className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(percGasto, 100)}%`,
+                    background: 'linear-gradient(90deg, #FF2E9A, #A855F7, #00D4FF)',
+                  }} />
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              <div className="text-center">
+                <p className="text-lg font-bold text-accent-blue">{formatar(salario)}</p>
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">Salário</p>
+              </div>
+              <div className="text-center">
+                <p className={`text-lg font-bold ${percGasto > 70 ? 'text-accent-pink' : 'text-white'}`}>
+                  {percGasto.toFixed(1)}%
+                </p>
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">Comprometido</p>
+              </div>
+              <div className="text-center">
+                <p className={`text-lg font-bold ${saldoLivre >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>
+                  {formatar(saldoLivre)}
+                </p>
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">Saldo livre</p>
+              </div>
+            </div>
           </div>
         </div>
-        {salario > 0 && (
-          <div className="mt-3 w-full bg-white/5 rounded-full h-3 overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 70 ? 'bg-accent-pink' : 'bg-accent-blue'}`}
-              style={{ width: `${Math.min(percGasto, 100)}%` }} />
-          </div>
-        )}
       </div>
     </div>
   )
