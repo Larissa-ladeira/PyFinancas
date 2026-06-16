@@ -6,7 +6,7 @@ import {
   TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
 } from 'lucide-react'
 
-const COLORS = ['#f43f5e', '#f59e0b', '#9966DC', '#06b6d4', '#B894E2', '#572B99', '#704FA6', '#763EC0', '#10b981']
+const COLORS = ['#ec4899', '#f59e0b', '#60a5fa', '#8b5cf6', '#ffffff', '#a78bfa', '#f472b6', '#c4b5fd', '#3b82f6', '#f9a8d4', '#93c5fd']
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -210,13 +210,13 @@ export default function DespesasMensais() {
               </div>
             </div>
             {formErrorMsg && (
-              <div className="flex items-center gap-2 bg-rose-500/15 border border-rose-500/25 text-rose-300 text-sm rounded-xl p-3">
+              <div className="flex items-center gap-2 bg-pink-500/15 border border-pink-500/25 text-pink-300 text-sm rounded-xl p-3">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {formErrorMsg}
               </div>
             )}
             {formSuccess && (
-              <div className="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-sm rounded-xl p-3">
+              <div className="flex items-center gap-2 bg-blue-500/15 border border-blue-500/25 text-blue-300 text-sm rounded-xl p-3">
                 <CheckCircle className="w-4 h-4 shrink-0" />
                 Despesa salva com sucesso!
               </div>
@@ -231,7 +231,7 @@ export default function DespesasMensais() {
       </div>
 
       <div className="metric-card metric-card-despesa">
-        <div className="flex items-center gap-2 text-rose-300 mb-1.5">
+        <div className="flex items-center gap-2 text-pink-300 mb-1.5">
           <TrendingDown className="w-4 h-4" />
           <span className="metric-label">Total de Despesas</span>
         </div>
@@ -302,7 +302,7 @@ export default function DespesasMensais() {
                       </select>
                     </div>
                     {errorMsg && (
-                      <p className="text-xs text-rose-300">{errorMsg}</p>
+                      <p className="text-xs text-pink-300">{errorMsg}</p>
                     )}
                     <div className="flex gap-2">
                       <button type="submit" disabled={loading}
@@ -325,7 +325,7 @@ export default function DespesasMensais() {
                         <span className="badge badge-despesa">{t.categoria}</span>
                       </div>
                     </div>
-                    <p className="text-lg font-bold text-rose-300 shrink-0 -mt-0.5">
+                    <p className="text-lg font-bold text-pink-300 shrink-0 -mt-0.5">
                       -{formatar(Number(t.valor))}
                     </p>
                   </div>
@@ -333,19 +333,19 @@ export default function DespesasMensais() {
                     <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                         pagandoId === t.id
-                          ? 'bg-emerald-500/20 text-emerald-300'
-                          : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300'
+                          ? 'bg-blue-500/20 text-blue-300'
+                          : 'bg-white/5 text-white/50 hover:bg-blue-500/20 hover:text-blue-300'
                       }`}>
                       <DollarSign className="w-3.5 h-3.5" />
                       Pagar
                     </button>
                     <button onClick={() => iniciarEdicao(t)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-blue-500/20 hover:text-blue-300 transition-all">
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
                     </button>
                     <button onClick={() => handleDelete(t.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-pink-500/20 hover:text-pink-300 transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                       Excluir
                     </button>
@@ -356,7 +356,7 @@ export default function DespesasMensais() {
                         <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagar(''); setPagarError('') }}
                           className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
                             tipoPagamento === 'total'
-                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                              ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
                               : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
                           }`}>
                           Pagar Total
@@ -373,7 +373,7 @@ export default function DespesasMensais() {
                       {tipoPagamento === 'total' ? (
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-white/60">Valor a quitar:</span>
-                          <span className="text-lg font-bold text-emerald-300">
+                          <span className="text-lg font-bold text-blue-300">
                             {formatar(Number(t.valor))}
                           </span>
                         </div>
@@ -386,7 +386,7 @@ export default function DespesasMensais() {
                         </div>
                       )}
                       {pagarError && (
-                        <p className="text-xs text-rose-300">{pagarError}</p>
+                        <p className="text-xs text-pink-300">{pagarError}</p>
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => handlePagarDespesa(t)}
@@ -415,24 +415,24 @@ export default function DespesasMensais() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <span className="text-xs text-white/40">Salário</span>
-            <p className="text-lg font-bold text-emerald-300">{formatar(salario)}</p>
+            <p className="text-lg font-bold text-blue-300">{formatar(salario)}</p>
           </div>
           <div>
             <span className="text-xs text-white/40">% Comprometido</span>
-            <p className={`text-lg font-bold ${percGasto > 70 ? 'text-rose-300' : 'text-white'}`}>
+            <p className={`text-lg font-bold ${percGasto > 70 ? 'text-pink-300' : 'text-white'}`}>
               {percGasto.toFixed(1)}%
             </p>
           </div>
           <div>
             <span className="text-xs text-white/40">Saldo livre</span>
-            <p className={`text-lg font-bold ${saldoLivre >= 0 ? 'text-cyan-300' : 'text-rose-300'}`}>
+            <p className={`text-lg font-bold ${saldoLivre >= 0 ? 'text-purple-300' : 'text-pink-300'}`}>
               {formatar(saldoLivre)}
             </p>
           </div>
         </div>
         {salario > 0 && (
           <div className="mt-3 w-full bg-white/5 rounded-full h-3 overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 70 ? 'bg-rose-500' : 'bg-emerald-500'}`}
+            <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 70 ? 'bg-pink-500' : 'bg-blue-500'}`}
               style={{ width: `${Math.min(percGasto, 100)}%` }} />
           </div>
         )}

@@ -90,7 +90,7 @@ export default function Extrato() {
                     </div>
                   </div>
                   <p className={`text-lg font-bold shrink-0 -mt-0.5 ${
-                    t.tipo.toLowerCase() === 'receita' ? 'text-emerald-300' : 'text-rose-300'
+                    t.tipo.toLowerCase() === 'receita' ? 'text-blue-300' : 'text-pink-300'
                   }`}>
                     {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                   </p>
@@ -115,7 +115,7 @@ export default function Extrato() {
           </div>
           <div className="text-right">
             <span className="text-white/40">Saldo: </span>
-            <span className={`font-bold text-lg ${total >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+            <span className={`font-bold text-lg ${total >= 0 ? 'text-blue-300' : 'text-pink-300'}`}>
               {formatar(total)}
             </span>
           </div>

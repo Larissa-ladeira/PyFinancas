@@ -88,7 +88,7 @@ export default function Acordos() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="metric-card metric-card-despesa">
-          <div className="flex items-center gap-2 text-rose-300 mb-1.5">
+          <div className="flex items-center gap-2 text-pink-300 mb-1.5">
             <TrendingDown className="w-4 h-4" />
             <span className="metric-label">Total em parcelas</span>
           </div>
@@ -102,11 +102,11 @@ export default function Acordos() {
           <p className="metric-value text-white">{ativos.length}</p>
         </div>
         <div className="metric-card metric-card-saldo">
-          <div className="flex items-center gap-2 text-cyan-300 mb-1.5">
+          <div className="flex items-center gap-2 text-purple-300 mb-1.5">
             <AlertCircle className="w-4 h-4" />
             <span className="metric-label">Total a pagar</span>
           </div>
-          <p className="metric-value text-cyan-300">{formatar(totalRestante)}</p>
+          <p className="metric-value text-purple-300">{formatar(totalRestante)}</p>
         </div>
       </div>
 
@@ -114,7 +114,7 @@ export default function Acordos() {
         <form onSubmit={handleSubmit} className="glass-card p-5 space-y-4">
           <h3 className="font-semibold text-white/70 text-sm">Novo Acordo</h3>
           {errorMsg && (
-            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3">
+            <div className="bg-pink-500/10 border border-pink-500/20 text-pink-300 text-sm rounded-xl p-3">
               {errorMsg}
             </div>
           )}
@@ -181,26 +181,26 @@ export default function Acordos() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-lg font-bold text-rose-300 -mt-0.5">
+                      <p className="text-lg font-bold text-pink-300 -mt-0.5">
                         {formatar(Number(a.valor_parcela))}
                       </p>
                       <p className="text-xs text-white/30">de {formatar(Number(a.valor_total))}</p>
                     </div>
                   </div>
                   <div className="mt-3 w-full bg-white/5 rounded-full h-2 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-500 ${a.quitada ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                    <div className={`h-full rounded-full transition-all duration-500 ${a.quitada ? 'bg-blue-500' : 'bg-amber-500'}`}
                       style={{ width: `${Math.min(progresso, 100)}%` }} />
                   </div>
                   <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
                     {!a.quitada && (
                       <button onClick={() => handlePagarParcela(a)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300 transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-blue-500/20 hover:text-blue-300 transition-all">
                         <CheckCircle className="w-3.5 h-3.5" />
                         Pagar parcela
                       </button>
                     )}
                     <button onClick={() => handleDelete(a.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-pink-500/20 hover:text-pink-300 transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                       Excluir
                     </button>

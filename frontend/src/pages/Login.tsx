@@ -46,8 +46,8 @@ export default function Login({ onAuth }: LoginProps) {
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
-            bg-gradient-to-br from-[#763EC0]/30 to-[#9966DC]/20 border border-[#9966DC]/30 mb-5 shadow-lg shadow-[#763EC0]/20">
-            <Sparkles className="w-8 h-8 text-[#B894E2]" />
+            bg-gradient-to-br from-[#ec4899]/30 to-[#8b5cf6]/20 border border-[#8b5cf6]/30 mb-5 shadow-lg shadow-[#ec4899]/20">
+            <Sparkles className="w-8 h-8 text-[#f9a8d4]" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">PyFinanças</h1>
           <p className="text-white/40 text-sm mt-2">Controle suas finanças de forma simples</p>
@@ -55,12 +55,12 @@ export default function Login({ onAuth }: LoginProps) {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
 
         {error && (
-          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3 mb-4">
+          <div className="bg-pink-500/10 border border-pink-500/20 text-pink-300 text-sm rounded-xl p-3 mb-4">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm rounded-xl p-3 mb-4">
+          <div className="bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm rounded-xl p-3 mb-4">
             {success}
           </div>
         )}
@@ -75,8 +75,8 @@ export default function Login({ onAuth }: LoginProps) {
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
-                bg-gradient-to-r from-[#763EC0] to-[#9966DC] text-white
-                hover:from-[#8768B3] hover:to-[#B894E2] transition-all duration-200
+                bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] text-white
+                hover:from-[#f472b6] hover:to-[#a78bfa] transition-all duration-200
                 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <LogIn className="w-4 h-4" />
               {loading ? 'Entrando...' : 'Entrar'}
@@ -109,8 +109,8 @@ export default function Login({ onAuth }: LoginProps) {
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
-                bg-gradient-to-r from-[#763EC0] to-[#9966DC] text-white
-                hover:from-[#8768B3] hover:to-[#B894E2] transition-all duration-200
+                bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] text-white
+                hover:from-[#f472b6] hover:to-[#a78bfa] transition-all duration-200
                 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <UserPlus className="w-4 h-4" />
               {loading ? 'Cadastrando...' : 'Criar conta'}

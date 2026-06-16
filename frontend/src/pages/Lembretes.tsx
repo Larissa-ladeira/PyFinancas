@@ -92,28 +92,28 @@ export default function Lembretes() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="metric-card metric-card-despesa">
-          <div className="flex items-center gap-2 text-rose-300 mb-1.5">
+          <div className="flex items-center gap-2 text-pink-300 mb-1.5">
             <AlertCircle className="w-4 h-4" />
             <span className="metric-label">Pendentes</span>
           </div>
           <p className="metric-value text-despesa">{formatar(totalPendente)}</p>
           {vencidos.length > 0 && (
-            <p className="text-rose-400/70 text-xs mt-1">{vencidos.length} vencido(s)</p>
+            <p className="text-pink-400/70 text-xs mt-1">{vencidos.length} vencido(s)</p>
           )}
         </div>
         <div className="metric-card metric-card-receita">
-          <div className="flex items-center gap-2 text-emerald-300 mb-1.5">
+          <div className="flex items-center gap-2 text-blue-300 mb-1.5">
             <Check className="w-4 h-4" />
             <span className="metric-label">Pagos</span>
           </div>
-          <p className="metric-value text-emerald-300">{formatar(totalPago)}</p>
+          <p className="metric-value text-blue-300">{formatar(totalPago)}</p>
         </div>
         <div className="metric-card metric-card-saldo">
-          <div className="flex items-center gap-2 text-cyan-300 mb-1.5">
+          <div className="flex items-center gap-2 text-purple-300 mb-1.5">
             <Bell className="w-4 h-4" />
             <span className="metric-label">{MESES_PT[filtroMes - 1]}</span>
           </div>
-          <p className="metric-value text-cyan-300">{lembretes.length} conta(s)</p>
+          <p className="metric-value text-purple-300">{lembretes.length} conta(s)</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export default function Lembretes() {
         <form onSubmit={handleAdd} className="glass-card p-5 space-y-4">
           <h3 className="font-semibold text-white/70 text-sm">Novo Lembrete</h3>
           {errorMsg && (
-            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm rounded-xl p-3">
+            <div className="bg-pink-500/10 border border-pink-500/20 text-pink-300 text-sm rounded-xl p-3">
               {errorMsg}
             </div>
           )}
@@ -153,9 +153,9 @@ export default function Lembretes() {
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-medium truncate">{l.descricao}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs ${vencida ? 'text-rose-300 font-medium' : 'text-white/40'}`}>
+                        <span className={`text-xs ${vencida ? 'text-pink-300 font-medium' : 'text-white/40'}`}>
                           {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
-                          {vencida && <span className="ml-1 text-rose-400">(vencido)</span>}
+                          {vencida && <span className="ml-1 text-pink-400">(vencido)</span>}
                         </span>
                       </div>
                     </div>
@@ -167,14 +167,14 @@ export default function Lembretes() {
                     <button onClick={() => togglePago(l.id, l.pago)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                         l.pago
-                          ? 'bg-emerald-500/20 text-emerald-300'
-                          : 'bg-white/5 text-white/50 hover:bg-emerald-500/20 hover:text-emerald-300'
+                          ? 'bg-blue-500/20 text-blue-300'
+                          : 'bg-white/5 text-white/50 hover:bg-blue-500/20 hover:text-blue-300'
                       }`}>
                       <Check className="w-3.5 h-3.5" />
                       {l.pago ? 'Pago' : 'Pendente'}
                     </button>
                     <button onClick={() => handleDelete(l.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-rose-500/20 hover:text-rose-300 transition-all">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-pink-500/20 hover:text-pink-300 transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                       Excluir
                     </button>
