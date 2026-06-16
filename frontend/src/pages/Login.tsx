@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { LogIn, UserPlus, Sparkles, ArrowLeft } from 'lucide-react'
+import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound } from 'lucide-react'
 
 interface LoginProps {
   onAuth: () => void
@@ -16,7 +16,7 @@ const GoogleIcon = () => (
 )
 
 export default function Login({ onAuth }: LoginProps) {
-  const [view, setView] = useState<'login' | 'signup'>('login')
+  const [view, setView] = useState<'login' | 'signup' | 'forgot'>('login')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -57,6 +57,18 @@ export default function Login({ onAuth }: LoginProps) {
     } else {
       setSuccess('Conta criada! Verifique seu email.')
     }
+    setLoading(false)
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) { setError('Digite seu email'); return }
+    setLoading(true); setError(''); setSuccess('')
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    })
+    if (error) setError(error.message)
+    else setSuccess('Email de redefinição enviado! Verifique sua caixa de entrada.')
     setLoading(false)
   }
 
@@ -119,6 +131,12 @@ export default function Login({ onAuth }: LoginProps) {
             <input type="password" required placeholder="Senha"
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
+            <div className="flex justify-end -mt-2">
+              <button type="button" onClick={() => { setView('forgot'); setError(''); setSuccess('') }}
+                className="text-xs text-white/40 hover:text-accent-blue transition-colors">
+                Esqueceu a senha?
+              </button>
+            </div>
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
                 bg-gradient-to-r from-[var(--accent-pink)] to-[var(--accent-purple)] text-white
@@ -150,7 +168,7 @@ export default function Login({ onAuth }: LoginProps) {
               Criar nova conta
             </button>
           </form>
-        ) : (
+        ) : view === 'signup' ? (
           <form onSubmit={handleSignup} className="space-y-3">
             <input type="text" required placeholder="Seu nome"
               className="input-glass" value={nome}
@@ -185,6 +203,27 @@ export default function Login({ onAuth }: LoginProps) {
               {googleLoading ? 'Entrando...' : 'Cadastrar com Google'}
             </button>
 
+            <button type="button" onClick={() => { setView('login'); setError(''); setSuccess('') }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
+                bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para login
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleForgotPassword} className="space-y-3">
+            <p className="text-sm text-white/50 mb-2">Digite seu email para receber o link de redefinição de senha.</p>
+            <input type="email" required placeholder="Seu email"
+              className="input-glass" value={email}
+              onChange={e => setEmail(e.target.value)} />
+            <button type="submit" disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
+                bg-gradient-to-r from-[var(--accent-pink)] to-[var(--accent-purple)] text-white
+                hover:from-[#FF2E9A] hover:to-[#A855F7] transition-all duration-200
+                disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
+              <KeyRound className="w-4 h-4" />
+              {loading ? 'Enviando...' : 'Redefinir senha'}
+            </button>
             <button type="button" onClick={() => { setView('login'); setError(''); setSuccess('') }}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
                 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
