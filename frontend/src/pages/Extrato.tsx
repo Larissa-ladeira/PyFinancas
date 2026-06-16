@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Transacao } from '../types'
 import { MESES_PT, CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../types'
-import { Filter, Search, Upload, CheckCircle, AlertCircle, Trash2, ArrowRight } from 'lucide-react'
+import { Filter, Search, Upload, CheckCircle, AlertCircle, Trash2, ArrowRight, Download } from 'lucide-react'
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -159,6 +159,18 @@ export default function Extrato() {
           {todas.length > 0 && (
             <span className="text-xs text-white/30">{todas.length} transações</span>
           )}
+          <button onClick={() => {
+            const csv = [['Data', 'Descrição', 'Valor', 'Tipo', 'Categoria']]
+              .concat(filtradas.map(t => [t.data_transacao, t.descricao, String(t.valor), t.tipo, t.categoria]))
+              .map(r => r.join(',')).join('\n')
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a'); a.href = url; a.download = `pyfinancas-export-${new Date().toISOString().split('T')[0]}.csv`; a.click()
+            URL.revokeObjectURL(url)
+          }} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-white/10 text-white/50 hover:bg-white/5 hover:text-white/80 transition-all">
+            <Download className="w-4 h-4" />
+            Exportar CSV
+          </button>
           <button onClick={() => setShowImport(!showImport)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
               showImport

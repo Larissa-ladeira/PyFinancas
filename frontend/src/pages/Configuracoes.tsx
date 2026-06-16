@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao } from '../types'
-import { Save, Bell, User } from 'lucide-react'
+import type { Transacao, Conta } from '../types'
+import { TIPOS_CONTA } from '../types'
+import { Save, Bell, User, Building2, Plus, Trash2, Pencil } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -24,6 +26,14 @@ export default function Configuracoes() {
   const [profileEmail, setProfileEmail] = useState('')
   const [profileSaved, setProfileSaved] = useState(false)
 
+  const [contas, setContas] = useState<Conta[]>([])
+  const [showContaForm, setShowContaForm] = useState(false)
+  const [contaNome, setContaNome] = useState('')
+  const [contaTipo, setContaTipo] = useState('corrente')
+  const [contaSaldo, setContaSaldo] = useState('')
+  const [contaEditId, setContaEditId] = useState<number | null>(null)
+  const [deleteContaId, setDeleteContaId] = useState<number | null>(null)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -44,7 +54,37 @@ export default function Configuracoes() {
         setNotifId(data.id)
       }
     })
+    carregarContas()
   }, [])
+
+  async function carregarContas() {
+    const { data } = await supabase.from('contas').select('*').order('created_at', { ascending: false })
+    setContas(data || [])
+  }
+
+  function resetContaForm() { setContaNome(''); setContaTipo('corrente'); setContaSaldo(''); setContaEditId(null) }
+
+  async function handleContaSave() {
+    if (!usuarioId || !contaNome) return
+    const payload = { nome: contaNome, tipo: contaTipo, saldo: Number(contaSaldo || 0) }
+    if (contaEditId) {
+      await supabase.from('contas').update(payload).eq('id', contaEditId)
+    } else {
+      await supabase.from('contas').insert({ ...payload, usuario_id: usuarioId })
+    }
+    resetContaForm(); setShowContaForm(false); carregarContas()
+  }
+
+  async function handleDeleteConta() {
+    if (!deleteContaId) return
+    await supabase.from('contas').delete().eq('id', deleteContaId)
+    setDeleteContaId(null); carregarContas()
+  }
+
+  function editConta(c: Conta) {
+    setContaNome(c.nome); setContaTipo(c.tipo); setContaSaldo(String(c.saldo))
+    setContaEditId(c.id); setShowContaForm(true)
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,6 +163,74 @@ export default function Configuracoes() {
           {saved ? 'Salvo!' : 'Salvar'}
         </button>
       </form>
+
+      <div className="glass-card p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <Building2 className="w-5 h-5" /> Contas Bancárias
+        </h2>
+
+        {contas.length > 0 && (
+          <div className="space-y-2">
+            {contas.map(c => (
+              <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                <div>
+                  <p className="text-sm font-medium text-white">{c.nome}</p>
+                  <span className="text-xs text-white/40">{TIPOS_CONTA.find(t => t.value === c.tipo)?.label || c.tipo}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-accent-blue">{formatar(Number(c.saldo))}</span>
+                  <button onClick={() => editConta(c)} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-accent-blue transition-colors">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => setDeleteContaId(c.id)} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-accent-pink transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {showContaForm && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-white/5">
+            <div>
+              <label className="block text-xs text-white/60 mb-1">Nome</label>
+              <input value={contaNome} onChange={e => setContaNome(e.target.value)}
+                className="input-glass" placeholder="Ex: Nubank" />
+            </div>
+            <div>
+              <label className="block text-xs text-white/60 mb-1">Tipo</label>
+              <select value={contaTipo} onChange={e => setContaTipo(e.target.value)} className="select-glass">
+                {TIPOS_CONTA.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-white/60 mb-1">Saldo (R$)</label>
+              <input type="number" step="0.01" value={contaSaldo} onChange={e => setContaSaldo(e.target.value)}
+                className="input-glass" placeholder="0,00" />
+            </div>
+            <div className="sm:col-span-3 flex gap-2">
+              <button onClick={() => { resetContaForm(); setShowContaForm(false) }} className="btn-outline text-sm">Cancelar</button>
+              <button onClick={handleContaSave} className="btn-primary text-sm">{contaEditId ? 'Atualizar' : 'Adicionar'}</button>
+            </div>
+          </div>
+        )}
+
+        {!showContaForm && (
+          <button onClick={() => { resetContaForm(); setShowContaForm(true) }}
+            className="btn-outline w-full flex items-center justify-center gap-2">
+            <Plus className="w-4 h-4" /> Adicionar Conta
+          </button>
+        )}
+      </div>
+
+      <ConfirmDialog
+        open={deleteContaId !== null}
+        title="Excluir conta?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDeleteConta}
+        onCancel={() => setDeleteContaId(null)}
+      />
 
       <form onSubmit={handleNotifSave} className="glass-card p-6 space-y-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">

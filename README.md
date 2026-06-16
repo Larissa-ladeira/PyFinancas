@@ -1,34 +1,42 @@
 # PyFinanças 💰
 
-Aplicação para controle financeiro pessoal com foco em **sair do endividamento**. Combina um frontend React + Vite com um backend alternativo em Streamlit (Python).
+> **🌐 Aplicação online:** [https://pyfinancas-1.onrender.com/](https://pyfinancas-1.onrender.com/)
+
+Aplicação para controle financeiro pessoal com foco em **sair do endividamento**.
 
 ## Funcionalidades
 
-- **Dashboard** — Visão geral de receitas, despesas, saldo e gráficos
-- **Transações** — Cadastro de receitas e despesas por categoria
-- **Lembretes** — Contas a pagar com vencimento, status pago/pendente e filtro por mês
+- **Dashboard** — Visão geral de receitas, despesas, saldo, patrimônio líquido e gráficos
+- **Despesas Mensais** — Controle de gastos mensais com orçamentos por categoria
+- **Renda Extra** — Registro de receitas adicionais
+- **Lembretes** — Contas a pagar com vencimento e status pago/pendente
 - **Desfudência** — Controle de dívidas com:
-  - Juros (% a.m.) e parcela mínima
   - Estratégias Bola de Neve (menor saldo) e Avalanche (maior juro)
   - Simulador de liberdade financeira
   - Previsão de data de quitação
-- **Extrato** — Histórico de transações com filtros e busca por descrição
-- **Configurações** — Definição de salário base e indicadores
+- **Acordos** — Parcelamento de dívidas com acompanhamento
+- **Metas de Economia** — Definição e acompanhamento de objetivos financeiros
+- **Transações Recorrentes** — Automatização de receitas/despesas fixas
+- **Extrato** — Histórico completo com filtros, busca e importação CSV
+- **Calendário Financeiro** — Visão mensal de todos os compromissos
+- **Relatórios** — Análise anual com gráficos e indicadores
+- **Configurações** — Perfil, salário base, notificações por e-mail
 
 ## Stack
 
 | Camada | Tecnologia |
 |--------|-----------|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS 4 |
-| Backend (alternativo) | Python, Streamlit, Plotly |
+| Backend | Node.js (servidor estático) |
 | Banco | Supabase (PostgreSQL + Auth) |
 | Gráficos | Recharts |
+| Ícones | Lucide React |
+| Deploy | Render |
 
-## Como rodar
-
-### Frontend (React)
+## Como rodar localmente
 
 ```bash
+# Frontend (React)
 cd frontend
 cp .env.example .env
 # Preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no .env
@@ -36,17 +44,9 @@ npm install
 npm run dev
 ```
 
-### Backend (Streamlit)
-
-```bash
-cp .env.example .env
-# Preencha SUPABASE_URL e SUPABASE_KEY no .env
-streamlit run app.py
-```
-
 ### Banco de dados
 
-Execute o conteúdo de `setup_supabase.sql` no SQL Editor do Supabase para criar as tabelas e políticas de segurança.
+Execute o conteúdo de `sql/setup_supabase.sql` no SQL Editor do Supabase.
 
 ## Estrutura
 
@@ -54,11 +54,11 @@ Execute o conteúdo de `setup_supabase.sql` no SQL Editor do Supabase para criar
 PyFinanças/
 ├── frontend/          # React + Vite
 │   └── src/
-│       ├── components/  # Layout, ProtectedRoute
-│       ├── pages/       # Dashboard, Transações, Lembretes, Dívidas, Extrato, Config
+│       ├── components/  # Layout, Onboarding
+│       ├── pages/       # 13 páginas
 │       ├── lib/         # Cliente Supabase
 │       └── types/       # Tipos TypeScript
-├── app.py             # Backend Streamlit
-├── setup_supabase.sql # Schema do banco
-└── .env.example       # Variáveis de ambiente (exemplo)
+├── sql/               # Scripts do banco
+├── server.js          # Servidor Node (deploy)
+└── render.yaml        # Configuração Render
 ```

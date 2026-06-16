@@ -1,31 +1,13 @@
 services:
   - type: web
     name: pyfinancas
-    env: python
+    env: node
     region: ohio
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run app.py --server.port $PORT
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: node server.js
     envVars:
-      - key: SUPABASE_URL
+      - key: VITE_SUPABASE_URL
         sync: false
-      - key: SUPABASE_KEY
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-
-  - type: cron
-    name: pyfinancas-notificacoes
-    env: python
-    region: ohio
-    plan: free
-    schedule: "0 12 * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python notificacao_email.py
-    envVars:
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
-      - key: RESEND_API_KEY
+      - key: VITE_SUPABASE_ANON_KEY
         sync: false

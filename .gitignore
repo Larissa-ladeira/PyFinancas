@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.production
+frontend/.env
 
 # Python
 venv/
@@ -12,3 +13,4 @@ __pycache__/
 # Node
 node_modules/
 dist/
+frontend/dist/

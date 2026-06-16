@@ -103,6 +103,27 @@ export interface TransacaoRecorrente {
   created_at: string
 }
 
+export interface Investimento {
+  id: number
+  usuario_id: string
+  descricao: string
+  tipo: 'acao' | 'fii' | 'crypto' | 'cdb' | 'renda_fixa' | 'poupanca' | 'outros'
+  valor_investido: number
+  valor_atual: number
+  quantidade: number | null
+  data_aquisicao: string | null
+  created_at: string
+}
+
+export interface Conta {
+  id: number
+  usuario_id: string
+  nome: string
+  tipo: 'corrente' | 'poupanca' | 'investimento' | 'outros'
+  saldo: number
+  created_at: string
+}
+
 export const CATEGORIAS_RECEITA = [
   'Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'
 ]
@@ -115,4 +136,21 @@ export const CATEGORIAS_DESPESA = [
 export const MESES_PT = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+]
+
+export const TIPOS_INVESTIMENTO = [
+  { value: 'acao', label: 'Ações' },
+  { value: 'fii', label: 'FIIs' },
+  { value: 'crypto', label: 'Criptomoedas' },
+  { value: 'cdb', label: 'CDB' },
+  { value: 'renda_fixa', label: 'Renda Fixa' },
+  { value: 'poupanca', label: 'Poupança' },
+  { value: 'outros', label: 'Outros' },
+]
+
+export const TIPOS_CONTA = [
+  { value: 'corrente', label: 'Conta Corrente' },
+  { value: 'poupanca', label: 'Poupança' },
+  { value: 'investimento', label: 'Investimento' },
+  { value: 'outros', label: 'Outros' },
 ]
