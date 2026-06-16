@@ -78,7 +78,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 shrink-0">
                   <img src={`/avatars/${userGenero}.jpg`} alt="Avatar" className="w-full h-full object-cover"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                    onError={e => { (e.target as HTMLImageElement).src = '/avatars/menina-negra.jpg' }} />
                 </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-white truncate">{userNome || 'Larissa'}</p>

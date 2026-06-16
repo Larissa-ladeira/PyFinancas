@@ -152,7 +152,8 @@ export default function Configuracoes() {
         </h2>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 shrink-0">
-            <img src={`/avatars/${genero}.jpg`} alt="Avatar" className="w-full h-full object-cover" />
+            <img src={`/avatars/${genero}.jpg`} alt="Avatar" className="w-full h-full object-cover"
+              onError={e => { (e.target as HTMLImageElement).src = '/avatars/menina-negra.jpg' }} />
           </div>
           <div className="flex-1 space-y-3">
             <div>
