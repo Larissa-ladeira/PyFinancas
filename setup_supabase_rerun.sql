@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS dividas (
   usuario_id UUID NOT NULL DEFAULT auth.uid(),
   descricao TEXT NOT NULL,
   valor_total DECIMAL(12,2) NOT NULL,
+  valor_original DECIMAL(12,2),
   valor_pago DECIMAL(12,2) NOT NULL DEFAULT 0,
   taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
   pagamento_minimo DECIMAL(12,2) NOT NULL DEFAULT 0,

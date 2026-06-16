@@ -60,6 +60,7 @@ export default function Dividas() {
     const { error } = await supabase.from('dividas').insert({
       usuario_id: usuarioId,
       descricao,
+      valor_original: parseFloat(valorOriginal) || null,
       valor_total: parseFloat(valorAtual || valorOriginal),
       pagamento_minimo: parseFloat(pagamentoMinimo) || 0,
       data_vencimento: dataVenc || null,
@@ -101,7 +102,7 @@ export default function Dividas() {
   function iniciarEdicao(d: Divida) {
     setEditandoId(d.id)
     setEditDescricao(d.descricao)
-    setEditValorTotal(String(d.valor_total))
+    setEditValorTotal(String(d.valor_original ?? d.valor_total))
     setEditValorAtual(String(d.valor_total))
     setEditPagamentoMinimo(String(d.pagamento_minimo))
     setEditDataVenc(d.data_vencimento || '')
@@ -113,6 +114,7 @@ export default function Dividas() {
     setLoading(true)
     const { error } = await supabase.from('dividas').update({
       descricao: editDescricao,
+      valor_original: parseFloat(editValorTotal) || null,
       valor_total: parseFloat(editValorAtual || editValorTotal),
       pagamento_minimo: parseFloat(editPagamentoMinimo) || 0,
       data_vencimento: editDataVenc || null,
@@ -464,6 +466,11 @@ export default function Dividas() {
                         <p className="text-accent-purple font-medium">{formatar(Number(d.pagamento_minimo))}</p>
                       </div>
                     </div>
+                    {d.valor_original != null && Number(d.valor_original) > 0 && (
+                      <div className="text-xs text-amber-300 mb-2">
+                        +{((Number(d.valor_total) - Number(d.valor_original)) / Number(d.valor_original) * 100).toFixed(1)}% de juros
+                      </div>
+                    )}
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
                         <div className="h-full rounded-full bg-accent-blue transition-all"

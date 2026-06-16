@@ -39,6 +39,7 @@ export interface Divida {
   usuario_id: string
   descricao: string
   valor_total: number
+  valor_original: number | null
   valor_pago: number
   taxa_juros: number
   pagamento_minimo: number
