@@ -50,9 +50,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30
+              <div className="w-9 h-9 rounded-xl bg-[#763EC0]/20 border border-[#9966DC]/30
                 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-emerald-300" />
+                <DollarSign className="w-5 h-5 text-[#B894E2]" />
               </div>
               <span className="font-bold text-lg text-white">$PyFinanças</span>
             </div>
@@ -100,8 +100,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-emerald-300" />
+              <div className="w-7 h-7 rounded-lg bg-[#763EC0]/20 border border-[#9966DC]/30 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-[#B894E2]" />
               </div>
               <span className="font-semibold text-white">$PyFinanças</span>
             </div>
@@ -117,7 +117,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <NavLink key={to} to={to} end={to === '/'}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 text-[11px] font-medium transition-all duration-200
-                ${isActive ? 'text-emerald-300' : 'text-white/40 hover:text-white/70'}`}
+                ${isActive ? 'text-[#B894E2]' : 'text-white/40 hover:text-white/70'}`}
             >
               <Icon className="w-5 h-5" />
               {label}

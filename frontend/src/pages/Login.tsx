@@ -39,15 +39,15 @@ export default function Login({ onAuth }: LoginProps) {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0" style={{
         backgroundImage: `
-          radial-gradient(circle at 80% 20%, rgba(74,0,128,0.6), transparent 40%),
-          radial-gradient(circle at 20% 80%, rgba(46,0,79,0.6), transparent 40%)
+          radial-gradient(circle at 80% 20%, rgba(118,62,192,0.5), transparent 40%),
+          radial-gradient(circle at 20% 80%, rgba(58,0,112,0.5), transparent 40%)
         `
       }} />
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
-            bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 border border-violet-500/30 mb-5 shadow-lg shadow-violet-500/10">
-            <Sparkles className="w-8 h-8 text-violet-300" />
+            bg-gradient-to-br from-[#763EC0]/30 to-[#9966DC]/20 border border-[#9966DC]/30 mb-5 shadow-lg shadow-[#763EC0]/20">
+            <Sparkles className="w-8 h-8 text-[#B894E2]" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">$PyFinanças</h1>
           <p className="text-white/40 text-sm mt-2">Controle suas finanças de forma simples</p>
@@ -75,8 +75,8 @@ export default function Login({ onAuth }: LoginProps) {
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
-                bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white
-                hover:from-violet-400 hover:to-fuchsia-400 transition-all duration-200
+                bg-gradient-to-r from-[#763EC0] to-[#9966DC] text-white
+                hover:from-[#8768B3] hover:to-[#B894E2] transition-all duration-200
                 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <LogIn className="w-4 h-4" />
               {loading ? 'Entrando...' : 'Entrar'}
@@ -109,8 +109,8 @@ export default function Login({ onAuth }: LoginProps) {
               onChange={e => setPassword(e.target.value)} />
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
-                bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white
-                hover:from-violet-400 hover:to-fuchsia-400 transition-all duration-200
+                bg-gradient-to-r from-[#763EC0] to-[#9966DC] text-white
+                hover:from-[#8768B3] hover:to-[#B894E2] transition-all duration-200
                 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
               <UserPlus className="w-4 h-4" />
               {loading ? 'Cadastrando...' : 'Criar conta'}

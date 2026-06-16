@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --deep-violet: #0d001a;
-  --royal-purple: #390066;
-  --electric-purple: #7f00ff;
-  --glass-background: rgba(255, 255, 255, 0.05);
-  --button-gradient-start: #a366ff;
-  --button-gradient-end: #7f00ff;
-  --text-white: #ffffff;
-  --border-light: rgba(255, 255, 255, 0.2);
+  --purple-950: #17002C;
+  --purple-900: #150027;
+  --purple-800: #3A0070;
+  --purple-700: #3D0173;
+  --purple-600: #572B99;
+  --purple-500: #704FA6;
+  --purple-400: #8768B3;
+  --purple-300: #9966DC;
+  --purple-200: #B894E2;
+  --accent: #763EC0;
 }
 
 @layer base {
@@ -19,11 +21,11 @@
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(rgba(13, 0, 26, 0.7), rgba(13, 0, 26, 0.7)),
-                url('./assets/Fundo-PyFinancas.jpg') center / cover fixed;
+    background: linear-gradient(135deg, #17002C, #3A0070);
+    color: #e0d4ff;
   }
 
-  ::selection { background: rgba(16, 185, 129, 0.3); }
+  ::selection { background: rgba(118, 62, 192, 0.3); }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
@@ -32,12 +34,12 @@
 
 @layer components {
   .glass-card {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(23, 0, 44, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(153, 102, 220, 0.3);
     border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 30px rgba(118, 62, 192, 0.4);
   }
 
   .metric-value {
@@ -56,12 +58,12 @@
   }
 
   .metric-card {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(23, 0, 44, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(153, 102, 220, 0.3);
     border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 30px rgba(118, 62, 192, 0.4);
     padding: 1.25rem;
   }
 
@@ -74,18 +76,18 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: rgba(16, 185, 129, 0.2);
-    color: #6ee7b7;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: linear-gradient(90deg, #763EC0, #9966DC);
+    color: white;
+    border: none;
     border-radius: 0.75rem;
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
     font-weight: 600;
+    box-shadow: 0 0 15px rgba(118, 62, 192, 0.6);
     transition: all 0.2s;
   }
   .btn-primary:hover {
-    background: rgba(16, 185, 129, 0.3);
-    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 25px rgba(118, 62, 192, 0.8);
   }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -95,16 +97,16 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(58, 0, 112, 0.6);
+    color: #e0d4ff;
+    border: 1px solid #704FA6;
     border-radius: 0.75rem;
     padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
     font-weight: 600;
     transition: all 0.2s;
   }
-  .btn-outline:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+  .btn-outline:hover { background: rgba(58, 0, 112, 0.8); color: white; }
   .btn-outline:active { transform: scale(0.98); }
 
   .badge {
@@ -131,25 +133,25 @@
   .input-glass {
     width: 100%;
     border-radius: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(58, 0, 112, 0.6);
+    border: 1px solid #704FA6;
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
     color: white;
     transition: all 0.2s;
   }
-  .input-glass::placeholder { color: rgba(255, 255, 255, 0.3); }
+  .input-glass::placeholder { color: rgba(224, 212, 255, 0.4); }
   .input-glass:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
-    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 2px rgba(118, 62, 192, 0.4);
+    border-color: #9966DC;
   }
 
   .select-glass {
     width: 100%;
     border-radius: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(58, 0, 112, 0.6);
+    border: 1px solid #704FA6;
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
     color: white;
@@ -162,10 +164,10 @@
   }
   .select-glass:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
-    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 2px rgba(118, 62, 192, 0.4);
+    border-color: #9966DC;
   }
-  .select-glass option { background: #1a1a2e; color: white; }
+  .select-glass option { background: #17002C; color: white; }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0.7);
@@ -173,21 +175,21 @@
   }
 
   .table-glass { width: 100%; font-size: 0.875rem; }
-  .table-glass thead tr { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+  .table-glass thead tr { border-bottom: 1px solid rgba(153, 102, 220, 0.2); }
   .table-glass th {
     text-align: left;
     padding: 0.875rem 1rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(224, 212, 255, 0.5);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
   .table-glass tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(153, 102, 220, 0.1);
     transition: all 0.15s;
   }
-  .table-glass tbody tr:hover { background: rgba(255, 255, 255, 0.05); }
+  .table-glass tbody tr:hover { background: rgba(58, 0, 112, 0.4); }
   .table-glass td { padding: 0.75rem 1rem; }
 }
 
@@ -197,14 +199,14 @@
 }
 
 .card {
-  background: rgba(25, 25, 45, 0.6);
+  background: rgba(23, 0, 44, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(153, 102, 220, 0.3);
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 30px rgba(118, 62, 192, 0.4);
   padding: 20px;
-  color: white;
+  color: #e0d4ff;
 }
 
 .bottom-nav {
@@ -215,13 +217,14 @@
   width: 90%;
   max-width: 600px;
   height: 70px;
-  background: rgba(25, 25, 45, 0.8);
+  background: rgba(23, 0, 44, 0.9);
   border-radius: 35px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(153, 102, 220, 0.3);
+  box-shadow: 0 0 30px rgba(118, 62, 192, 0.4);
   z-index: 50;
 }
