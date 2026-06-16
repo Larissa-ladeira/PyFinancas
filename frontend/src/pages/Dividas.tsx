@@ -5,6 +5,9 @@ import {
   PiggyBank, Plus, Trash2, TrendingDown, CheckCircle,
   Brain, Calculator, Calendar, Pencil, X
 } from 'lucide-react'
+import {
+  PieChart, Pie, Cell, ResponsiveContainer
+} from 'recharts'
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -240,22 +243,62 @@ export default function Dividas() {
               /{dividas.length} dívidas quitadas
             </span>
           </div>
-          <div className="flex gap-1.5 h-4">
-            {dividas.map((d, i) => (
-              <div key={d.id} className="flex-1 rounded-full transition-all duration-500"
-                style={{
-                  backgroundColor: d.quitada ? '#3b82f6' : 'rgba(255,255,255,0.08)',
-                  transitionDelay: `${i * 30}ms`,
-                }} />
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <div className="flex gap-1.5 h-4 mb-3">
+                {dividas.map((d, i) => (
+                  <div key={d.id} className="flex-1 rounded-full transition-all duration-500"
+                    style={{
+                      backgroundColor: d.quitada ? '#3b82f6' : 'rgba(255,255,255,0.08)',
+                      transitionDelay: `${i * 30}ms`,
+                    }} />
+                ))}
+              </div>
+              <div className="w-full bg-white/5 rounded-full h-4 overflow-hidden mb-3">
+                <div className="h-full rounded-full bg-purple-500/60 transition-all duration-500"
+                  style={{ width: `${Math.min((totalPago / totalDivida) * 100, 100)}%` }} />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/40">Total</span>
+                  <span className="text-white">{formatar(totalDivida)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/40">Pago</span>
+                  <span className="text-blue-300 font-medium">{formatar(totalPago)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/40">Falta</span>
+                  <span className="text-pink-300 font-medium">{formatar(totalRestante)}</span>
+                </div>
+              </div>
+              <p className="text-sm text-white/40 mt-3">
+                {((totalPago / totalDivida) * 100).toFixed(1)}% pago
+              </p>
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-[200px]">
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie data={[
+                      { name: 'Pago', value: totalPago },
+                      { name: 'Restante', value: Math.max(totalRestante, 0) },
+                    ]} dataKey="value" innerRadius={50} outerRadius={75}
+                      startAngle={90} endAngle={-270}>
+                      <Cell fill="#3b82f6" />
+                      <Cell fill="rgba(255,255,255,0.08)" />
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="text-center -mt-10">
+                  <p className="text-2xl font-bold text-white">
+                    {totalDivida > 0 ? ((totalPago / totalDivida) * 100).toFixed(0) : 0}%
+                  </p>
+                  <p className="text-xs text-white/40">pago</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-full bg-white/5 rounded-full h-4 overflow-hidden mt-2">
-            <div className="h-full rounded-full bg-purple-500/60 transition-all duration-500"
-              style={{ width: `${Math.min((totalPago / totalDivida) * 100, 100)}%` }} />
-          </div>
-          <p className="text-sm text-white/40 mt-2">
-            {((totalPago / totalDivida) * 100).toFixed(1)}% pago — falta {formatar(totalRestante)}
-          </p>
         </div>
       )}
 
