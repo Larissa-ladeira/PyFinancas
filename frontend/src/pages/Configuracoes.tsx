@@ -28,7 +28,7 @@ export default function Configuracoes() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUsuarioId(data.user.id)
-        setProfileNome((data.user.user_metadata?.nome as string) || '')
+        setProfileNome((data.user.user_metadata?.nome as string) || 'Larissa')
         setProfileEmail(data.user.email || '')
       }
     })
@@ -57,8 +57,10 @@ export default function Configuracoes() {
 
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    const nome = profileNome.trim() || 'Larissa'
+    setProfileNome(nome)
     const { error } = await supabase.auth.updateUser({
-      data: { nome: profileNome.trim() }
+      data: { nome }
     })
     if (!error) {
       setProfileSaved(true)
