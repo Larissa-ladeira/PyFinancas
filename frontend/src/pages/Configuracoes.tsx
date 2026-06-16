@@ -25,6 +25,7 @@ export default function Configuracoes() {
   const [profileNome, setProfileNome] = useState('')
   const [profileEmail, setProfileEmail] = useState('')
   const [profileSaved, setProfileSaved] = useState(false)
+  const [genero, setGenero] = useState('feminino')
 
   const [contas, setContas] = useState<Conta[]>([])
   const [investimentos, setInvestimentos] = useState<Investimento[]>([])
@@ -41,6 +42,7 @@ export default function Configuracoes() {
         setUsuarioId(data.user.id)
         setProfileNome((data.user.user_metadata?.nome as string) || 'Larissa')
         setProfileEmail(data.user.email || '')
+        setGenero((data.user.user_metadata?.genero as string) || 'feminino')
       }
     })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
@@ -102,7 +104,7 @@ export default function Configuracoes() {
     const nome = profileNome.trim() || 'Larissa'
     setProfileNome(nome)
     const { error } = await supabase.auth.updateUser({
-      data: { nome }
+      data: { nome, genero }
     })
     if (!error) {
       setProfileSaved(true)
@@ -141,11 +143,39 @@ export default function Configuracoes() {
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <User className="w-5 h-5" /> Perfil
         </h2>
-        <div>
-          <label className="block text-sm font-medium text-white/60 mb-2">Nome</label>
-          <input type="text" placeholder="Seu nome"
-            className="input-glass" value={profileNome}
-            onChange={e => setProfileNome(e.target.value)} />
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 shrink-0">
+            {genero === 'feminino' ? (
+              <img src="/avatars/feminino.jpg" alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white/30">
+                <User className="w-10 h-10" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Nome</label>
+              <input type="text" placeholder="Seu nome"
+                className="input-glass" value={profileNome}
+                onChange={e => setProfileNome(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Gênero</label>
+              <div className="flex gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="genero" value="feminino" checked={genero === 'feminino'}
+                    onChange={e => setGenero(e.target.value)} className="accent-accent-blue" />
+                  <span className="text-sm text-white/70">Feminino</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="genero" value="masculino" checked={genero === 'masculino'}
+                    onChange={e => setGenero(e.target.value)} className="accent-accent-blue" />
+                  <span className="text-sm text-white/70">Masculino</span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-white/60 mb-2">Email</label>
