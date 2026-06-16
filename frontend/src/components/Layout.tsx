@@ -21,15 +21,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const [userDisplay, setUserDisplay] = useState('')
-
   const pageTitle = links.find(l => l.to === location.pathname)?.label || 'PyFinanças'
+
+  const [userNome, setUserNome] = useState('')
+  const [userEmail, setUserEmail] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        const nome = data.user.user_metadata?.nome as string | undefined
-        setUserDisplay(nome || data.user.email || '')
+        setUserNome((data.user.user_metadata?.nome as string) || '')
+        setUserEmail(data.user.email || '')
       }
     })
   }, [])
@@ -50,14 +51,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       `}>
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-white/10">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-accent-pink/20 border border-accent-purple/30
                 flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-accent-pink" />
               </div>
               <span className="font-bold text-lg text-white">PyFinanças</span>
             </div>
-            <p className="text-sm text-white/40 mt-2 truncate">{userDisplay}</p>
+            <div className="bg-white/5 rounded-xl p-3">
+              <p className="text-sm font-medium text-white truncate">{userNome || 'Larissa'}</p>
+              <p className="text-xs text-white/40 truncate mt-0.5">{userEmail}</p>
+            </div>
           </div>
 
           <nav className="flex-1 p-3 space-y-1">
