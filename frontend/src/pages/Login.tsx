@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound } from 'lucide-react'
 
+const AVATARES = [
+  { value: 'menina-branca', label: 'Menina Branca', img: '/avatars/menina-branca.jpg' },
+  { value: 'menina-negra', label: 'Menina Negra', img: '/avatars/menina-negra.jpg' },
+  { value: 'menino-branco', label: 'Menino Branco', img: '/avatars/menino-branco.jpg' },
+  { value: 'menino-negro', label: 'Menino Negro', img: '/avatars/menino-negro.jpg' },
+]
+
 interface LoginProps {
   onAuth: () => void
 }
@@ -20,6 +27,7 @@ export default function Login({ onAuth }: LoginProps) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [avatar, setAvatar] = useState('menina-negra')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState('')
@@ -45,7 +53,7 @@ export default function Login({ onAuth }: LoginProps) {
     setLoading(true); setError(''); setSuccess('')
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { nome: nome.trim() } },
+      options: { data: { nome: nome.trim(), genero: avatar } },
     })
     if (error) {
       if (/already.*registered|already.*exists|email.*taken/i.test(error.message)) {
@@ -179,6 +187,19 @@ export default function Login({ onAuth }: LoginProps) {
             <input type="password" required placeholder="Senha"
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
+            <div>
+              <label className="block text-sm text-white/50 mb-2">Escolha seu avatar</label>
+              <div className="flex gap-3 justify-center">
+                {AVATARES.map(a => (
+                  <button key={a.value} type="button" onClick={() => setAvatar(a.value)}
+                    className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all ${
+                      avatar === a.value ? 'border-accent-blue scale-110 ring-2 ring-accent-blue/30' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}>
+                    <img src={a.img} alt={a.label} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
                 bg-gradient-to-r from-[var(--accent-pink)] to-[var(--accent-purple)] text-white
