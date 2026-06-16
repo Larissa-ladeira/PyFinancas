@@ -151,8 +151,6 @@ export default function Dividas() {
   const totalDivida = ativas.reduce((s, d) => s + Number(d.valor_total), 0)
   const totalPago = ativas.reduce((s, d) => s + Number(d.valor_pago), 0)
   const totalRestante = totalDivida - totalPago
-  const totalMinimo = ativas.reduce((s, d) => s + Number(d.pagamento_minimo), 0)
-
   function calcularPrevisao(extra: number): { meses: number; totalJuros: number } | null {
     const restante = ativas.map(d => ({
       saldo: Number(d.valor_total) - Number(d.valor_pago),
@@ -210,12 +208,12 @@ export default function Dividas() {
           </div>
           <p className="metric-value text-accent-pink">{formatar(totalRestante)}</p>
         </div>
-        <div className="metric-card metric-card-saldo">
-          <div className="flex items-center gap-2 text-accent-purple mb-1.5">
-            <Calculator className="w-4 h-4" />
-            <span className="metric-label">Parcela mínima</span>
+        <div className="metric-card metric-card-receita">
+          <div className="flex items-center gap-2 text-accent-blue mb-1.5">
+            <CheckCircle className="w-4 h-4" />
+            <span className="metric-label">Total pago</span>
           </div>
-          <p className="metric-value text-accent-purple">{formatar(totalMinimo)}</p>
+          <p className="metric-value text-accent-blue">{formatar(totalPago)}</p>
         </div>
       </div>
 
