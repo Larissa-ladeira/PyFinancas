@@ -17,8 +17,6 @@ const links = [
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
-const bottomLinks = links.slice(0, 5)
-
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -106,22 +104,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-24 lg:pb-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-8">
           {children}
         </main>
 
-        <nav className="bottom-nav lg:hidden">
-          {bottomLinks.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end={to === '/'}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 text-[11px] font-medium transition-all duration-200
-                ${isActive ? 'text-[#B894E2]' : 'text-white/40 hover:text-white/70'}`}
-            >
-              <Icon className="w-5 h-5" />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
+
       </div>
     </div>
   )
