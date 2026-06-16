@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Investimento } from '../types'
+import type { Investimento, Conta } from '../types'
 import { TIPOS_INVESTIMENTO } from '../types'
-import { TrendingUp, Plus, Trash2, Pencil, BarChart3 } from 'lucide-react'
+import { TrendingUp, Plus, Trash2, Pencil, BarChart3, Landmark } from 'lucide-react'
 import EmptyState from '../components/EmptyState'
 import ConfirmDialog from '../components/ConfirmDialog'
 
@@ -21,12 +21,18 @@ export default function Investimentos() {
   const [quantidade, setQuantidade] = useState('')
   const [dataAquisicao, setDataAquisicao] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [contas, setContas] = useState<Conta[]>([])
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { carregar(); carregarContas() }, [])
 
   async function carregar() {
     const { data } = await supabase.from('investimentos').select('*').order('created_at', { ascending: false })
     setItems(data || [])
+  }
+
+  async function carregarContas() {
+    const { data } = await supabase.from('contas').select('*').order('created_at', { ascending: false })
+    setContas(data || [])
   }
 
   function resetForm() {
@@ -70,6 +76,8 @@ export default function Investimentos() {
   const totalAtual = items.reduce((s, i) => s + Number(i.valor_atual), 0)
   const rendimento = totalAtual - totalInvestido
   const rendimentoPerc = totalInvestido > 0 ? (rendimento / totalInvestido) * 100 : 0
+  const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
+  const patrimonioLiquido = totalAtual + saldoBancario
 
   return (
     <div className="space-y-6">
@@ -80,7 +88,7 @@ export default function Investimentos() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="metric-card metric-card-receita">
           <div className="flex items-center gap-2 text-accent-blue mb-1.5">
             <TrendingUp className="w-4 h-4" />
@@ -104,6 +112,19 @@ export default function Investimentos() {
             {rendimento >= 0 ? '+' : ''}{formatar(rendimento)}
             <span className="text-sm ml-1">({rendimentoPerc >= 0 ? '+' : ''}{rendimentoPerc.toFixed(1)}%)</span>
           </p>
+        </div>
+        <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
+          <div className={`flex items-center gap-2 mb-1.5 ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
+            <Landmark className="w-4 h-4" />
+            <span className="metric-label">Patrimônio Líquido</span>
+          </div>
+          <p className={`metric-value ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
+            {formatar(patrimonioLiquido)}
+          </p>
+          <div className="flex items-center justify-center gap-3 mt-2 text-xs text-white/40">
+            <span>Investimentos: <strong className="text-accent-blue">{formatar(totalAtual)}</strong></span>
+            <span>Contas: <strong className="text-accent-purple">{formatar(saldoBancario)}</strong></span>
+          </div>
         </div>
       </div>
 

@@ -112,7 +112,8 @@ export default function Dashboard() {
     return (data || []) as Transacao[]
   }
 
-  const receitas = transacoes.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
+  const receitasTransacoes = transacoes.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
+  const receitas = salario + receitasTransacoes
   const despesas = transacoes.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const saldo = receitas - despesas
 
