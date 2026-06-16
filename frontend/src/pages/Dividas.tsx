@@ -217,43 +217,6 @@ export default function Dividas() {
         </div>
       </div>
 
-      {dividas.length > 0 && (
-        <div className="glass-card p-5"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255,46,154,0.18), rgba(168,85,247,0.18), rgba(0,212,255,0.18))',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid var(--border)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-          }}>
-          <div className="text-center mb-3">
-            <span className="text-xs text-white/50 uppercase tracking-wider">Dívidas quitadas</span>
-            <p className="text-3xl font-bold mt-1"
-              style={{
-                background: 'linear-gradient(90deg, #FF2E9A, #A855F7, #00D4FF)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}>
-              {quitadas.length}/{dividas.length}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/10">
-            <div className="text-center">
-              <p className="text-xs text-white/50 uppercase tracking-wider">Gastos</p>
-              <p className="text-lg font-bold text-white">
-                {formatar(totalDivida)}
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-white/50 uppercase tracking-wider">Pagos</p>
-              <p className="text-lg font-bold text-accent-blue">
-                {formatar(totalPago)}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {totalDivida > 0 && (
         <div className="glass-card p-5">
           <div className="flex items-center justify-between mb-3">
