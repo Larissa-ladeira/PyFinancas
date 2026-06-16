@@ -161,7 +161,7 @@ export default function Configuracoes() {
 
       {salarioNum > 0 && todas.length > 0 && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="metric-card">
               <div className="metric-label text-white/40 mb-1">Salário Base</div>
               <div className="metric-value text-white">{formatar(salarioNum)}</div>

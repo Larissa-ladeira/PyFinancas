@@ -509,7 +509,7 @@ export default function DespesasMensais() {
                   }} />
               </div>
             )}
-            <div className="grid grid-cols-3 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="text-center">
                 <p className="text-lg font-bold text-accent-blue">{formatar(salario)}</p>
                 <p className="text-[10px] text-white/40 uppercase tracking-wider">Salário</p>

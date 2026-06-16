@@ -217,9 +217,9 @@ export default function Extrato() {
                   <tbody>
                     {linhas.map((l, i) => (
                       <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="py-1.5 pr-2"><input type="date" className="input-glass !py-1 !px-2 !text-xs w-28" value={l.data} onChange={e => atualizarLinha(i, 'data', e.target.value)} /></td>
-                        <td className="py-1.5 pr-2"><input className="input-glass !py-1 !px-2 !text-xs w-36" value={l.descricao} onChange={e => atualizarLinha(i, 'descricao', e.target.value)} /></td>
-                        <td className="py-1.5 pr-2"><input type="number" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-20 text-right" value={l.valor} onChange={e => atualizarLinha(i, 'valor', parseFloat(e.target.value) || 0)} /></td>
+                        <td className="py-1.5 pr-2"><input type="date" className="input-glass !py-1 !px-2 !text-xs w-full min-w-[100px]" value={l.data} onChange={e => atualizarLinha(i, 'data', e.target.value)} /></td>
+                        <td className="py-1.5 pr-2"><input className="input-glass !py-1 !px-2 !text-xs w-full min-w-[120px]" value={l.descricao} onChange={e => atualizarLinha(i, 'descricao', e.target.value)} /></td>
+                        <td className="py-1.5 pr-2"><input type="number" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-full min-w-[80px] text-right" value={l.valor} onChange={e => atualizarLinha(i, 'valor', parseFloat(e.target.value) || 0)} /></td>
                         <td className="py-1.5 pr-2 text-center">
                           <select className="select-glass !py-1 !px-2 !text-xs" value={l.tipo} onChange={e => atualizarLinha(i, 'tipo', e.target.value)}>
                             <option value="despesa">Despesa</option>
@@ -263,7 +263,7 @@ export default function Extrato() {
               onChange={e => setBusca(e.target.value)} />
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <select value={String(filtroMes)} onChange={e => setFiltroMes(e.target.value === 'todos' ? 'todos' : Number(e.target.value))} className="select-glass">
             <option value="todos">Todos os meses</option>
             {MESES_PT.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
