@@ -49,7 +49,7 @@ export default function Login({ onAuth }: LoginProps) {
             bg-gradient-to-br from-[#763EC0]/30 to-[#9966DC]/20 border border-[#9966DC]/30 mb-5 shadow-lg shadow-[#763EC0]/20">
             <Sparkles className="w-8 h-8 text-[#B894E2]" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">$PyFinanças</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">PyFinanças</h1>
           <p className="text-white/40 text-sm mt-2">Controle suas finanças de forma simples</p>
         </div>
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
