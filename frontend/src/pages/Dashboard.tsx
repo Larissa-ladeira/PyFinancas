@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao, Divida, Lembrete, Investimento, Conta } from '../types'
+import type { Transacao, Divida, Lembrete } from '../types'
 import { MESES_PT } from '../types'
 import {
   TrendingUp, TrendingDown, Wallet, PieChart, BarChart3, ArrowUpRight,
-  PiggyBank, Target, Bell, Check, Landmark
+  PiggyBank, Target, Bell, Check
 } from 'lucide-react'
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer,
@@ -24,8 +24,6 @@ export default function Dashboard() {
   const [dividas, setDividas] = useState<Divida[]>([])
   const [salario, setSalario] = useState(0)
   const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
-  const [investimentos, setInvestimentos] = useState<Investimento[]>([])
-  const [contas, setContas] = useState<Conta[]>([])
 
   useEffect(() => { carregar() }, [mes, ano])
   useEffect(() => {
@@ -35,10 +33,6 @@ export default function Dashboard() {
       .then(({ data }) => setDividas(data || []))
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
-    supabase.from('investimentos').select('*')
-      .then(({ data }) => setInvestimentos(data || []))
-    supabase.from('contas').select('*')
-      .then(({ data }) => setContas(data || []))
     gerarRecorrentes()
   }, [])
 
@@ -130,11 +124,6 @@ export default function Dashboard() {
   const dividaRatio = salario > 0 ? (totalRestante / salario) * 100 : 0
   const excedente = saldo - totalMinimo
 
-  const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
-  const totalInvestimentos = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
-  const totalAtivos = saldoBancario + totalInvestimentos
-  const patrimonioLiquido = totalAtivos - totalRestante
-
   function calcularLiberdade() {
     const restante = ativas.map(d => ({
       saldo: Number(d.valor_total) - Number(d.valor_pago),
@@ -209,7 +198,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="metric-card metric-card-receita">
           <div className="flex items-center gap-2 text-accent-blue mb-1.5">
             <TrendingUp className="w-4 h-4" />
@@ -230,19 +219,6 @@ export default function Dashboard() {
             <span className="metric-label">Saldo</span>
           </div>
           <p className={`metric-value ${saldo >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>{formatar(saldo)}</p>
-        </div>
-        <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
-          <div className={`flex items-center gap-2 mb-1.5 ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
-            <Landmark className="w-4 h-4" />
-            <span className="metric-label">Patrimônio Líquido</span>
-          </div>
-          <p className={`metric-value ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
-            {formatar(patrimonioLiquido)}
-          </p>
-          <div className="flex items-center justify-center gap-3 mt-2 text-xs text-white/40">
-            <span>Ativos: <strong className="text-accent-blue">{formatar(totalAtivos)}</strong></span>
-            <span>Dívidas: <strong className="text-accent-pink">{formatar(totalRestante)}</strong></span>
-          </div>
         </div>
       </div>
 
