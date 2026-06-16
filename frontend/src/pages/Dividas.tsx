@@ -500,22 +500,18 @@ export default function Dividas() {
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm mb-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm mb-3">
                       <div>
-                        <span className="text-white/30 text-xs">Total</span>
+                        <span className="text-white/30 text-xs">Valor Original</span>
                         <p className="text-white font-medium">{formatar(Number(d.valor_total))}</p>
                       </div>
                       <div>
-                        <span className="text-white/30 text-xs">Falta</span>
+                        <span className="text-white/30 text-xs">Valor Atual</span>
                         <p className="text-accent-pink font-medium">{formatar(saldoRestante)}</p>
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Pago</span>
                         <p className="text-accent-blue font-medium">{formatar(Number(d.valor_pago))}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/30 text-xs">Juros</span>
-                        <p className="text-amber-300 font-medium">{Number(d.taxa_juros).toFixed(1)}% a.m.</p>
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Mínimo</span>
