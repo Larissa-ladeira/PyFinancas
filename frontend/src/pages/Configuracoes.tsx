@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao, Conta } from '../types'
+import type { Transacao, Conta, Investimento } from '../types'
 import { TIPOS_CONTA } from '../types'
 import { Save, Bell, User, Building2, Plus, Trash2, Pencil } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -27,6 +27,7 @@ export default function Configuracoes() {
   const [profileSaved, setProfileSaved] = useState(false)
 
   const [contas, setContas] = useState<Conta[]>([])
+  const [investimentos, setInvestimentos] = useState<Investimento[]>([])
   const [showContaForm, setShowContaForm] = useState(false)
   const [contaNome, setContaNome] = useState('')
   const [contaTipo, setContaTipo] = useState('corrente')
@@ -55,6 +56,7 @@ export default function Configuracoes() {
       }
     })
     carregarContas()
+    supabase.from('investimentos').select('*').then(({ data }) => setInvestimentos(data || []))
   }, [])
 
   async function carregarContas() {
@@ -123,8 +125,12 @@ export default function Configuracoes() {
 
   const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
   const totalDesp = todas.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
-  const economia = totalRec - totalDesp
   const salarioNum = parseFloat(salario) || 0
+  const receitasTotal = salarioNum + totalRec
+  const totalInvestido = investimentos.reduce((s, i) => s + Number(i.valor_investido), 0)
+  const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
+  const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
+  const patrimonioLiquido = totalAtual + saldoBancario
   const percGasto = salarioNum > 0 ? (totalDesp / salarioNum) * 100 : 0
 
   return (
@@ -270,22 +276,23 @@ export default function Configuracoes() {
       {salarioNum > 0 && todas.length > 0 && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="metric-card">
-              <div className="metric-label text-white/40 mb-1">Salário Base</div>
-              <div className="metric-value text-white">{formatar(salarioNum)}</div>
-            </div>
             <div className="metric-card metric-card-receita">
               <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
-              <div className="metric-value text-accent-blue">{formatar(totalRec)}</div>
+              <div className="metric-value text-accent-blue">{formatar(receitasTotal)}</div>
+              <div className="text-xs text-white/30 mt-1">Salário + Extras</div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label text-white/40 mb-1">Total Investido</div>
+              <div className="metric-value text-white">{formatar(totalInvestido)}</div>
             </div>
             <div className="metric-card metric-card-despesa">
               <div className="metric-label text-accent-pink/60 mb-1">Total Despesas</div>
               <div className="metric-value text-despesa">{formatar(totalDesp)}</div>
             </div>
-            <div className="metric-card metric-card-saldo">
-              <div className="metric-label text-accent-purple/60 mb-1">Economia</div>
-              <div className={`metric-value ${economia >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>
-                {formatar(economia)}
+            <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
+              <div className={`metric-label mb-1 ${patrimonioLiquido >= 0 ? 'text-accent-blue/60' : 'text-accent-pink/60'}`}>Patrimônio Líquido</div>
+              <div className={`metric-value ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
+                {formatar(patrimonioLiquido)}
               </div>
             </div>
           </div>
