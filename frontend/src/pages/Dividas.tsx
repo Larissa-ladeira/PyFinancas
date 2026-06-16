@@ -258,13 +258,13 @@ export default function Dividas() {
             <div className="text-center">
               <p className="text-xs text-white/50 uppercase tracking-wider">Gastos</p>
               <p className="text-lg font-bold text-white">
-                {formatar(dividas.reduce((s, d) => s + Number(d.valor_total), 0))}
+                {formatar(totalDivida)}
               </p>
             </div>
             <div className="text-center">
               <p className="text-xs text-white/50 uppercase tracking-wider">Pagos</p>
               <p className="text-lg font-bold text-accent-blue">
-                {formatar(dividas.reduce((s, d) => s + Number(d.valor_pago), 0))}
+                {formatar(totalPago)}
               </p>
             </div>
           </div>
