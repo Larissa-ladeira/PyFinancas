@@ -74,8 +74,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                   ${isActive
-                    ? 'bg-white/10 text-white border border-white/10'
-                    : 'text-white/50 hover:bg-white/5 hover:text-white/80 border border-transparent'}`
+                    ? 'bg-gradient-to-r from-accent-blue to-accent-purple text-white shadow-lg shadow-accent-blue/20'
+                    : 'text-white/50 hover:bg-gradient-to-r hover:from-accent-blue/20 hover:to-accent-purple/20 hover:text-white'}`
                 }
               >
                 <Icon className="w-4 h-4" />
