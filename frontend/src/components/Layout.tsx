@@ -31,14 +31,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const [userNome, setUserNome] = useState('')
   const [userEmail, setUserEmail] = useState('')
-  const [userGenero, setUserGenero] = useState('feminino')
+  const [userGenero, setUserGenero] = useState('menina-negra')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserNome((data.user.user_metadata?.nome as string) || '')
         setUserEmail(data.user.email || '')
-        setUserGenero((data.user.user_metadata?.genero as string) || 'feminino')
+        setUserGenero((data.user.user_metadata?.genero as string) || 'menina-negra')
       }
     })
 
@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         setUserNome((session.user.user_metadata?.nome as string) || '')
         setUserEmail(session.user.email || '')
-        setUserGenero((session.user.user_metadata?.genero as string) || 'feminino')
+        setUserGenero((session.user.user_metadata?.genero as string) || 'menina-negra')
       }
     })
     return () => subscription.unsubscribe()
@@ -75,16 +75,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
               <span className="font-bold text-lg text-white">PyFinanças</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 shrink-0">
-                {userGenero === 'feminino' ? (
-                  <img src="/avatars/feminino.jpg" alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/30">
-                    <DollarSign className="w-5 h-5" />
-                  </div>
-                )}
-              </div>
+              <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 shrink-0">
+                  <img src={`/avatars/${userGenero}.jpg`} alt="Avatar" className="w-full h-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-white truncate">{userNome || 'Larissa'}</p>
                 <p className="text-xs text-white/40 truncate mt-0.5">{userEmail}</p>

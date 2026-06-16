@@ -25,7 +25,14 @@ export default function Configuracoes() {
   const [profileNome, setProfileNome] = useState('')
   const [profileEmail, setProfileEmail] = useState('')
   const [profileSaved, setProfileSaved] = useState(false)
-  const [genero, setGenero] = useState('feminino')
+  const [genero, setGenero] = useState('menina-negra')
+
+  const AVATARES = [
+    { value: 'menina-branca', label: 'Menina Branca', img: '/avatars/menina-branca.jpg' },
+    { value: 'menina-negra', label: 'Menina Negra', img: '/avatars/menina-negra.jpg' },
+    { value: 'menino-branco', label: 'Menino Branco', img: '/avatars/menino-branco.jpg' },
+    { value: 'menino-negro', label: 'Menino Negro', img: '/avatars/menino-negro.jpg' },
+  ]
 
   const [contas, setContas] = useState<Conta[]>([])
   const [investimentos, setInvestimentos] = useState<Investimento[]>([])
@@ -42,7 +49,7 @@ export default function Configuracoes() {
         setUsuarioId(data.user.id)
         setProfileNome((data.user.user_metadata?.nome as string) || 'Larissa')
         setProfileEmail(data.user.email || '')
-        setGenero((data.user.user_metadata?.genero as string) || 'feminino')
+        setGenero((data.user.user_metadata?.genero as string) || 'menina-negra')
       }
     })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
@@ -145,13 +152,7 @@ export default function Configuracoes() {
         </h2>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 shrink-0">
-            {genero === 'feminino' ? (
-              <img src="/avatars/feminino.jpg" alt="Avatar" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white/30">
-                <User className="w-10 h-10" />
-              </div>
-            )}
+            <img src={`/avatars/${genero}.jpg`} alt="Avatar" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 space-y-3">
             <div>
@@ -161,18 +162,16 @@ export default function Configuracoes() {
                 onChange={e => setProfileNome(e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">Gênero</label>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="genero" value="feminino" checked={genero === 'feminino'}
-                    onChange={e => setGenero(e.target.value)} className="accent-accent-blue" />
-                  <span className="text-sm text-white/70">Feminino</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="genero" value="masculino" checked={genero === 'masculino'}
-                    onChange={e => setGenero(e.target.value)} className="accent-accent-blue" />
-                  <span className="text-sm text-white/70">Masculino</span>
-                </label>
+              <label className="block text-sm font-medium text-white/60 mb-2">Avatar</label>
+              <div className="flex gap-3 flex-wrap">
+                {AVATARES.map(a => (
+                  <button key={a.value} type="button" onClick={() => setGenero(a.value)}
+                    className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${
+                      genero === a.value ? 'border-accent-blue scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}>
+                    <img src={a.img} alt={a.label} className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             </div>
           </div>
