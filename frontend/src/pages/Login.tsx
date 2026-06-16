@@ -188,16 +188,34 @@ export default function Login({ onAuth }: LoginProps) {
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
             <div>
-              <label className="block text-sm text-white/50 mb-2">Escolha seu avatar</label>
-              <div className="flex gap-3 justify-center">
-                {AVATARES.map(a => (
-                  <button key={a.value} type="button" onClick={() => setAvatar(a.value)}
-                    className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all ${
-                      avatar === a.value ? 'border-accent-blue scale-110 ring-2 ring-accent-blue/30' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}>
-                    <img src={a.img} alt={a.label} className="w-full h-full object-cover" />
-                  </button>
-                ))}
+              <label className="block text-sm text-white/50 mb-3">Escolha seu avatar</label>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-white/30 mb-2 text-center">Feminino</p>
+                  <div className="flex gap-3 justify-center">
+                    {AVATARES.filter(a => a.value.startsWith('menina')).map(a => (
+                      <button key={a.value} type="button" onClick={() => setAvatar(a.value)}
+                        className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all ${
+                          avatar === a.value ? 'border-accent-blue scale-110 ring-2 ring-accent-blue/30' : 'border-white/20 opacity-60 hover:opacity-100'
+                        }`}>
+                        <img src={a.img} alt={a.label} className="w-full h-full object-cover rounded-full" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-white/30 mb-2 text-center">Masculino</p>
+                  <div className="flex gap-3 justify-center">
+                    {AVATARES.filter(a => a.value.startsWith('menino')).map(a => (
+                      <button key={a.value} type="button" onClick={() => setAvatar(a.value)}
+                        className={`w-14 h-14 rounded-full overflow-hidden border-2 transition-all ${
+                          avatar === a.value ? 'border-accent-blue scale-110 ring-2 ring-accent-blue/30' : 'border-white/20 opacity-60 hover:opacity-100'
+                        }`}>
+                        <img src={a.img} alt={a.label} className="w-full h-full object-cover rounded-full" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
             <button type="submit" disabled={loading}

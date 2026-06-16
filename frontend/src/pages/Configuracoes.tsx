@@ -162,16 +162,34 @@ export default function Configuracoes() {
                 onChange={e => setProfileNome(e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">Avatar</label>
-              <div className="flex gap-3 flex-wrap">
-                {AVATARES.map(a => (
-                  <button key={a.value} type="button" onClick={() => setGenero(a.value)}
-                    className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${
-                      genero === a.value ? 'border-accent-blue scale-110' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}>
-                    <img src={a.img} alt={a.label} className="w-full h-full object-cover" />
-                  </button>
-                ))}
+              <label className="block text-sm font-medium text-white/60 mb-3">Avatar</label>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-white/30 mb-2">Feminino</p>
+                  <div className="flex gap-3">
+                    {AVATARES.filter(a => a.value.startsWith('menina')).map(a => (
+                      <button key={a.value} type="button" onClick={() => setGenero(a.value)}
+                        className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${
+                          genero === a.value ? 'border-accent-blue scale-110' : 'border-white/20 opacity-60 hover:opacity-100'
+                        }`}>
+                        <img src={a.img} alt={a.label} className="w-full h-full object-cover rounded-full" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-white/30 mb-2">Masculino</p>
+                  <div className="flex gap-3">
+                    {AVATARES.filter(a => a.value.startsWith('menino')).map(a => (
+                      <button key={a.value} type="button" onClick={() => setGenero(a.value)}
+                        className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all ${
+                          genero === a.value ? 'border-accent-blue scale-110' : 'border-white/20 opacity-60 hover:opacity-100'
+                        }`}>
+                        <img src={a.img} alt={a.label} className="w-full h-full object-cover rounded-full" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
