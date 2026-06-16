@@ -131,7 +131,7 @@ export default function Configuracoes() {
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={notifAtivo} onChange={e => setNotifAtivo(e.target.checked)}
-            className="w-5 h-5 accent-blue-500" />
+            className="w-5 h-5 accent-accent-blue" />
           <span className="text-sm text-white/70">Ativar notificações de lembretes</span>
         </label>
 
@@ -167,16 +167,16 @@ export default function Configuracoes() {
               <div className="metric-value text-white">{formatar(salarioNum)}</div>
             </div>
             <div className="metric-card metric-card-receita">
-              <div className="metric-label text-blue-300/60 mb-1">Total Receitas</div>
-              <div className="metric-value text-blue-300">{formatar(totalRec)}</div>
+              <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
+              <div className="metric-value text-accent-blue">{formatar(totalRec)}</div>
             </div>
             <div className="metric-card metric-card-despesa">
-              <div className="metric-label text-pink-300/60 mb-1">Total Despesas</div>
+              <div className="metric-label text-accent-pink/60 mb-1">Total Despesas</div>
               <div className="metric-value text-despesa">{formatar(totalDesp)}</div>
             </div>
             <div className="metric-card metric-card-saldo">
-              <div className="metric-label text-purple-300/60 mb-1">Economia</div>
-              <div className={`metric-value ${economia >= 0 ? 'text-purple-300' : 'text-pink-300'}`}>
+              <div className="metric-label text-accent-purple/60 mb-1">Economia</div>
+              <div className={`metric-value ${economia >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>
                 {formatar(economia)}
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function Configuracoes() {
           <div className="glass-card p-5">
             <h3 className="font-semibold text-white/70 mb-3">📊 Gastos vs Salário</h3>
             <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 100 ? 'bg-pink-500' : 'bg-blue-500'}`}
+              <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 100 ? 'bg-accent-pink' : 'bg-accent-blue'}`}
                 style={{ width: `${Math.min(percGasto, 100)}%` }} />
             </div>
             <p className="text-sm text-white/40 mt-2">

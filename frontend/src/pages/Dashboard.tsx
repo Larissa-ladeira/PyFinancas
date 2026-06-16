@@ -11,7 +11,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend
 } from 'recharts'
 
-const COLORS = ['#3b82f6', '#f472b6', '#ffffff', '#8b5cf6', '#60a5fa', '#f9a8d4', '#a78bfa', '#f59e0b', '#93c5fd']
+const COLORS = ['#00D4FF', '#FF2E9A', '#ffffff', '#A855F7', '#00D4FF', '#FF2E9A', '#A855F7', '#f59e0b', '#00D4FF']
 
 function formatar(val: number) {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -165,25 +165,25 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="metric-card metric-card-receita">
-          <div className="flex items-center gap-2 text-blue-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-blue mb-1.5">
             <TrendingUp className="w-4 h-4" />
             <span className="metric-label">Receitas</span>
           </div>
-          <p className="metric-value text-blue-300">{formatar(receitas)}</p>
+          <p className="metric-value text-accent-blue">{formatar(receitas)}</p>
         </div>
         <div className="metric-card metric-card-despesa">
-          <div className="flex items-center gap-2 text-pink-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-pink mb-1.5">
             <TrendingDown className="w-4 h-4" />
             <span className="metric-label">Despesas</span>
           </div>
-          <p className="metric-value text-despesa">{formatar(despesas)}</p>
+          <p className="metric-value text-accent-pink">{formatar(despesas)}</p>
         </div>
         <div className="metric-card metric-card-saldo">
-          <div className="flex items-center gap-2 text-purple-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-purple mb-1.5">
             <Wallet className="w-4 h-4" />
             <span className="metric-label">Saldo</span>
           </div>
-          <p className={`metric-value ${saldo >= 0 ? 'text-purple-300' : 'text-pink-300'}`}>{formatar(saldo)}</p>
+          <p className={`metric-value ${saldo >= 0 ? 'text-accent-purple' : 'text-accent-pink'}`}>{formatar(saldo)}</p>
         </div>
       </div>
 
@@ -210,7 +210,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <span className="text-xs text-white/40">Já gasto (transações)</span>
-                  <p className="text-lg font-bold text-pink-300">{formatar(gastoMes)}</p>
+                  <p className="text-lg font-bold text-accent-pink">{formatar(gastoMes)}</p>
                 </div>
                 <div>
                   <span className="text-xs text-white/40">Total comprometido</span>
@@ -218,7 +218,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <span className="text-xs text-white/40">% do salário</span>
-                  <p className={`text-lg font-bold ${percComprometido > 70 ? 'text-pink-300' : 'text-blue-300'}`}>
+                  <p className={`text-lg font-bold ${percComprometido > 70 ? 'text-accent-pink' : 'text-accent-blue'}`}>
                     {percComprometido.toFixed(1)}%
                   </p>
                 </div>
@@ -226,21 +226,21 @@ export default function Dashboard() {
 
               {salario > 0 && (
                 <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden mb-4">
-                  <div className={`h-full rounded-full transition-all duration-500 ${percComprometido > 70 ? 'bg-pink-500' : 'bg-amber-500'}`}
+                  <div className={`h-full rounded-full transition-all duration-500 ${percComprometido > 70 ? 'bg-accent-pink' : 'bg-amber-500'}`}
                     style={{ width: `${Math.min(percComprometido, 100)}%` }} />
                 </div>
               )}
 
               {salarioLiquido > 0 && (
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 mb-4">
-                  <p className="text-sm text-blue-200">
+                <div className="bg-accent-blue/10 border border-accent-blue/20 rounded-xl p-3 mb-4">
+                  <p className="text-sm text-accent-blue">
                     Saldo livre após compromissos: <strong>{formatar(salarioLiquido)}</strong>
                   </p>
                 </div>
               )}
               {salarioLiquido <= 0 && salario > 0 && (
-                <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-3 mb-4">
-                  <p className="text-sm text-pink-200">
+                <div className="bg-accent-pink/10 border border-accent-pink/20 rounded-xl p-3 mb-4">
+                  <p className="text-sm text-accent-pink">
                     Seus compromissos excedem seu salário em <strong>{formatar(Math.abs(salarioLiquido))}</strong>
                   </p>
                 </div>
@@ -258,7 +258,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                           <button onClick={() => togglePago(l.id, l.pago)}
                             className="w-5 h-5 rounded border border-amber-500/50 flex items-center justify-center
-                              hover:bg-blue-500/20 hover:border-blue-500 transition-all">
+                              hover:bg-accent-blue/20 hover:border-accent-blue transition-all">
                           </button>
                           <div>
                             <p className="text-sm text-white/80 font-medium">{l.descricao}</p>
@@ -274,7 +274,7 @@ export default function Dashboard() {
                 </details>
               )}
               {pendentes.length === 0 && (
-                <p className="text-sm text-blue-300/70 flex items-center gap-2">
+                <p className="text-sm text-accent-blue/70 flex items-center gap-2">
                   <Check className="w-4 h-4" /> Nenhum lembrete pendente neste mês
                 </p>
               )}
@@ -292,35 +292,35 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <span className="text-xs text-white/40">Dívida restante</span>
-              <p className="text-lg font-bold text-pink-300">{formatar(totalRestante)}</p>
+              <p className="text-lg font-bold text-accent-pink">{formatar(totalRestante)}</p>
             </div>
             <div>
               <span className="text-xs text-white/40">Parcelas mínimas</span>
-              <p className="text-lg font-bold text-purple-300">{formatar(totalMinimo)}/mês</p>
+              <p className="text-lg font-bold text-accent-purple">{formatar(totalMinimo)}/mês</p>
             </div>
             <div>
               <span className="text-xs text-white/40">Excedente mensal</span>
-              <p className={`text-lg font-bold ${excedente > 0 ? 'text-blue-300' : 'text-pink-300'}`}>
+              <p className={`text-lg font-bold ${excedente > 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
                 {formatar(excedente)}
               </p>
             </div>
             <div>
               <span className="text-xs text-white/40">Dívida / Renda</span>
-              <p className={`text-lg font-bold ${dividaRatio < 50 ? 'text-blue-300' : 'text-amber-300'}`}>
+              <p className={`text-lg font-bold ${dividaRatio < 50 ? 'text-accent-blue' : 'text-amber-300'}`}>
                 {dividaRatio.toFixed(1)}%
               </p>
             </div>
           </div>
           {totalDivida > 0 && (
             <div className="mt-3 w-full bg-white/5 rounded-full h-3 overflow-hidden">
-              <div className="h-full rounded-full bg-blue-500 transition-all duration-500"
+              <div className="h-full rounded-full bg-accent-blue transition-all duration-500"
                 style={{ width: `${Math.min((totalPago / totalDivida) * 100, 100)}%` }} />
             </div>
           )}
           {mesesLiberdade !== null && mesesLiberdade > 0 && (
-            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 flex items-center gap-2">
-              <PiggyBank className="w-5 h-5 text-blue-300 shrink-0" />
-              <p className="text-sm text-blue-200">
+            <div className="mt-3 bg-accent-blue/10 border border-accent-blue/20 rounded-xl p-3 flex items-center gap-2">
+              <PiggyBank className="w-5 h-5 text-accent-blue shrink-0" />
+              <p className="text-sm text-accent-blue">
                 Pagando <strong>{formatar(excedente)}</strong> por mês além das parcelas mínimas,
                 você estará livre das dívidas em{' '}
                 <strong>
@@ -332,14 +332,14 @@ export default function Dashboard() {
             </div>
           )}
           {mesesLiberdade === 0 && (
-            <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 flex items-center gap-2">
-              <PiggyBank className="w-5 h-5 text-blue-300 shrink-0" />
-              <p className="text-sm text-blue-200">Você não tem dívidas ativas. 🎉</p>
+            <div className="mt-3 bg-accent-blue/10 border border-accent-blue/20 rounded-xl p-3 flex items-center gap-2">
+              <PiggyBank className="w-5 h-5 text-accent-blue shrink-0" />
+              <p className="text-sm text-accent-blue">Você não tem dívidas ativas. 🎉</p>
             </div>
           )}
           {excedente <= 0 && totalRestante > 0 && (
-            <div className="mt-3 bg-pink-500/10 border border-pink-500/20 rounded-xl p-3">
-              <p className="text-sm text-pink-200">
+            <div className="mt-3 bg-accent-pink/10 border border-accent-pink/20 rounded-xl p-3">
+              <p className="text-sm text-accent-pink">
                 Suas despesas + parcelas mínimas estão maiores que sua receita.
                 Reveja seus gastos para conseguir abrir margem para pagar as dívidas.
               </p>
@@ -384,12 +384,12 @@ export default function Dashboard() {
                 tick={{ fill: 'rgba(255,255,255,0.3)' }} />
               <Tooltip content={<TooltipCustom />} />
               <Legend formatter={(v: string) => <span style={{ color: 'rgba(255,255,255,0.6)' }}>{v}</span>} />
-              <Line type="monotone" dataKey="Receitas" stroke="#3b82f6" strokeWidth={2.5}
-                dot={{ fill: '#ffffff', stroke: '#3b82f6', strokeWidth: 2.5, r: 4 }}
-                activeDot={{ r: 7, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }} />
-              <Line type="monotone" dataKey="Despesas" stroke="#ec4899" strokeWidth={2.5}
-                dot={{ fill: '#ffffff', stroke: '#ec4899', strokeWidth: 2.5, r: 4 }}
-                activeDot={{ r: 7, fill: '#ec4899', stroke: '#ffffff', strokeWidth: 2 }} />
+              <Line type="monotone" dataKey="Receitas" stroke="#00D4FF" strokeWidth={2.5}
+                dot={{ fill: '#ffffff', stroke: '#00D4FF', strokeWidth: 2.5, r: 4 }}
+                activeDot={{ r: 7, fill: '#00D4FF', stroke: '#ffffff', strokeWidth: 2 }} />
+              <Line type="monotone" dataKey="Despesas" stroke="#FF2E9A" strokeWidth={2.5}
+                dot={{ fill: '#ffffff', stroke: '#FF2E9A', strokeWidth: 2.5, r: 4 }}
+                activeDot={{ r: 7, fill: '#FF2E9A', stroke: '#ffffff', strokeWidth: 2 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -422,7 +422,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <p className={`text-lg font-bold shrink-0 -mt-0.5 ${
-                        t.tipo.toLowerCase() === 'receita' ? 'text-blue-300' : 'text-pink-300'
+                        t.tipo.toLowerCase() === 'receita' ? 'text-accent-blue' : 'text-accent-pink'
                       }`}>
                         {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                       </p>

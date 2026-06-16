@@ -83,11 +83,11 @@ export default function RendaExtra() {
       </div>
 
       <div className="metric-card metric-card-receita">
-        <div className="flex items-center gap-2 text-blue-300 mb-1.5">
+        <div className="flex items-center gap-2 text-accent-blue mb-1.5">
           <TrendingUp className="w-4 h-4" />
           <span className="metric-label">Total de Renda Extra</span>
         </div>
-        <p className="metric-value text-blue-300">{formatar(totalExtra)}</p>
+        <p className="metric-value text-accent-blue">{formatar(totalExtra)}</p>
       </div>
 
       <div className="glass-card p-5">
@@ -120,13 +120,13 @@ export default function RendaExtra() {
             </div>
           </div>
           {errorMsg && (
-            <div className="flex items-center gap-2 bg-pink-500/15 border border-pink-500/25 text-pink-300 text-sm rounded-xl p-3">
+            <div className="flex items-center gap-2 bg-accent-pink/15 border border-accent-pink/25 text-accent-pink text-sm rounded-xl p-3">
               <AlertCircle className="w-4 h-4 shrink-0" />
               {errorMsg}
             </div>
           )}
           {success && (
-            <div className="flex items-center gap-2 bg-blue-500/15 border border-blue-500/25 text-blue-300 text-sm rounded-xl p-3">
+            <div className="flex items-center gap-2 bg-accent-blue/15 border border-accent-blue/25 text-accent-blue text-sm rounded-xl p-3">
               <CheckCircle className="w-4 h-4 shrink-0" />
               Renda extra salva com sucesso!
             </div>
@@ -155,13 +155,13 @@ export default function RendaExtra() {
                       <span className="badge badge-receita">{t.categoria}</span>
                     </div>
                   </div>
-                  <p className="text-lg font-bold text-blue-300 shrink-0 -mt-0.5">
+                  <p className="text-lg font-bold text-accent-blue shrink-0 -mt-0.5">
                     +{formatar(Number(t.valor))}
                   </p>
                 </div>
                 <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
                   <button onClick={() => handleDelete(t.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-pink-500/20 hover:text-pink-300 transition-all">
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                     <Trash2 className="w-3.5 h-3.5" />
                     Excluir
                   </button>

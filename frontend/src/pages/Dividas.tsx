@@ -206,11 +206,11 @@ export default function Dividas() {
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="metric-card metric-card-despesa">
-          <div className="flex items-center gap-2 text-pink-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-pink mb-1.5">
             <TrendingDown className="w-4 h-4" />
             <span className="metric-label">Total devido</span>
           </div>
-          <p className="metric-value text-despesa">{formatar(totalRestante)}</p>
+          <p className="metric-value text-accent-pink">{formatar(totalRestante)}</p>
         </div>
         <div className="metric-card">
           <div className="flex items-center gap-2 text-white/50 mb-1.5">
@@ -219,18 +219,18 @@ export default function Dividas() {
           <p className="metric-value text-white">{formatar(totalDivida)}</p>
         </div>
         <div className="metric-card metric-card-receita">
-          <div className="flex items-center gap-2 text-blue-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-blue mb-1.5">
             <CheckCircle className="w-4 h-4" />
             <span className="metric-label">Já pago</span>
           </div>
-          <p className="metric-value text-blue-300">{formatar(totalPago)}</p>
+          <p className="metric-value text-accent-blue">{formatar(totalPago)}</p>
         </div>
         <div className="metric-card metric-card-saldo">
-          <div className="flex items-center gap-2 text-purple-300 mb-1.5">
+          <div className="flex items-center gap-2 text-accent-purple mb-1.5">
             <Calculator className="w-4 h-4" />
             <span className="metric-label">Parcela mínima</span>
           </div>
-          <p className="metric-value text-purple-300">{formatar(totalMinimo)}</p>
+          <p className="metric-value text-accent-purple">{formatar(totalMinimo)}</p>
         </div>
       </div>
 
@@ -239,7 +239,7 @@ export default function Dividas() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-white/70">Progresso Geral</h3>
             <span className="text-xs text-white/40">
-              <span className="text-blue-300 font-semibold">{quitadas.length}</span>
+              <span className="text-accent-blue font-semibold">{quitadas.length}</span>
               /{dividas.length} dívidas quitadas
             </span>
           </div>
@@ -249,13 +249,13 @@ export default function Dividas() {
                 {dividas.map((d, i) => (
                   <div key={d.id} className="flex-1 rounded-full transition-all duration-500"
                     style={{
-                      backgroundColor: d.quitada ? '#3b82f6' : 'rgba(255,255,255,0.08)',
+                      backgroundColor: d.quitada ? '#00D4FF' : 'rgba(255,255,255,0.08)',
                       transitionDelay: `${i * 30}ms`,
                     }} />
                 ))}
               </div>
               <div className="w-full bg-white/5 rounded-full h-4 overflow-hidden mb-3">
-                <div className="h-full rounded-full bg-purple-500/60 transition-all duration-500"
+                <div className="h-full rounded-full bg-accent-purple/60 transition-all duration-500"
                   style={{ width: `${Math.min((totalPago / totalDivida) * 100, 100)}%` }} />
               </div>
               <div className="space-y-1">
@@ -265,11 +265,11 @@ export default function Dividas() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/40">Pago</span>
-                  <span className="text-blue-300 font-medium">{formatar(totalPago)}</span>
+                  <span className="text-accent-blue font-medium">{formatar(totalPago)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/40">Falta</span>
-                  <span className="text-pink-300 font-medium">{formatar(totalRestante)}</span>
+                  <span className="text-accent-pink font-medium">{formatar(totalRestante)}</span>
                 </div>
               </div>
               <p className="text-sm text-white/40 mt-3">
@@ -285,7 +285,7 @@ export default function Dividas() {
                       { name: 'Restante', value: Math.max(totalRestante, 0) },
                     ]} dataKey="value" innerRadius={50} outerRadius={75}
                       startAngle={90} endAngle={-270}>
-                      <Cell fill="#3b82f6" />
+                      <Cell fill="#00D4FF" />
                       <Cell fill="rgba(255,255,255,0.08)" />
                     </Pie>
                   </PieChart>
@@ -306,7 +306,7 @@ export default function Dividas() {
         <form onSubmit={handleAdd} className="glass-card p-5 space-y-4">
           <h3 className="font-semibold text-white/70 text-sm">Nova Dívida</h3>
           {errorMsg && (
-            <div className="bg-pink-500/10 border border-pink-500/20 text-pink-300 text-sm rounded-xl p-3">
+            <div className="bg-accent-pink/10 border border-accent-pink/20 text-accent-pink text-sm rounded-xl p-3">
               {errorMsg}
             </div>
           )}
@@ -343,14 +343,14 @@ export default function Dividas() {
                 <button onClick={() => setEstrategia('snowball')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                     ${estrategia === 'snowball'
-                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      ? 'bg-accent-blue/20 text-accent-blue border border-accent-blue/30'
                       : 'text-white/40 hover:text-white/70'}`}>
                   Bola de Neve
                 </button>
                 <button onClick={() => setEstrategia('avalanche')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                     ${estrategia === 'avalanche'
-                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      ? 'bg-accent-purple/20 text-accent-purple border border-accent-purple/30'
                       : 'text-white/40 hover:text-white/70'}`}>
                   Avalanche
                 </button>
@@ -378,10 +378,10 @@ export default function Dividas() {
             </div>
             {simResult && (
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
-                  <Calendar className="w-5 h-5 text-blue-300 mx-auto mb-1" />
+                <div className="bg-accent-blue/10 border border-accent-blue/20 rounded-xl p-4 text-center">
+                  <Calendar className="w-5 h-5 text-accent-blue mx-auto mb-1" />
                   <p className="text-xs text-white/40">Livre em</p>
-                  <p className="text-lg font-bold text-blue-300">
+                  <p className="text-lg font-bold text-accent-blue">
                     {simResult.meses < 12
                       ? `${simResult.meses} ${simResult.meses === 1 ? 'mês' : 'meses'}`
                       : `${Math.floor(simResult.meses / 12)}a ${simResult.meses % 12}m`}
@@ -422,7 +422,7 @@ export default function Dividas() {
                           </button>
                         </div>
                         {errorMsg && (
-                          <div className="bg-pink-500/10 border border-pink-500/20 text-pink-300 text-sm rounded-xl p-3">
+                          <div className="bg-accent-pink/10 border border-accent-pink/20 text-accent-pink text-sm rounded-xl p-3">
                             {errorMsg}
                           </div>
                         )}
@@ -470,11 +470,11 @@ export default function Dividas() {
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Falta</span>
-                        <p className="text-pink-300 font-medium">{formatar(saldoRestante)}</p>
+                        <p className="text-accent-pink font-medium">{formatar(saldoRestante)}</p>
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Pago</span>
-                        <p className="text-blue-300 font-medium">{formatar(Number(d.valor_pago))}</p>
+                        <p className="text-accent-blue font-medium">{formatar(Number(d.valor_pago))}</p>
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Juros</span>
@@ -482,12 +482,12 @@ export default function Dividas() {
                       </div>
                       <div>
                         <span className="text-white/30 text-xs">Mínimo</span>
-                        <p className="text-purple-300 font-medium">{formatar(Number(d.pagamento_minimo))}</p>
+                        <p className="text-accent-purple font-medium">{formatar(Number(d.pagamento_minimo))}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
-                        <div className="h-full rounded-full bg-blue-500 transition-all"
+                        <div className="h-full rounded-full bg-accent-blue transition-all"
                           style={{ width: `${Math.min(progresso, 100)}%` }} />
                       </div>
                       <span className="text-xs text-white/30 w-10 text-right">{progresso.toFixed(0)}%</span>
@@ -496,11 +496,11 @@ export default function Dividas() {
                         Pagar
                       </button>
                       <button onClick={() => iniciarEdicao(d)}
-                        className="p-1.5 rounded-lg hover:bg-blue-500/20 text-white/30 hover:text-blue-300 transition-all">
+                        className="p-1.5 rounded-lg hover:bg-accent-blue/20 text-white/30 hover:text-accent-blue transition-all">
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(d.id)}
-                        className="p-1.5 rounded-lg hover:bg-pink-500/20 text-white/30 hover:text-pink-300 transition-all">
+                        className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -511,7 +511,7 @@ export default function Dividas() {
                           <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagamento('') }}
                             className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all
                               ${tipoPagamento === 'total'
-                                ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
+                                ? 'bg-accent-blue/20 border-accent-blue/40 text-accent-blue'
                                 : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'}`}>
                             Pagar Total
                           </button>
@@ -526,7 +526,7 @@ export default function Dividas() {
                         {tipoPagamento === 'total' ? (
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-white/60">Valor restante:</span>
-                            <span className="text-lg font-bold text-blue-300">
+                            <span className="text-lg font-bold text-accent-blue">
                               {formatar(Number(d.valor_total) - Number(d.valor_pago))}
                             </span>
                           </div>
@@ -566,8 +566,8 @@ export default function Dividas() {
 
       {ativas.length === 0 && quitadas.length > 0 && (
         <div className="glass-card text-center py-12">
-          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-blue-300" />
-          <p className="text-blue-300/70 text-sm font-semibold">Todas as dívidas quitadas! 🎉</p>
+          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-accent-blue" />
+          <p className="text-accent-blue/70 text-sm font-semibold">Todas as dívidas quitadas! 🎉</p>
         </div>
       )}
 
@@ -576,7 +576,7 @@ export default function Dividas() {
           <summary className="p-5 cursor-pointer flex items-center justify-between text-white/70 font-semibold
             [&::-webkit-details-marker]:hidden">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-blue-300" />
+              <CheckCircle className="w-4 h-4 text-accent-blue" />
               <span className="text-sm">Dívidas Quitadas ({quitadas.length})</span>
             </div>
             <span className="text-xs text-white/30 group-open:rotate-180 transition-transform">▼</span>

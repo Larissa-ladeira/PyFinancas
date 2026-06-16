@@ -51,9 +51,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#ec4899]/20 border border-[#8b5cf6]/30
+              <div className="w-9 h-9 rounded-xl bg-accent-pink/20 border border-accent-purple/30
                 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-[#f9a8d4]" />
+                <DollarSign className="w-5 h-5 text-accent-pink" />
               </div>
               <span className="font-bold text-lg text-white">PyFinanças</span>
             </div>
@@ -81,7 +81,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="p-3 border-t border-white/10">
             <button onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                text-white/40 hover:text-pink-300 hover:bg-pink-500/10 transition-all duration-200 w-full">
+                text-white/40 hover:text-accent-pink hover:bg-accent-pink/10 transition-all duration-200 w-full">
               <LogOut className="w-4 h-4" />
               Sair
             </button>
