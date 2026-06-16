@@ -18,8 +18,8 @@ type Estrategia = 'snowball' | 'avalanche'
 export default function Dividas() {
   const [dividas, setDividas] = useState<Divida[]>([])
   const [descricao, setDescricao] = useState('')
-  const [valorTotal, setValorTotal] = useState('')
-  const [taxaJuros, setTaxaJuros] = useState('')
+  const [valorOriginal, setValorOriginal] = useState('')
+  const [valorAtual, setValorAtual] = useState('')
   const [pagamentoMinimo, setPagamentoMinimo] = useState('')
   const [dataVenc, setDataVenc] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,7 +35,7 @@ export default function Dividas() {
   const [editandoId, setEditandoId] = useState<number | null>(null)
   const [editDescricao, setEditDescricao] = useState('')
   const [editValorTotal, setEditValorTotal] = useState('')
-  const [editTaxaJuros, setEditTaxaJuros] = useState('')
+  const [editValorAtual, setEditValorAtual] = useState('')
   const [editPagamentoMinimo, setEditPagamentoMinimo] = useState('')
   const [editDataVenc, setEditDataVenc] = useState('')
 
@@ -60,15 +60,14 @@ export default function Dividas() {
     const { error } = await supabase.from('dividas').insert({
       usuario_id: usuarioId,
       descricao,
-      valor_total: parseFloat(valorTotal),
-      taxa_juros: parseFloat(taxaJuros) || 0,
+      valor_total: parseFloat(valorAtual || valorOriginal),
       pagamento_minimo: parseFloat(pagamentoMinimo) || 0,
       data_vencimento: dataVenc || null,
     })
     if (error) {
       setErrorMsg(error.message)
     } else {
-      setDescricao(''); setValorTotal(''); setTaxaJuros('')
+      setDescricao(''); setValorOriginal(''); setValorAtual('')
       setPagamentoMinimo(''); setDataVenc('')
       setShowForm(false)
       carregar()
@@ -103,7 +102,7 @@ export default function Dividas() {
     setEditandoId(d.id)
     setEditDescricao(d.descricao)
     setEditValorTotal(String(d.valor_total))
-    setEditTaxaJuros(String(d.taxa_juros))
+    setEditValorAtual(String(d.valor_total))
     setEditPagamentoMinimo(String(d.pagamento_minimo))
     setEditDataVenc(d.data_vencimento || '')
   }
@@ -114,8 +113,7 @@ export default function Dividas() {
     setLoading(true)
     const { error } = await supabase.from('dividas').update({
       descricao: editDescricao,
-      valor_total: parseFloat(editValorTotal),
-      taxa_juros: parseFloat(editTaxaJuros) || 0,
+      valor_total: parseFloat(editValorAtual || editValorTotal),
       pagamento_minimo: parseFloat(editPagamentoMinimo) || 0,
       data_vencimento: editDataVenc || null,
     }).eq('id', editandoId)
@@ -204,26 +202,13 @@ export default function Dividas() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="metric-card metric-card-despesa">
           <div className="flex items-center gap-2 text-accent-pink mb-1.5">
             <TrendingDown className="w-4 h-4" />
             <span className="metric-label">Total devido</span>
           </div>
           <p className="metric-value text-accent-pink">{formatar(totalRestante)}</p>
-        </div>
-        <div className="metric-card">
-          <div className="flex items-center gap-2 text-white/50 mb-1.5">
-            <span className="metric-label">Valor original</span>
-          </div>
-          <p className="metric-value text-white">{formatar(totalDivida)}</p>
-        </div>
-        <div className="metric-card metric-card-receita">
-          <div className="flex items-center gap-2 text-accent-blue mb-1.5">
-            <CheckCircle className="w-4 h-4" />
-            <span className="metric-label">Já pago</span>
-          </div>
-          <p className="metric-value text-accent-blue">{formatar(totalPago)}</p>
         </div>
         <div className="metric-card metric-card-saldo">
           <div className="flex items-center gap-2 text-accent-purple mb-1.5">
@@ -347,13 +332,13 @@ export default function Dividas() {
               {errorMsg}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <input type="text" required placeholder="Descrição"
               className="input-glass" value={descricao} onChange={e => setDescricao(e.target.value)} />
-            <input type="number" required min="0.01" step="0.01" placeholder="Valor total"
-              className="input-glass" value={valorTotal} onChange={e => setValorTotal(e.target.value)} />
-            <input type="number" min="0" step="0.1" placeholder="Juros % a.m."
-              className="input-glass" value={taxaJuros} onChange={e => setTaxaJuros(e.target.value)} />
+            <input type="number" required min="0.01" step="0.01" placeholder="Valor Original"
+              className="input-glass" value={valorOriginal} onChange={e => { setValorOriginal(e.target.value); if (!valorAtual) setValorAtual(e.target.value) }} />
+            <input type="number" min="0" step="0.01" placeholder="Valor Atual"
+              className="input-glass" value={valorAtual} onChange={e => setValorAtual(e.target.value)} />
             <input type="number" min="0" step="0.01" placeholder="Pgto mínimo"
               className="input-glass" value={pagamentoMinimo} onChange={e => setPagamentoMinimo(e.target.value)} />
             <input type="date" placeholder="Vencimento"
@@ -467,12 +452,12 @@ export default function Dividas() {
                           <input type="text" required placeholder="Descrição"
                             className="input-glass" value={editDescricao}
                             onChange={e => setEditDescricao(e.target.value)} />
-                          <input type="number" required min="0.01" step="0.01" placeholder="Valor total"
+                          <input type="number" required min="0.01" step="0.01" placeholder="Valor Original"
                             className="input-glass" value={editValorTotal}
                             onChange={e => setEditValorTotal(e.target.value)} />
-                          <input type="number" min="0" step="0.1" placeholder="Juros % a.m."
-                            className="input-glass" value={editTaxaJuros}
-                            onChange={e => setEditTaxaJuros(e.target.value)} />
+                          <input type="number" min="0" step="0.01" placeholder="Valor Atual"
+                            className="input-glass" value={editValorAtual}
+                            onChange={e => setEditValorAtual(e.target.value)} />
                           <input type="number" min="0" step="0.01" placeholder="Pgto mínimo"
                             className="input-glass" value={editPagamentoMinimo}
                             onChange={e => setEditPagamentoMinimo(e.target.value)} />
@@ -502,11 +487,11 @@ export default function Dividas() {
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm mb-3">
                       <div>
-                        <span className="text-white/30 text-xs">Valor Original</span>
+                        <span className="text-white/30 text-xs">Total</span>
                         <p className="text-white font-medium">{formatar(Number(d.valor_total))}</p>
                       </div>
                       <div>
-                        <span className="text-white/30 text-xs">Valor Atual</span>
+                        <span className="text-white/30 text-xs">Restante</span>
                         <p className="text-accent-pink font-medium">{formatar(saldoRestante)}</p>
                       </div>
                       <div>
