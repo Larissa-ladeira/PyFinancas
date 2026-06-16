@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, ListOrdered, Settings,
-  LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown, TrendingUp, Handshake
+  LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown, TrendingUp, Handshake, Target, Repeat, BarChart3, CalendarDays, Upload
 } from 'lucide-react'
 
 const links = [
@@ -13,6 +13,11 @@ const links = [
   { to: '/lembretes', label: 'Lembretes', icon: Bell },
   { to: '/dividas', label: 'Desfudência', icon: PiggyBank },
   { to: '/acordos', label: 'Acordos', icon: Handshake },
+  { to: '/metas', label: 'Metas', icon: Target },
+  { to: '/recorrentes', label: 'Recorrentes', icon: Repeat },
+  { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { to: '/calendario', label: 'Calendário', icon: CalendarDays },
+  { to: '/importar', label: 'Importar', icon: Upload },
   { to: '/extrato', label: 'Extrato', icon: ListOrdered },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ]

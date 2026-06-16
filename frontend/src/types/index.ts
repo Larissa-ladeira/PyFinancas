@@ -70,6 +70,39 @@ export interface Acordo {
   created_at: string
 }
 
+export interface MetaEconomia {
+  id: number
+  usuario_id: string
+  descricao: string
+  valor_alvo: number
+  valor_atual: number
+  data_alvo: string | null
+  concluida: boolean
+  created_at: string
+}
+
+export interface MetaOrcamento {
+  id: number
+  usuario_id: string
+  categoria: string
+  valor_limite: number
+  mes: number
+  ano: number
+}
+
+export interface TransacaoRecorrente {
+  id: number
+  usuario_id: string
+  descricao: string
+  valor: number
+  tipo: 'receita' | 'despesa'
+  categoria: string
+  dia_vencimento: number
+  ativa: boolean
+  data_inicio: string
+  created_at: string
+}
+
 export const CATEGORIAS_RECEITA = [
   'Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'
 ]

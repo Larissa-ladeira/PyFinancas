@@ -11,6 +11,11 @@ import Dividas from './pages/Dividas'
 import DespesasMensais from './pages/DespesasMensais'
 import RendaExtra from './pages/RendaExtra'
 import Acordos from './pages/Acordos'
+import MetasEconomia from './pages/MetasEconomia'
+import TransacoesRecorrentes from './pages/TransacoesRecorrentes'
+import Relatorios from './pages/Relatorios'
+import CalendarioFinanceiro from './pages/CalendarioFinanceiro'
+import ImportarExtrato from './pages/ImportarExtrato'
 
 export default function App() {
   const [authed, setAuthed] = useState<boolean | null>(null)
@@ -44,6 +49,11 @@ export default function App() {
         <Route path="/despesas" element={<DespesasMensais />} />
         <Route path="/renda-extra" element={<RendaExtra />} />
         <Route path="/acordos" element={<Acordos />} />
+        <Route path="/metas" element={<MetasEconomia />} />
+        <Route path="/recorrentes" element={<TransacoesRecorrentes />} />
+        <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/calendario" element={<CalendarioFinanceiro />} />
+        <Route path="/importar" element={<ImportarExtrato />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

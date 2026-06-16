@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao } from '../types'
+import type { Transacao, MetaOrcamento } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
   TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
@@ -39,13 +39,34 @@ export default function DespesasMensais() {
   const [tipoPagamento, setTipoPagamento] = useState<'total' | 'parcial'>('total')
   const [valorPagar, setValorPagar] = useState('')
   const [pagarError, setPagarError] = useState('')
+  const [metasOrcamento, setMetasOrcamento] = useState<MetaOrcamento[]>([])
+  const [editandoBudget, setEditandoBudget] = useState<string | null>(null)
+  const [budgetValor, setBudgetValor] = useState('')
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
   }, [])
 
-  useEffect(() => { carregar() }, [mes, ano])
+  useEffect(() => { carregar(); carregarOrcamento() }, [mes, ano])
+
+  async function carregarOrcamento() {
+    const { data } = await supabase.from('metas_orcamento').select('*')
+      .eq('mes', mes).eq('ano', ano)
+    setMetasOrcamento(data || [])
+  }
+
+  async function salvarOrcamento(categoria: string, valor: number) {
+    const existente = metasOrcamento.find(m => m.categoria === categoria)
+    if (existente) {
+      await supabase.from('metas_orcamento').update({ valor_limite: valor }).eq('id', existente.id)
+    } else {
+      await supabase.from('metas_orcamento').insert({
+        categoria, valor_limite: valor, mes, ano,
+      })
+    }
+    carregarOrcamento()
+  }
 
   async function carregar() {
     const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
@@ -249,20 +270,49 @@ export default function DespesasMensais() {
           </div>
           <div className="space-y-3">
             {catOrdenadas.map(([cat, valor], i) => {
-              const pct = totalDespesas > 0 ? (valor / totalDespesas) * 100 : 0
+              const meta = metasOrcamento.find(m => m.categoria === cat)
+              const limite = meta?.valor_limite || 0
+              const budgetPct = limite > 0 ? (valor / limite) * 100 : 0
+              const estourou = limite > 0 && valor > limite
               return (
                 <div key={cat}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className={`w-2.5 h-2.5 rounded-full ${estourou ? 'bg-accent-pink animate-pulse' : ''}`}
+                        style={{ backgroundColor: estourou ? undefined : COLORS[i % COLORS.length] }} />
                       <span className="text-white/70">{cat}</span>
+                      {estourou && <span className="text-[10px] text-accent-pink font-medium">● Acima do orçamento</span>}
                     </div>
-                    <span className="text-white font-medium">{formatar(valor)}</span>
+                    <div className="flex items-center gap-2">
+                      {limite > 0 && (
+                        <span className="text-xs text-white/30">
+                          {formatar(valor)} / {formatar(limite)}
+                        </span>
+                      )}
+                      {limite === 0 && <span className="text-white font-medium">{formatar(valor)}</span>}
+                      {editandoBudget === cat ? (
+                        <form onSubmit={(e) => { e.preventDefault(); salvarOrcamento(cat, parseFloat(budgetValor)); setEditandoBudget(null) }}
+                          className="flex items-center gap-1">
+                          <input type="number" min="0" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-24"
+                            value={budgetValor} onChange={e => setBudgetValor(e.target.value)} autoFocus />
+                          <button type="submit" className="text-xs text-accent-blue hover:text-accent-blue/80">ok</button>
+                          <button type="button" className="text-xs text-white/30 hover:text-white/60"
+                            onClick={() => setEditandoBudget(null)}>x</button>
+                        </form>
+                      ) : (
+                        <button onClick={() => { setEditandoBudget(cat); setBudgetValor(String(limite || '')) }}
+                          className="text-xs text-white/20 hover:text-accent-blue transition-all">
+                          {limite > 0 ? 'Editar' : 'Definir orçamento'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%`, backgroundColor: COLORS[i % COLORS.length] }} />
-                  </div>
+                  {(limite > 0 || estourou) && (
+                    <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-500 ${estourou ? 'bg-accent-pink' : ''}`}
+                        style={{ width: `${Math.min(budgetPct, 100)}%`, backgroundColor: estourou ? undefined : COLORS[i % COLORS.length] }} />
+                    </div>
+                  )}
                 </div>
               )
             })}

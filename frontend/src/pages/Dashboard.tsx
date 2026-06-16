@@ -33,7 +33,42 @@ export default function Dashboard() {
       .then(({ data }) => setDividas(data || []))
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
+    gerarRecorrentes()
   }, [])
+
+  async function gerarRecorrentes() {
+    const hoje = new Date()
+    const mesAtual = hoje.getMonth() + 1
+    const anoAtual = hoje.getFullYear()
+    const { data: recorrentes } = await supabase.from('transacoes_recorrentes').select('*').eq('ativa', true)
+    if (!recorrentes?.length) return
+
+    const inicio = new Date(anoAtual, mesAtual - 1, 1).toISOString().split('T')[0]
+    const fim = mesAtual === 12
+      ? new Date(anoAtual + 1, 0, 1).toISOString().split('T')[0]
+      : new Date(anoAtual, mesAtual, 1).toISOString().split('T')[0]
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: existentes } = await supabase.from('transacoes').select('descricao, valor')
+      .eq('usuario_id', user.id)
+      .gte('data_transacao', inicio).lt('data_transacao', fim)
+
+    for (const r of recorrentes) {
+      const jaExiste = existentes?.some(e =>
+        e.descricao === r.descricao && Math.abs(Number(e.valor) - Number(r.valor)) < 0.01
+      )
+      if (jaExiste) continue
+
+      const diaValido = Math.min(r.dia_vencimento, new Date(anoAtual, mesAtual, 0).getDate())
+      const dataTransacao = new Date(anoAtual, mesAtual - 1, diaValido).toISOString().split('T')[0]
+
+      await supabase.from('transacoes').insert({
+        usuario_id: user.id, descricao: r.descricao, valor: r.valor,
+        tipo: r.tipo, categoria: r.categoria, data_transacao: dataTransacao,
+      })
+    }
+  }
 
   useEffect(() => {
     const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
