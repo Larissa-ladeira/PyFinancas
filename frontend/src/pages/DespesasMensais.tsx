@@ -178,8 +178,9 @@ export default function DespesasMensais() {
     setFormErrorMsg('')
     setFormLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setFormErrorMsg('Usuário não autenticado'); setFormLoading(false); return }
     const { error } = await supabase.from('transacoes').insert({
-      usuario_id: user?.id,
+      usuario_id: user.id,
       descricao: formDescricao,
       valor: parseFloat(formValor),
       tipo: 'despesa',
@@ -190,7 +191,7 @@ export default function DespesasMensais() {
       setFormErrorMsg(error.message)
     } else {
       await supabase.from('lembretes').insert({
-        usuario_id: user?.id,
+        usuario_id: user.id,
         descricao: formDescricao,
         valor: parseFloat(formValor),
         data_vencimento: formData,
@@ -198,8 +199,8 @@ export default function DespesasMensais() {
       })
       if (formRecorrente) {
         const dia = new Date(formData).getDate()
-        await supabase.from('transacoes_recorrentes').insert({
-          usuario_id: user?.id,
+        const { error: recError } = await supabase.from('transacoes_recorrentes').insert({
+          usuario_id: user.id,
           descricao: formDescricao,
           valor: parseFloat(formValor),
           tipo: 'despesa',
@@ -207,6 +208,7 @@ export default function DespesasMensais() {
           dia_vencimento: dia,
           ativa: true,
         })
+        if (recError) setFormErrorMsg(recError.message)
       }
       setFormSuccess(true)
       setFormDescricao('')
@@ -214,9 +216,9 @@ export default function DespesasMensais() {
       setFormData(new Date().toISOString().split('T')[0])
       setFormCategoria(CATEGORIAS_DESPESA[0])
       setFormRecorrente(false)
-      carregar()
-      carregarLembretes()
-      carregarRecorrentes()
+      await carregar()
+      await carregarLembretes()
+      await carregarRecorrentes()
       setTimeout(() => setFormSuccess(false), 2000)
     }
     setFormLoading(false)
@@ -254,6 +256,8 @@ export default function DespesasMensais() {
     e.preventDefault()
     if (!editandoId) return
     setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setLoading(false); return }
     const { error } = await supabase.from('transacoes').update({
       descricao: editDescricao,
       valor: parseFloat(editValor),
@@ -263,33 +267,32 @@ export default function DespesasMensais() {
     if (error) {
       setErrorMsg(error.message)
     } else {
-      const { data: { user } } = await supabase.auth.getUser()
+      const existing = await supabase.from('transacoes_recorrentes').select('id')
+        .eq('descricao', editDescricao)
+        .gte('valor', parseFloat(editValor) - 0.01)
+        .lte('valor', parseFloat(editValor) + 0.01)
+        .maybeSingle()
       if (editRecorrente) {
-        const existing = await supabase.from('transacoes_recorrentes').select('id')
-          .eq('descricao', editDescricao)
-          .gte('valor', parseFloat(editValor) - 0.01)
-          .lte('valor', parseFloat(editValor) + 0.01)
-          .maybeSingle()
         if (!existing.data) {
-          await supabase.from('transacoes_recorrentes').upsert({
-            usuario_id: user?.id,
+          const { error: recError } = await supabase.from('transacoes_recorrentes').insert({
+            usuario_id: user.id,
             descricao: editDescricao,
             valor: parseFloat(editValor),
             tipo: 'despesa',
             categoria: editCategoria,
             dia_vencimento: parseInt(editRecDia) || new Date(editData).getDate(),
             ativa: true,
-          }, { onConflict: 'usuario_id, descricao, valor' })
+          })
+          if (recError) setErrorMsg(recError.message)
         }
       } else {
-        await supabase.from('transacoes_recorrentes').delete()
-          .eq('descricao', editDescricao)
-          .gte('valor', parseFloat(editValor) - 0.01)
-          .lte('valor', parseFloat(editValor) + 0.01)
+        if (existing.data) {
+          await supabase.from('transacoes_recorrentes').delete().eq('id', existing.data.id)
+        }
       }
       setEditandoId(null)
-      carregar()
-      carregarRecorrentes()
+      await carregar()
+      await carregarRecorrentes()
     }
     setLoading(false)
   }
