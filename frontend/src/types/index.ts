@@ -148,6 +148,14 @@ export const TIPOS_INVESTIMENTO = [
   { value: 'outros', label: 'Outros' },
 ]
 
+export interface DeviceToken {
+  id: number
+  usuario_id: string
+  token: string
+  platform: string
+  created_at: string
+}
+
 export const TIPOS_CONTA = [
   { value: 'corrente', label: 'Conta Corrente' },
   { value: 'poupanca', label: 'Poupança' },

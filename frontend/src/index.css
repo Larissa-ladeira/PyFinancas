@@ -4,6 +4,7 @@
   --color-accent-blue: #00D4FF;
   --color-accent-pink: #FF2E9A;
   --color-accent-purple: #A855F7;
+  --color-accent-green: #22D68C;
 }
 
 :root {
@@ -12,6 +13,7 @@
   --accent-blue: #00D4FF;
   --accent-purple: #A855F7;
   --accent-pink: #FF2E9A;
+  --accent-green: #22D68C;
   --text: #E0E7FF;
   --text-light: #B0B8E0;
   --border: rgba(168, 85, 247, 0.3);
@@ -92,6 +94,7 @@
   .metric-card-receita { border-left: 3px solid var(--accent-blue); }
   .metric-card-despesa { border-left: 3px solid var(--accent-pink); }
   .metric-card-saldo   { border-left: 3px solid var(--accent-purple); }
+  .metric-card-desconto { border-left: 3px solid var(--accent-green); }
 
   .btn-primary {
     display: inline-flex;

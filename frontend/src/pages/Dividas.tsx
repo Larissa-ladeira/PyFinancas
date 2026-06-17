@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Divida } from '../types'
 import {
   PiggyBank, Plus, Trash2, TrendingDown, CheckCircle,
-  Brain, Calculator, Calendar, Pencil, X
+  Brain, Calculator, Calendar, Pencil, X, Tag
 } from 'lucide-react'
 import {
   PieChart, Pie, Cell, ResponsiveContainer
@@ -143,7 +143,11 @@ export default function Dividas() {
   const ordenadas = useMemo(() => {
     const lista = [...ativas]
     if (estrategia === 'snowball') {
-      lista.sort((a, b) => (Number(a.valor_total) - Number(a.valor_pago)) - (Number(b.valor_total) - Number(b.valor_pago)))
+      lista.sort((a, b) => {
+        const saldoA = (a.valor_original != null ? Number(a.valor_original) : Number(a.valor_total)) - Number(a.valor_pago)
+        const saldoB = (b.valor_original != null ? Number(b.valor_original) : Number(b.valor_total)) - Number(b.valor_pago)
+        return saldoA - saldoB
+      })
     } else {
       lista.sort((a, b) => Number(b.taxa_juros) - Number(a.taxa_juros))
     }
@@ -153,6 +157,10 @@ export default function Dividas() {
   const totalDivida = ativas.reduce((s, d) => s + Number(d.valor_total), 0)
   const totalPago = ativas.reduce((s, d) => s + Number(d.valor_pago), 0)
   const totalRestante = totalDivida - totalPago
+  const totalComDescontos = ativas.reduce((s, d) => {
+    const original = d.valor_original != null ? Number(d.valor_original) : Number(d.valor_total)
+    return s + Math.max(0, original - Number(d.valor_pago))
+  }, 0)
   function calcularPrevisao(extra: number): { meses: number; totalJuros: number } | null {
     const restante = ativas.map(d => ({
       saldo: Number(d.valor_total) - Number(d.valor_pago),
@@ -202,7 +210,7 @@ export default function Dividas() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="metric-card metric-card-despesa">
           <div className="flex items-center gap-2 text-accent-pink mb-1.5">
             <TrendingDown className="w-4 h-4" />
@@ -216,6 +224,13 @@ export default function Dividas() {
             <span className="metric-label">Total pago</span>
           </div>
           <p className="metric-value text-accent-blue">{formatar(totalPago)}</p>
+        </div>
+        <div className="metric-card metric-card-desconto">
+          <div className="flex items-center gap-2 text-accent-green mb-1.5">
+            <Tag className="w-4 h-4" />
+            <span className="metric-label">Total c/ desconto</span>
+          </div>
+          <p className="metric-value text-accent-green">{formatar(totalComDescontos)}</p>
         </div>
       </div>
 
@@ -448,9 +463,13 @@ export default function Dividas() {
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm mb-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm mb-3">
                       <div>
-                        <span className="text-white/30 text-xs">Total</span>
+                        <span className="text-white/30 text-xs">Original</span>
+                        <p className="text-white font-medium">{formatar(Number(d.valor_original ?? d.valor_total))}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/30 text-xs">Atual</span>
                         <p className="text-white font-medium">{formatar(Number(d.valor_total))}</p>
                       </div>
                       <div>
@@ -466,11 +485,13 @@ export default function Dividas() {
                         <p className="text-accent-purple font-medium">{formatar(Number(d.pagamento_minimo))}</p>
                       </div>
                     </div>
-                    {d.valor_original != null && Number(d.valor_original) > 0 && (
+                    {d.valor_original != null && Number(d.valor_original) > 0 ? (
                       <div className="text-xs text-amber-300 mb-2">
                         +{((Number(d.valor_total) - Number(d.valor_original)) / Number(d.valor_original) * 100).toFixed(1)}% de juros
                       </div>
-                    )}
+                    ) : d.valor_original == null ? (
+                      <div className="text-xs text-white/30 mb-2">0,0% de juros</div>
+                    ) : null}
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
                         <div className="h-full rounded-full bg-accent-blue transition-all"

@@ -1,21 +1,21 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
+import { registerPushNotifications } from '../lib/notifications'
 import {
   LayoutDashboard, ListOrdered, Settings,
-  LogOut, Menu, DollarSign, Bell, PiggyBank, TrendingDown, TrendingUp, Handshake, Target, Repeat,
-  CalendarDays, BarChart3, TrendingUp as InvestmentIcon
+  LogOut, Menu, DollarSign, PiggyBank, TrendingDown, TrendingUp, Handshake, Target,
+  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X
 } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/despesas', label: 'Despesas', icon: TrendingDown },
   { to: '/renda-extra', label: 'Renda Extra', icon: TrendingUp },
-  { to: '/lembretes', label: 'Lembretes', icon: Bell },
   { to: '/dividas', label: 'Desfudência', icon: PiggyBank },
   { to: '/acordos', label: 'Acordos', icon: Handshake },
   { to: '/metas', label: 'Metas', icon: Target },
-  { to: '/recorrentes', label: 'Recorrentes', icon: Repeat },
+
   { to: '/investimentos', label: 'Investimentos', icon: InvestmentIcon },
   { to: '/calendario', label: 'Calendário', icon: CalendarDays },
   { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
@@ -33,6 +33,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState('')
   const [userGenero, setUserGenero] = useState('menina-negra')
 
+  const [lembretesAmanha, setLembretesAmanha] = useState<{ descricao: string; valor: number }[]>([])
+  const [showPopup, setShowPopup] = useState(false)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -49,6 +52,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         setUserGenero((session.user.user_metadata?.genero as string) || 'menina-negra')
       }
     })
+
+    const amanha = new Date()
+    amanha.setDate(amanha.getDate() + 1)
+    const amanhaStr = amanha.toISOString().split('T')[0]
+    supabase.from('lembretes').select('descricao, valor')
+      .eq('data_vencimento', amanhaStr)
+      .eq('pago', false)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setLembretesAmanha(data)
+          setShowPopup(true)
+        }
+      })
+
+    registerPushNotifications()
+
     return () => subscription.unsubscribe()
   }, [])
 
@@ -135,7 +154,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
 
-
+        {showPopup && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPopup(false)} />
+            <div className="relative glass-card max-w-md w-full p-6 animate-in fade-in slide-in-from-top-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+                  <Bell className="w-5 h-5 text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-white mb-1">Lembretes de amanhã</h3>
+                  <p className="text-xs text-white/40 mb-3">Não se esqueça de pagar:</p>
+                  <div className="space-y-2">
+                    {lembretesAmanha.map((l, i) => (
+                      <div key={i} className="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                        <span className="text-sm text-white font-medium">{l.descricao}</span>
+                        <span className="text-sm font-bold text-accent-pink">
+                          {l.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button onClick={() => setShowPopup(false)}
+                  className="p-1 rounded-lg hover:bg-white/10 text-white/30 hover:text-white transition-all shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

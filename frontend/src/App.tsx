@@ -7,13 +7,13 @@ import Onboarding from './components/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Extrato from './pages/Extrato'
 import Configuracoes from './pages/Configuracoes'
-import Lembretes from './pages/Lembretes'
+
 import Dividas from './pages/Dividas'
 import DespesasMensais from './pages/DespesasMensais'
 import RendaExtra from './pages/RendaExtra'
 import Acordos from './pages/Acordos'
 import MetasEconomia from './pages/MetasEconomia'
-import TransacoesRecorrentes from './pages/TransacoesRecorrentes'
+
 import CalendarioFinanceiro from './pages/CalendarioFinanceiro'
 import Relatorios from './pages/Relatorios'
 import Investimentos from './pages/Investimentos'
@@ -67,13 +67,13 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/extrato" element={<Extrato />} />
         <Route path="/configuracoes" element={<Configuracoes />} />
-        <Route path="/lembretes" element={<Lembretes />} />
+
         <Route path="/dividas" element={<Dividas />} />
         <Route path="/despesas" element={<DespesasMensais />} />
         <Route path="/renda-extra" element={<RendaExtra />} />
         <Route path="/acordos" element={<Acordos />} />
         <Route path="/metas" element={<MetasEconomia />} />
-        <Route path="/recorrentes" element={<TransacoesRecorrentes />} />
+
         <Route path="/calendario" element={<CalendarioFinanceiro />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/investimentos" element={<Investimentos />} />

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao, MetaOrcamento } from '../types'
+import type { Transacao, MetaOrcamento, Lembrete, TransacaoRecorrente } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
-  TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign
+  TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign, Bell, Repeat, Pause
 } from 'lucide-react'
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer
@@ -42,13 +42,21 @@ export default function DespesasMensais() {
   const [metasOrcamento, setMetasOrcamento] = useState<MetaOrcamento[]>([])
   const [editandoBudget, setEditandoBudget] = useState<string | null>(null)
   const [budgetValor, setBudgetValor] = useState('')
+  const [lembretes, setLembretes] = useState<Lembrete[]>([])
+  const [formRecorrente, setFormRecorrente] = useState(false)
+  const [recorrentesAtivos, setRecorrentesAtivos] = useState<TransacaoRecorrente[]>([])
+  const [editandoRecId, setEditandoRecId] = useState<number | null>(null)
+  const [editRecDescricao, setEditRecDescricao] = useState('')
+  const [editRecValor, setEditRecValor] = useState('')
+  const [editRecCategoria, setEditRecCategoria] = useState('')
+  const [editRecDia, setEditRecDia] = useState('')
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
       .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
   }, [])
 
-  useEffect(() => { carregar(); carregarOrcamento() }, [mes, ano])
+  useEffect(() => { carregar(); carregarOrcamento(); carregarLembretes(); carregarRecorrentes() }, [mes, ano])
 
   async function carregarOrcamento() {
     const { data } = await supabase.from('metas_orcamento').select('*')
@@ -68,7 +76,91 @@ export default function DespesasMensais() {
     carregarOrcamento()
   }
 
+  async function carregarLembretes() {
+    const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
+    const fim = mes === 12
+      ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
+      : new Date(ano, mes, 1).toISOString().split('T')[0]
+    const { data } = await supabase.from('lembretes').select('*')
+      .gte('data_vencimento', inicio).lt('data_vencimento', fim)
+      .order('data_vencimento', { ascending: false })
+    setLembretes(data || [])
+  }
+
+  async function autoGerarRecorrentes() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data: recorrentes } = await supabase.from('transacoes_recorrentes')
+      .select('*').eq('ativa', true)
+    if (!recorrentes?.length) return
+
+    const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
+    const fim = mes === 12
+      ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
+      : new Date(ano, mes, 1).toISOString().split('T')[0]
+
+    const { data: existentes } = await supabase.from('transacoes').select('descricao, valor')
+      .eq('usuario_id', user.id).eq('tipo', 'despesa')
+      .gte('data_transacao', inicio).lt('data_transacao', fim)
+
+    for (const r of recorrentes) {
+      if (r.tipo !== 'despesa') continue
+      const jaExiste = existentes?.some(e =>
+        e.descricao === r.descricao && Math.abs(Number(e.valor) - Number(r.valor)) < 0.01
+      )
+      if (jaExiste) continue
+      const diaValido = Math.min(r.dia_vencimento, new Date(ano, mes, 0).getDate())
+      const dataTransacao = new Date(ano, mes - 1, diaValido).toISOString().split('T')[0]
+      await supabase.from('transacoes').insert({
+        usuario_id: user.id, descricao: r.descricao, valor: r.valor,
+        tipo: 'despesa', categoria: r.categoria, data_transacao: dataTransacao,
+      })
+    }
+  }
+
+  async function carregarRecorrentes() {
+    const { data } = await supabase.from('transacoes_recorrentes').select('*')
+      .eq('ativa', true).order('created_at', { ascending: false })
+    setRecorrentesAtivos(data || [])
+  }
+
+  async function toggleRecorrente(id: number, ativa: boolean) {
+    await supabase.from('transacoes_recorrentes').update({ ativa: !ativa }).eq('id', id)
+    carregarRecorrentes()
+  }
+
+  async function deleteRecorrente(id: number) {
+    await supabase.from('transacoes_recorrentes').delete().eq('id', id)
+    carregarRecorrentes()
+  }
+
+  function iniciarEdicaoRecorrente(r: TransacaoRecorrente) {
+    setEditandoRecId(r.id)
+    setEditRecDescricao(r.descricao)
+    setEditRecValor(String(r.valor))
+    setEditRecCategoria(r.categoria)
+    setEditRecDia(String(r.dia_vencimento))
+  }
+
+  function cancelarEdicaoRecorrente() {
+    setEditandoRecId(null)
+  }
+
+  async function handleEditRecSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoRecId) return
+    await supabase.from('transacoes_recorrentes').update({
+      descricao: editRecDescricao,
+      valor: parseFloat(editRecValor),
+      categoria: editRecCategoria,
+      dia_vencimento: parseInt(editRecDia),
+    }).eq('id', editandoRecId)
+    setEditandoRecId(null)
+    carregarRecorrentes()
+  }
+
   async function carregar() {
+    await autoGerarRecorrentes()
     const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
     const fim = mes === 12
       ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
@@ -96,12 +188,34 @@ export default function DespesasMensais() {
     if (error) {
       setFormErrorMsg(error.message)
     } else {
+      await supabase.from('lembretes').insert({
+        usuario_id: user?.id,
+        descricao: formDescricao,
+        valor: parseFloat(formValor),
+        data_vencimento: formData,
+        pago: false,
+      })
+      if (formRecorrente) {
+        const dia = new Date(formData).getDate()
+        await supabase.from('transacoes_recorrentes').insert({
+          usuario_id: user?.id,
+          descricao: formDescricao,
+          valor: parseFloat(formValor),
+          tipo: 'despesa',
+          categoria: formCategoria,
+          dia_vencimento: dia,
+          ativa: true,
+        })
+      }
       setFormSuccess(true)
       setFormDescricao('')
       setFormValor('')
       setFormData(new Date().toISOString().split('T')[0])
       setFormCategoria(CATEGORIAS_DESPESA[0])
+      setFormRecorrente(false)
       carregar()
+      carregarLembretes()
+      carregarRecorrentes()
       setTimeout(() => setFormSuccess(false), 2000)
     }
     setFormLoading(false)
@@ -185,6 +299,18 @@ export default function DespesasMensais() {
     carregar()
   }
 
+  async function toggleLembrete(id: number, pago: boolean) {
+    await supabase.from('lembretes').update({ pago: !pago }).eq('id', id)
+    carregarLembretes()
+  }
+
+  async function deleteLembrete(id: number) {
+    await supabase.from('lembretes').delete().eq('id', id)
+    carregarLembretes()
+  }
+
+  const lembretesPendentes = lembretes.filter(l => !l.pago)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -233,6 +359,12 @@ export default function DespesasMensais() {
                   value={formData} onChange={e => setFormData(e.target.value)} />
               </div>
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={formRecorrente}
+                onChange={e => setFormRecorrente(e.target.checked)}
+                className="w-4 h-4 rounded border-white/20 bg-white/5 accent-accent-blue" />
+              <span className="text-sm text-white/60">Repetir todo mês</span>
+            </label>
             {formErrorMsg && (
               <div className="flex items-center gap-2 bg-accent-pink/15 border border-accent-pink/25 text-accent-pink text-sm rounded-xl p-3">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -459,6 +591,108 @@ export default function DespesasMensais() {
           <p className="text-white/30 text-sm py-4 text-center">Nenhuma despesa neste mês</p>
         )}
       </div>
+
+      {lembretesPendentes.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 text-white/70 mb-4">
+            <Bell className="w-4 h-4" />
+            <h2 className="font-semibold text-sm">Lembretes pendentes ({lembretesPendentes.length})</h2>
+          </div>
+          <div className="space-y-2">
+            {lembretesPendentes.map(l => (
+              <div key={l.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm truncate">{l.descricao}</p>
+                  <p className="text-xs text-white/40">
+                    vence {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <span className="text-sm font-bold text-accent-pink">
+                    {formatar(Number(l.valor))}
+                  </span>
+                  <button onClick={() => toggleLembrete(l.id, l.pago)}
+                    className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-blue/20 hover:text-accent-blue transition-all"
+                    title="Marcar como pago">
+                    <CheckCircle className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => deleteLembrete(l.id)}
+                    className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-pink/20 hover:text-accent-pink transition-all"
+                    title="Excluir lembrete">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(recorrentesAtivos.length > 0 || editandoRecId) && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 text-white/70 mb-4">
+            <Repeat className="w-4 h-4" />
+            <h2 className="font-semibold text-sm">Repetições automáticas ({recorrentesAtivos.length})</h2>
+          </div>
+          <div className="space-y-2">
+            {recorrentesAtivos.map(r => (
+              editandoRecId === r.id ? (
+                <form key={r.id} onSubmit={handleEditRecSave} className="bg-white/5 rounded-xl p-4 space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <input type="text" required placeholder="Descrição"
+                      className="input-glass !py-1.5 !text-xs" value={editRecDescricao}
+                      onChange={e => setEditRecDescricao(e.target.value)} />
+                    <input type="number" required min="0.01" step="0.01" placeholder="Valor"
+                      className="input-glass !py-1.5 !text-xs" value={editRecValor}
+                      onChange={e => setEditRecValor(e.target.value)} />
+                    <select className="select-glass !py-1.5 !text-xs" value={editRecCategoria}
+                      onChange={e => setEditRecCategoria(e.target.value)}>
+                      {CATEGORIAS_DESPESA.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <input type="number" min="1" max="31" required placeholder="Dia"
+                      className="input-glass !py-1.5 !text-xs" value={editRecDia}
+                      onChange={e => setEditRecDia(e.target.value)} />
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn-primary !py-1.5 !text-xs">Salvar</button>
+                    <button type="button" onClick={cancelarEdicaoRecorrente}
+                      className="btn-outline !py-1.5 !text-xs">Cancelar</button>
+                  </div>
+                </form>
+              ) : (
+                <div key={r.id} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium text-sm truncate">{r.descricao}</p>
+                    <p className="text-xs text-white/40">
+                      dia {r.dia_vencimento} • {r.categoria}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <span className="text-sm font-bold text-accent-pink">
+                      {formatar(Number(r.valor))}
+                    </span>
+                    <button onClick={() => iniciarEdicaoRecorrente(r)}
+                      className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-blue/20 hover:text-accent-blue transition-all"
+                      title="Editar">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => toggleRecorrente(r.id, r.ativa)}
+                      className="p-1.5 rounded-lg bg-white/5 text-amber-300/70 hover:bg-amber-500/20 hover:text-amber-300 transition-all"
+                      title="Pausar repetição">
+                      <Pause className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => deleteRecorrente(r.id)}
+                      className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-pink/20 hover:text-accent-pink transition-all"
+                      title="Excluir repetição">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="p-5 rounded-2xl"
         style={{
