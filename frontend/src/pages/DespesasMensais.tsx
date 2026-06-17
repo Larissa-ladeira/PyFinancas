@@ -50,6 +50,7 @@ export default function DespesasMensais() {
   const [editRecValor, setEditRecValor] = useState('')
   const [editRecCategoria, setEditRecCategoria] = useState('')
   const [editRecDia, setEditRecDia] = useState('')
+  const [editRecorrente, setEditRecorrente] = useState(false)
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
@@ -237,6 +238,11 @@ export default function DespesasMensais() {
     setEditValor(String(t.valor))
     setEditCategoria(t.categoria)
     setEditData(t.data_transacao)
+    setEditRecDia(new Date(t.data_transacao).getDate().toString())
+    const match = recorrentesAtivos.find(r =>
+      r.descricao === t.descricao && Math.abs(Number(r.valor) - Number(t.valor)) < 0.01
+    )
+    setEditRecorrente(!!match)
   }
 
   function cancelarEdicao() {
@@ -257,8 +263,33 @@ export default function DespesasMensais() {
     if (error) {
       setErrorMsg(error.message)
     } else {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (editRecorrente) {
+        const existing = await supabase.from('transacoes_recorrentes').select('id')
+          .eq('descricao', editDescricao)
+          .gte('valor', parseFloat(editValor) - 0.01)
+          .lte('valor', parseFloat(editValor) + 0.01)
+          .maybeSingle()
+        if (!existing.data) {
+          await supabase.from('transacoes_recorrentes').upsert({
+            usuario_id: user?.id,
+            descricao: editDescricao,
+            valor: parseFloat(editValor),
+            tipo: 'despesa',
+            categoria: editCategoria,
+            dia_vencimento: parseInt(editRecDia) || new Date(editData).getDate(),
+            ativa: true,
+          }, { onConflict: 'usuario_id, descricao, valor' })
+        }
+      } else {
+        await supabase.from('transacoes_recorrentes').delete()
+          .eq('descricao', editDescricao)
+          .gte('valor', parseFloat(editValor) - 0.01)
+          .lte('valor', parseFloat(editValor) + 0.01)
+      }
       setEditandoId(null)
       carregar()
+      carregarRecorrentes()
     }
     setLoading(false)
   }
@@ -486,6 +517,12 @@ export default function DespesasMensais() {
                         {CATEGORIAS_DESPESA.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={editRecorrente}
+                        onChange={e => setEditRecorrente(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 accent-accent-blue" />
+                      <span className="text-xs text-white/60">Repetir todo mês</span>
+                    </label>
                     {errorMsg && (
                       <p className="text-xs text-accent-pink">{errorMsg}</p>
                     )}
