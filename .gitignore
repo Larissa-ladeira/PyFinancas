@@ -17,6 +17,7 @@ frontend/dist/
 
 # Android / Capacitor
 frontend/android/.gradle/
+frontend/android/app/google-services.json
 frontend/android/build/
 frontend/android/app/build/
 frontend/android/capacitor-cordova-android-plugins/build/
