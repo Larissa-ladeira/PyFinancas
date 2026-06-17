@@ -545,6 +545,13 @@ export default function DespesasMensais() {
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-white/40">{t.data_transacao}</span>
                         <span className="badge badge-despesa">{t.categoria}</span>
+                        {recorrentesAtivos.some(r =>
+                          r.descricao === t.descricao && Math.abs(Number(r.valor) - Number(t.valor)) < 0.01
+                        ) && (
+                          <span className="badge !bg-accent-blue/15 !text-accent-blue !border-accent-blue/20 flex items-center gap-1">
+                            <Repeat className="w-3 h-3" /> recorre
+                          </span>
+                        )}
                       </div>
                     </div>
                     <p className="text-lg font-bold text-accent-pink shrink-0 -mt-0.5">
