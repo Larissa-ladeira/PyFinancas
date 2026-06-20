@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, setRememberMe } from '../lib/supabase'
 import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound } from 'lucide-react'
 
 const AVATARES = [
@@ -30,6 +30,7 @@ export default function Login({ onAuth }: LoginProps) {
   const [avatar, setAvatar] = useState('menina-negra')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [rememberMe, setRememberMeState] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [emailAlreadyExists, setEmailAlreadyExists] = useState('')
@@ -42,6 +43,7 @@ export default function Login({ onAuth }: LoginProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true); setError('')
+    setRememberMe(rememberMe)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setError(error.message); else onAuth()
     setLoading(false)
@@ -51,6 +53,7 @@ export default function Login({ onAuth }: LoginProps) {
     e.preventDefault()
     if (!nome.trim()) { setError('Preencha seu nome'); setLoading(false); return }
     setLoading(true); setError(''); setSuccess('')
+    setRememberMe(rememberMe)
     const { error } = await supabase.auth.signUp({
       email, password,
       options: { data: { nome: nome.trim(), genero: avatar } },
@@ -82,6 +85,7 @@ export default function Login({ onAuth }: LoginProps) {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true); setError('')
+    setRememberMe(rememberMe)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -139,7 +143,14 @@ export default function Login({ onAuth }: LoginProps) {
             <input type="password" required placeholder="Senha"
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
-            <div className="flex justify-end -mt-2">
+            <div className="flex items-center justify-between -mt-2">
+              <label className="flex items-center gap-2 text-xs text-white/40 cursor-pointer select-none">
+                <input type="checkbox" checked={rememberMe}
+                  onChange={e => setRememberMeState(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-white/20 bg-white/5 checked:bg-accent-blue checked:border-accent-blue
+                    accent-accent-blue cursor-pointer" />
+                Lembre de mim
+              </label>
               <button type="button" onClick={() => { setView('forgot'); setError(''); setSuccess('') }}
                 className="text-xs text-white/40 hover:text-accent-blue transition-colors">
                 Esqueceu a senha?
