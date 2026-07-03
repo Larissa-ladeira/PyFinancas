@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Transacao, Divida, Lembrete, MetaEconomia, MetaOrcamento } from '../types'
-import { MESES_PT, CATEGORIAS_DESPESA } from '../types'
+import { MESES_PT } from '../types'
 import { useNavigate } from 'react-router-dom'
 import {
   TrendingUp, TrendingDown, Wallet, PieChart, BarChart3, ArrowUpRight,
