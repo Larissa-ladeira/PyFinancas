@@ -27,6 +27,17 @@ html.light {
   --border: rgba(0, 212, 255, 0.2);
 }
 
+html.light [class*="text-white"] { color: #1F2937 !important; }
+html.light [class*="text-white/7"],
+html.light [class*="text-white/6"] { color: #374151 !important; }
+html.light [class*="text-white/5"],
+html.light [class*="text-white/4"] { color: #6B7280 !important; }
+html.light [class*="text-white/3"] { color: #9CA3AF !important; }
+html.light [class*="text-white/2"] { color: #D1D5DB !important; }
+html.light [class*="text-white/1"] { color: #E5E7EB !important; }
+html.light [class*="border-white"] { border-color: rgba(0,0,0,0.1) !important; }
+html.light [class*="bg-white/"] { background: rgba(0,0,0,0.03) !important; }
+
 @layer base {
   * { @apply border-white/10; }
 
