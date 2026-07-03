@@ -23,7 +23,9 @@ export default function Dashboard() {
   const [ano, setAno] = useState(new Date().getFullYear())
   const [dividas, setDividas] = useState<Divida[]>([])
   const [salarioReal, setSalarioReal] = useState(0)
+  const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
   const [valeAlimentacao, setValeAlimentacao] = useState(0)
+  const [temRefeicao, setTemRefeicao] = useState(true)
   const [refeicao, setRefeicao] = useState(0)
   const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
 
@@ -37,7 +39,9 @@ export default function Dashboard() {
       .then(({ data }) => {
         if (data) {
           setSalarioReal(Number(data.salario_real ?? 0))
+          setTemValeAlimentacao(data.tem_vale_alimentacao ?? true)
           setValeAlimentacao(Number(data.vale_alimentacao ?? 0))
+          setTemRefeicao(data.tem_refeicao ?? true)
           setRefeicao(Number(data.refeicao ?? 0))
         }
       })
@@ -121,7 +125,9 @@ export default function Dashboard() {
   }
 
   const receitasTransacoes = transacoes.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
-  const receitas = salarioReal + receitasTransacoes + valeAlimentacao + refeicao
+  const va = temValeAlimentacao ? valeAlimentacao : 0
+  const ref = temRefeicao ? refeicao : 0
+  const receitas = salarioReal + receitasTransacoes + va + ref
   const despesas = transacoes.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const saldo = receitas - despesas
 

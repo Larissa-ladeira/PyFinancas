@@ -12,7 +12,9 @@ function formatar(val: number) {
 export default function Configuracoes() {
   const [salario, setSalario] = useState('')
   const [salarioReal, setSalarioReal] = useState('')
+  const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
   const [valeAlimentacao, setValeAlimentacao] = useState('')
+  const [temRefeicao, setTemRefeicao] = useState(true)
   const [refeicao, setRefeicao] = useState('')
   const [configId, setConfigId] = useState<number | null>(null)
   const [todas, setTodas] = useState<Transacao[]>([])
@@ -59,7 +61,9 @@ export default function Configuracoes() {
       if (data) {
         setSalario(String(data.salario_base))
         setSalarioReal(String(data.salario_real ?? ''))
+        setTemValeAlimentacao(data.tem_vale_alimentacao ?? true)
         setValeAlimentacao(String(data.vale_alimentacao ?? ''))
+        setTemRefeicao(data.tem_refeicao ?? true)
         setRefeicao(String(data.refeicao ?? ''))
         setConfigId(data.id)
       }
@@ -111,8 +115,10 @@ export default function Configuracoes() {
     const payload = {
       salario_base: parseFloat(salario) || 0,
       salario_real: parseFloat(salarioReal) || 0,
-      vale_alimentacao: parseFloat(valeAlimentacao) || 0,
-      refeicao: parseFloat(refeicao) || 0,
+      tem_vale_alimentacao: temValeAlimentacao,
+      vale_alimentacao: temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0,
+      tem_refeicao: temRefeicao,
+      refeicao: temRefeicao ? (parseFloat(refeicao) || 0) : 0,
     }
     if (configId) await supabase.from('configuracoes').update(payload).eq('id', configId)
     else await supabase.from('configuracoes').insert({ ...payload, usuario_id: usuarioId })
@@ -150,8 +156,8 @@ export default function Configuracoes() {
   const totalDesp = todas.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const salarioNum = parseFloat(salario) || 0
   const salarioRealNum = parseFloat(salarioReal) || 0
-  const valeAlimentacaoNum = parseFloat(valeAlimentacao) || 0
-  const refeicaoNum = parseFloat(refeicao) || 0
+  const valeAlimentacaoNum = temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0
+  const refeicaoNum = temRefeicao ? (parseFloat(refeicao) || 0) : 0
   const receitasTotal = salarioRealNum + totalRec + valeAlimentacaoNum + refeicaoNum
   const totalInvestido = investimentos.reduce((s, i) => s + Number(i.valor_investido), 0)
   const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
@@ -239,14 +245,28 @@ export default function Configuracoes() {
               className="input-glass" value={salarioReal} onChange={e => setSalarioReal(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white/60 mb-2">Vale Alimentação</label>
+            <label className="flex items-center gap-2 mb-2">
+              <input type="checkbox" checked={temValeAlimentacao}
+                onChange={e => setTemValeAlimentacao(e.target.checked)}
+                className="w-4 h-4 accent-accent-blue" />
+              <span className="text-sm font-medium text-white/60">Vale Alimentação</span>
+            </label>
             <input type="number" step="0.01" min="0" placeholder="Ex: 600,00"
-              className="input-glass" value={valeAlimentacao} onChange={e => setValeAlimentacao(e.target.value)} />
+              className="input-glass" value={valeAlimentacao}
+              disabled={!temValeAlimentacao}
+              onChange={e => setValeAlimentacao(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white/60 mb-2">Refeição</label>
+            <label className="flex items-center gap-2 mb-2">
+              <input type="checkbox" checked={temRefeicao}
+                onChange={e => setTemRefeicao(e.target.checked)}
+                className="w-4 h-4 accent-accent-blue" />
+              <span className="text-sm font-medium text-white/60">Refeição</span>
+            </label>
             <input type="number" step="0.01" min="0" placeholder="Ex: 400,00"
-              className="input-glass" value={refeicao} onChange={e => setRefeicao(e.target.value)} />
+              className="input-glass" value={refeicao}
+              disabled={!temRefeicao}
+              onChange={e => setRefeicao(e.target.value)} />
           </div>
         </div>
         <button type="submit" className="btn-primary flex items-center justify-center gap-2">

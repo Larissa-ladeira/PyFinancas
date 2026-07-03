@@ -13,7 +13,9 @@ export interface Configuracao {
   usuario_id: string
   salario_base: number
   salario_real: number
+  tem_vale_alimentacao: boolean
   vale_alimentacao: number
+  tem_refeicao: boolean
   refeicao: number
 }
 
