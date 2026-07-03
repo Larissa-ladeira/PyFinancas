@@ -148,20 +148,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-20 glass border-b border-white/10">
-          <div className="flex items-center justify-between px-4 h-14">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setOpen(true)} className="p-1.5 -ml-1.5 rounded-xl hover:bg-white/10 text-white/70 lg:hidden">
-                <Menu className="w-5 h-5" />
-              </button>
-              <span className="font-semibold text-white">{pageTitle}</span>
-            </div>
-            <button onClick={() => setTema(tema === 'escuro' ? 'claro' : 'escuro')}
-              className="p-2 rounded-xl hover:bg-white/10 text-white/50 hover:text-accent-blue transition-all"
-              title={tema === 'escuro' ? 'Modo Claro' : 'Modo Escuro'}>
-              {tema === 'escuro' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <div className="flex items-center gap-3 px-4 h-14">
+            <button onClick={() => setOpen(true)} className="p-1.5 -ml-1.5 rounded-xl hover:bg-white/10 text-white/70 lg:hidden">
+              <Menu className="w-5 h-5" />
             </button>
+            <span className="font-semibold text-white">{pageTitle}</span>
           </div>
         </header>
+
+        <button onClick={() => setTema(tema === 'escuro' ? 'claro' : 'escuro')}
+          className="fixed top-4 right-4 z-50 p-2.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20
+            text-white/70 hover:text-accent-blue hover:bg-white/20 transition-all shadow-lg"
+          title={tema === 'escuro' ? 'Modo Claro' : 'Modo Escuro'}>
+          {tema === 'escuro' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-8">
           {children}
