@@ -23,6 +23,8 @@ export default function Extrato() {
   const [filtroAno, setFiltroAno] = useState<number | 'todos'>('todos')
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [filtroCat, setFiltroCat] = useState<string>('todas')
+  const [filtroValorMin, setFiltroValorMin] = useState('')
+  const [filtroValorMax, setFiltroValorMax] = useState('')
   const [showImport, setShowImport] = useState(false)
   const [linhas, setLinhas] = useState<LinhaPreview[]>([])
   const [loading, setLoading] = useState(false)
@@ -146,6 +148,8 @@ export default function Extrato() {
   if (filtroAno !== 'todos') filtradas = filtradas.filter(t => new Date(t.data_transacao).getFullYear() === filtroAno)
   if (filtroTipo !== 'todos') filtradas = filtradas.filter(t => t.tipo.toLowerCase() === filtroTipo)
   if (filtroCat !== 'todas') filtradas = filtradas.filter(t => t.categoria === filtroCat)
+  if (filtroValorMin) filtradas = filtradas.filter(t => Number(t.valor) >= parseFloat(filtroValorMin))
+  if (filtroValorMax) filtradas = filtradas.filter(t => Number(t.valor) <= parseFloat(filtroValorMax))
 
   const total = filtradas.reduce((s, t) => s + Number(t.valor) * (t.tipo.toLowerCase() === 'receita' ? 1 : -1), 0)
   const qtdRec = filtradas.filter(t => t.tipo.toLowerCase() === 'receita').length
@@ -293,6 +297,14 @@ export default function Extrato() {
             <option value="todas">Todas as categorias</option>
             {[...CATEGORIAS_RECEITA, ...CATEGORIAS_DESPESA].sort().map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <input type="number" step="0.01" min="0" placeholder="Valor mínimo (R$)"
+            className="input-glass" value={filtroValorMin}
+            onChange={e => setFiltroValorMin(e.target.value)} />
+          <input type="number" step="0.01" min="0" placeholder="Valor máximo (R$)"
+            className="input-glass" value={filtroValorMax}
+            onChange={e => setFiltroValorMax(e.target.value)} />
         </div>
       </div>
 

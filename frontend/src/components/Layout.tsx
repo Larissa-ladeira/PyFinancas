@@ -5,7 +5,7 @@ import { registerPushNotifications } from '../lib/notifications'
 import {
   LayoutDashboard, ListOrdered, Settings,
   LogOut, Menu, DollarSign, PiggyBank, TrendingDown, TrendingUp, Handshake, Target,
-  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X
+  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon
 } from 'lucide-react'
 
 const links = [
@@ -32,9 +32,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [userNome, setUserNome] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [userGenero, setUserGenero] = useState('menina-negra')
+  const [tema, setTema] = useState(() => localStorage.getItem('tema') || 'escuro')
 
   const [lembretesAmanha, setLembretesAmanha] = useState<{ descricao: string; valor: number }[]>([])
   const [showPopup, setShowPopup] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', tema === 'claro')
+    localStorage.setItem('tema', tema)
+  }, [tema])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -124,7 +130,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="p-3 border-t border-white/10">
+          <div className="p-3 border-t border-white/10 space-y-1">
+            <button onClick={() => setTema(tema === 'escuro' ? 'claro' : 'escuro')}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                text-white/40 hover:text-accent-blue hover:bg-accent-blue/10 transition-all duration-200 w-full">
+              {tema === 'escuro' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {tema === 'escuro' ? 'Modo Claro' : 'Modo Escuro'}
+            </button>
             <button onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                 text-white/40 hover:text-accent-pink hover:bg-accent-pink/10 transition-all duration-200 w-full">

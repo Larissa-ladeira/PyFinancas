@@ -19,6 +19,14 @@
   --border: rgba(168, 85, 247, 0.3);
 }
 
+html.light {
+  --bg: #F0F2F5;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --text: #1F2937;
+  --text-light: #6B7280;
+  --border: rgba(0, 212, 255, 0.2);
+}
+
 @layer base {
   * { @apply border-white/10; }
 
@@ -27,7 +35,7 @@
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(180deg, #0A0740 0%, #06032D 100%);
+    background: var(--bg);
     color: var(--text);
     padding: 20px;
   }
@@ -56,6 +64,10 @@
   .dashboard-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(168, 85, 247, 0.25);
+  }
+  html.light .glass-card:hover,
+  html.light .dashboard-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
   }
 
   .metric-value {
@@ -89,6 +101,9 @@
   .metric-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(168, 85, 247, 0.25);
+  }
+  html.light .metric-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
   }
 
   .metric-card-receita { border-left: 3px solid var(--accent-blue); }
@@ -192,10 +207,14 @@
     border-color: var(--accent-blue);
   }
   .select-glass option { background: #06032D; color: var(--text); }
+  html.light .select-glass option { background: #ffffff; color: var(--text); }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0.7);
     cursor: pointer;
+  }
+  html.light input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.3);
   }
 
   .table-glass { width: 100%; font-size: 0.875rem; }

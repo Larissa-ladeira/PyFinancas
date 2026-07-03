@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Transacao, Divida, Lembrete } from '../types'
-import { MESES_PT } from '../types'
+import type { Transacao, Divida, Lembrete, MetaEconomia, MetaOrcamento } from '../types'
+import { MESES_PT, CATEGORIAS_DESPESA } from '../types'
+import { useNavigate } from 'react-router-dom'
 import {
   TrendingUp, TrendingDown, Wallet, PieChart, BarChart3, ArrowUpRight,
-  PiggyBank, Target, Bell, Check
+  PiggyBank, Target, Bell, Check, Calendar
 } from 'lucide-react'
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer,
@@ -18,10 +19,13 @@ function formatar(val: number) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
   const [mes, setMes] = useState(new Date().getMonth() + 1)
   const [ano, setAno] = useState(new Date().getFullYear())
   const [dividas, setDividas] = useState<Divida[]>([])
+  const [metas, setMetas] = useState<MetaEconomia[]>([])
+  const [orcamentos, setOrcamentos] = useState<MetaOrcamento[]>([])
   const [salarioReal, setSalarioReal] = useState(0)
   const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
   const [valeAlimentacao, setValeAlimentacao] = useState(0)
@@ -45,8 +49,18 @@ export default function Dashboard() {
           setRefeicao(Number(data.refeicao ?? 0))
         }
       })
+    supabase.from('metas_economia').select('*')
+      .eq('concluida', false)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setMetas(data || []))
     gerarRecorrentes()
   }, [])
+
+  useEffect(() => {
+    supabase.from('metas_orcamento').select('*')
+      .eq('mes', mes).eq('ano', ano)
+      .then(({ data }) => setOrcamentos(data || []))
+  }, [mes, ano])
 
   async function gerarRecorrentes() {
     const hoje = new Date()
@@ -328,6 +342,52 @@ export default function Dashboard() {
         })()}
       </div>
 
+      {metas.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 text-white/70">
+              <Target className="w-4 h-4" />
+              <h2 className="font-semibold text-sm">Metas de Economia</h2>
+            </div>
+            <button onClick={() => navigate('/metas')}
+              className="text-xs text-accent-blue hover:text-white transition-colors">
+              Ver todas →
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {metas.slice(0, 4).map(m => {
+              const progresso = (m.valor_atual / m.valor_alvo) * 100
+              const diasRestantes = m.data_alvo
+                ? Math.max(0, Math.ceil((new Date(m.data_alvo).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                : null
+              return (
+                <div key={m.id} className="bg-white/5 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{m.descricao}</p>
+                      {diasRestantes !== null && (
+                        <span className="text-xs text-white/30 flex items-center gap-1 mt-0.5">
+                          <Calendar className="w-3 h-3" /> {diasRestantes} dias
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-white/40">{formatar(m.valor_atual)}</span>
+                    <span className="text-white/60">{formatar(m.valor_alvo)}</span>
+                  </div>
+                  <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-accent-blue to-accent-purple transition-all"
+                      style={{ width: `${Math.min(progresso, 100)}%` }} />
+                  </div>
+                  <p className="text-xs text-white/30 mt-1">{progresso.toFixed(1)}%</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {(totalRestante > 0 || excedente > 0) && (
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 text-white/70 mb-4">
@@ -439,6 +499,45 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {orcamentos.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 text-white/70 mb-4">
+            <BarChart3 className="w-4 h-4" />
+            <h2 className="font-semibold text-sm">Orçamento por Categoria</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {orcamentos.map(o => {
+              const gasto = transacoes
+                .filter(t => t.tipo.toLowerCase() === 'despesa' && t.categoria === o.categoria)
+                .reduce((s, t) => s + Number(t.valor), 0)
+              const perc = o.valor_limite > 0 ? (gasto / o.valor_limite) * 100 : 0
+              const estourou = gasto > o.valor_limite
+              return (
+                <div key={o.id} className="bg-white/5 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">{o.categoria}</span>
+                    <span className={`text-xs font-bold ${estourou ? 'text-accent-pink' : 'text-accent-blue'}`}>
+                      {formatar(gasto)} / {formatar(o.valor_limite)}
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-500 ${
+                      estourou ? 'bg-accent-pink' : perc > 80 ? 'bg-amber-500' : 'bg-accent-green'
+                    }`}
+                      style={{ width: `${Math.min(perc, 100)}%` }} />
+                  </div>
+                  {estourou && (
+                    <p className="text-xs text-accent-pink mt-1">
+                      Excedeu em {formatar(gasto - o.valor_limite)}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="glass-card">
         <details className="group">

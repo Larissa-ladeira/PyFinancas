@@ -49,7 +49,7 @@ export default function App() {
   }, [])
 
   if (authed === null) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#06032D]">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-accent-blue border-t-transparent" />
         <p className="text-white/50 text-sm">Carregando...</p>
