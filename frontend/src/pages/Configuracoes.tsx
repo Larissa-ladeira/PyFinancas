@@ -251,10 +251,11 @@ export default function Configuracoes() {
                 className="w-4 h-4 accent-accent-blue" />
               <span className="text-sm font-medium text-white/60">Vale Alimentação</span>
             </label>
-            <input type="number" step="0.01" min="0" placeholder="Ex: 600,00"
-              className="input-glass" value={valeAlimentacao}
-              disabled={!temValeAlimentacao}
-              onChange={e => setValeAlimentacao(e.target.value)} />
+            {temValeAlimentacao && (
+              <input type="number" step="0.01" min="0" placeholder="Ex: 600,00"
+                className="input-glass" value={valeAlimentacao}
+                onChange={e => setValeAlimentacao(e.target.value)} />
+            )}
           </div>
           <div>
             <label className="flex items-center gap-2 mb-2">
@@ -263,10 +264,11 @@ export default function Configuracoes() {
                 className="w-4 h-4 accent-accent-blue" />
               <span className="text-sm font-medium text-white/60">Refeição</span>
             </label>
-            <input type="number" step="0.01" min="0" placeholder="Ex: 400,00"
-              className="input-glass" value={refeicao}
-              disabled={!temRefeicao}
-              onChange={e => setRefeicao(e.target.value)} />
+            {temRefeicao && (
+              <input type="number" step="0.01" min="0" placeholder="Ex: 400,00"
+                className="input-glass" value={refeicao}
+                onChange={e => setRefeicao(e.target.value)} />
+            )}
           </div>
         </div>
         <button type="submit" className="btn-primary flex items-center justify-center gap-2">
