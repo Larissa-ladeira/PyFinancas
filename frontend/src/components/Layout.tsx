@@ -130,13 +130,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="p-3 border-t border-white/10 space-y-1">
-            <button onClick={() => setTema(tema === 'escuro' ? 'claro' : 'escuro')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                text-white/40 hover:text-accent-blue hover:bg-accent-blue/10 transition-all duration-200 w-full">
-              {tema === 'escuro' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              {tema === 'escuro' ? 'Modo Claro' : 'Modo Escuro'}
-            </button>
+          <div className="p-3 border-t border-white/10">
             <button onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                 text-white/40 hover:text-accent-pink hover:bg-accent-pink/10 transition-all duration-200 w-full">
@@ -153,12 +147,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-20 glass border-b border-white/10 lg:hidden">
-          <div className="flex items-center gap-3 px-4 h-14">
-            <button onClick={() => setOpen(true)} className="p-1.5 -ml-1.5 rounded-xl hover:bg-white/10 text-white/70">
-              <Menu className="w-5 h-5" />
+        <header className="sticky top-0 z-20 glass border-b border-white/10">
+          <div className="flex items-center justify-between px-4 h-14">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setOpen(true)} className="p-1.5 -ml-1.5 rounded-xl hover:bg-white/10 text-white/70 lg:hidden">
+                <Menu className="w-5 h-5" />
+              </button>
+              <span className="font-semibold text-white">{pageTitle}</span>
+            </div>
+            <button onClick={() => setTema(tema === 'escuro' ? 'claro' : 'escuro')}
+              className="p-2 rounded-xl hover:bg-white/10 text-white/50 hover:text-accent-blue transition-all"
+              title={tema === 'escuro' ? 'Modo Claro' : 'Modo Escuro'}>
+              {tema === 'escuro' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <span className="font-semibold text-white">{pageTitle}</span>
           </div>
         </header>
 
