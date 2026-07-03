@@ -12,6 +12,9 @@ export interface Configuracao {
   id: number
   usuario_id: string
   salario_base: number
+  salario_real: number
+  vale_alimentacao: number
+  refeicao: number
 }
 
 export interface Lembrete {

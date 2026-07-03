@@ -22,7 +22,9 @@ export default function Dashboard() {
   const [mes, setMes] = useState(new Date().getMonth() + 1)
   const [ano, setAno] = useState(new Date().getFullYear())
   const [dividas, setDividas] = useState<Divida[]>([])
-  const [salario, setSalario] = useState(0)
+  const [salarioReal, setSalarioReal] = useState(0)
+  const [valeAlimentacao, setValeAlimentacao] = useState(0)
+  const [refeicao, setRefeicao] = useState(0)
   const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
 
   useEffect(() => { carregar() }, [mes, ano])
@@ -32,7 +34,13 @@ export default function Dashboard() {
       .order('created_at', { ascending: false })
       .then(({ data }) => setDividas(data || []))
     supabase.from('configuracoes').select('*').single()
-      .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
+      .then(({ data }) => {
+        if (data) {
+          setSalarioReal(Number(data.salario_real ?? 0))
+          setValeAlimentacao(Number(data.vale_alimentacao ?? 0))
+          setRefeicao(Number(data.refeicao ?? 0))
+        }
+      })
     gerarRecorrentes()
   }, [])
 
@@ -113,7 +121,7 @@ export default function Dashboard() {
   }
 
   const receitasTransacoes = transacoes.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
-  const receitas = salario + receitasTransacoes
+  const receitas = salarioReal + receitasTransacoes + valeAlimentacao + refeicao
   const despesas = transacoes.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const saldo = receitas - despesas
 
@@ -122,7 +130,7 @@ export default function Dashboard() {
   const totalPago = ativas.reduce((s, d) => s + Number(d.valor_pago), 0)
   const totalRestante = totalDivida - totalPago
   const totalMinimo = ativas.reduce((s, d) => s + Number(d.pagamento_minimo), 0)
-  const dividaRatio = salario > 0 ? (totalRestante / salario) * 100 : 0
+  const dividaRatio = receitas > 0 ? (totalRestante / receitas) * 100 : 0
   const excedente = saldo - totalMinimo
 
   function calcularLiberdade() {
@@ -233,8 +241,8 @@ export default function Dashboard() {
           const pendentes = lembretesMes.filter(l => !l.pago)
           const totalPendente = despesas + pendentes.reduce((s, l) => s + Number(l.valor), 0)
           const compromissoTotal = totalPendente
-          const salarioLiquido = salario - compromissoTotal
-          const percComprometido = salario > 0 ? (compromissoTotal / salario) * 100 : 0
+          const salarioLiquido = receitas - compromissoTotal
+          const percComprometido = receitas > 0 ? (compromissoTotal / receitas) * 100 : 0
 
           return (
             <>
@@ -255,7 +263,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {salario > 0 && (
+              {receitas > 0 && (
                 <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden mb-4">
                   <div className={`h-full rounded-full transition-all duration-500 ${percComprometido > 70 ? 'bg-accent-pink' : 'bg-amber-500'}`}
                     style={{ width: `${Math.min(percComprometido, 100)}%` }} />
@@ -269,10 +277,10 @@ export default function Dashboard() {
                   </p>
                 </div>
               )}
-              {salarioLiquido <= 0 && salario > 0 && (
+              {salarioLiquido <= 0 && receitas > 0 && (
                 <div className="bg-accent-pink/10 border border-accent-pink/20 rounded-xl p-3 mb-4">
                   <p className="text-sm text-accent-pink">
-                    Seus compromissos excedem seu salário em <strong>{formatar(Math.abs(salarioLiquido))}</strong>
+                    Seus compromissos excedem sua receita em <strong>{formatar(Math.abs(salarioLiquido))}</strong>
                   </p>
                 </div>
               )}

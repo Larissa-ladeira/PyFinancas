@@ -17,7 +17,9 @@ function formatar(val: number) {
 
 export default function DespesasMensais() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
-  const [salario, setSalario] = useState(0)
+  const [salarioReal, setSalarioReal] = useState(0)
+  const [valeAlimentacao, setValeAlimentacao] = useState(0)
+  const [refeicao, setRefeicao] = useState(0)
   const [mes, setMes] = useState(new Date().getMonth() + 1)
   const [ano, setAno] = useState(new Date().getFullYear())
   const [editandoId, setEditandoId] = useState<number | null>(null)
@@ -54,7 +56,13 @@ export default function DespesasMensais() {
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
-      .then(({ data }) => { if (data) setSalario(Number(data.salario_base)) })
+      .then(({ data }) => {
+        if (data) {
+          setSalarioReal(Number(data.salario_real ?? 0))
+          setValeAlimentacao(Number(data.vale_alimentacao ?? 0))
+          setRefeicao(Number(data.refeicao ?? 0))
+        }
+      })
   }, [])
 
   useEffect(() => { carregar(); carregarOrcamento(); carregarLembretes(); carregarRecorrentes() }, [mes, ano])
@@ -225,8 +233,9 @@ export default function DespesasMensais() {
   }
 
   const totalDespesas = transacoes.reduce((s, t) => s + Number(t.valor), 0)
-  const percGasto = salario > 0 ? (totalDespesas / salario) * 100 : 0
-  const saldoLivre = salario - totalDespesas
+  const receitasTotal = salarioReal + valeAlimentacao + refeicao
+  const percGasto = receitasTotal > 0 ? (totalDespesas / receitasTotal) * 100 : 0
+  const saldoLivre = receitasTotal - totalDespesas
 
   const despCat = transacoes.reduce<Record<string, number>>((acc, t) => {
     acc[t.categoria] = (acc[t.categoria] || 0) + Number(t.valor)
@@ -776,12 +785,12 @@ export default function DespesasMensais() {
           </div>
           <div className="space-y-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-sm text-white/50">Gasto / Salário</span>
+              <span className="text-sm text-white/50">Gasto / Receitas</span>
               <span className="text-sm font-semibold text-white">
-                {formatar(totalDespesas)} / {formatar(salario)}
+                {formatar(totalDespesas)} / {formatar(receitasTotal)}
               </span>
             </div>
-            {salario > 0 && (
+            {receitasTotal > 0 && (
               <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500"
                   style={{
@@ -792,8 +801,8 @@ export default function DespesasMensais() {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="text-center">
-                <p className="text-lg font-bold text-accent-blue">{formatar(salario)}</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-wider">Salário</p>
+                <p className="text-lg font-bold text-accent-blue">{formatar(receitasTotal)}</p>
+                <p className="text-[10px] text-white/40 uppercase tracking-wider">Receitas</p>
               </div>
               <div className="text-center">
                 <p className={`text-lg font-bold ${percGasto > 70 ? 'text-accent-pink' : 'text-white'}`}>

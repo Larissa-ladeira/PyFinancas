@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Transacao, Conta, Investimento } from '../types'
 import { TIPOS_CONTA } from '../types'
-import { Save, Bell, User, Building2, Plus, Trash2, Pencil } from 'lucide-react'
+import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 function formatar(val: number) {
@@ -11,6 +11,9 @@ function formatar(val: number) {
 
 export default function Configuracoes() {
   const [salario, setSalario] = useState('')
+  const [salarioReal, setSalarioReal] = useState('')
+  const [valeAlimentacao, setValeAlimentacao] = useState('')
+  const [refeicao, setRefeicao] = useState('')
   const [configId, setConfigId] = useState<number | null>(null)
   const [todas, setTodas] = useState<Transacao[]>([])
   const [saved, setSaved] = useState(false)
@@ -53,7 +56,13 @@ export default function Configuracoes() {
       }
     })
     supabase.from('configuracoes').select('*').single().then(({ data }) => {
-      if (data) { setSalario(String(data.salario_base)); setConfigId(data.id) }
+      if (data) {
+        setSalario(String(data.salario_base))
+        setSalarioReal(String(data.salario_real ?? ''))
+        setValeAlimentacao(String(data.vale_alimentacao ?? ''))
+        setRefeicao(String(data.refeicao ?? ''))
+        setConfigId(data.id)
+      }
     })
     supabase.from('transacoes').select('*').then(({ data }) => setTodas(data || []))
     supabase.from('notificacoes').select('*').single().then(({ data }) => {
@@ -99,9 +108,14 @@ export default function Configuracoes() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    const valor = parseFloat(salario) || 0
-    if (configId) await supabase.from('configuracoes').update({ salario_base: valor }).eq('id', configId)
-    else await supabase.from('configuracoes').insert({ salario_base: valor, usuario_id: usuarioId })
+    const payload = {
+      salario_base: parseFloat(salario) || 0,
+      salario_real: parseFloat(salarioReal) || 0,
+      vale_alimentacao: parseFloat(valeAlimentacao) || 0,
+      refeicao: parseFloat(refeicao) || 0,
+    }
+    if (configId) await supabase.from('configuracoes').update(payload).eq('id', configId)
+    else await supabase.from('configuracoes').insert({ ...payload, usuario_id: usuarioId })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -135,7 +149,10 @@ export default function Configuracoes() {
   const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
   const totalDesp = todas.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
   const salarioNum = parseFloat(salario) || 0
-  const receitasTotal = salarioNum + totalRec
+  const salarioRealNum = parseFloat(salarioReal) || 0
+  const valeAlimentacaoNum = parseFloat(valeAlimentacao) || 0
+  const refeicaoNum = parseFloat(refeicao) || 0
+  const receitasTotal = salarioRealNum + totalRec + valeAlimentacaoNum + refeicaoNum
   const totalInvestido = investimentos.reduce((s, i) => s + Number(i.valor_investido), 0)
   const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
   const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
@@ -207,10 +224,30 @@ export default function Configuracoes() {
       </form>
 
       <form onSubmit={handleSave} className="glass-card p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-white/60 mb-2">💼 Salário Base</label>
-          <input type="number" step="0.01" min="0" placeholder="Ex: 5000,00"
-            className="input-glass" value={salario} onChange={e => setSalario(e.target.value)} />
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <DollarSign className="w-5 h-5" /> Rendimentos
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-white/60 mb-2">Salário Base</label>
+            <input type="number" step="0.01" min="0" placeholder="Ex: 5000,00"
+              className="input-glass" value={salario} onChange={e => setSalario(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white/60 mb-2">Salário Real</label>
+            <input type="number" step="0.01" min="0" placeholder="Ex: 4500,00"
+              className="input-glass" value={salarioReal} onChange={e => setSalarioReal(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white/60 mb-2">Vale Alimentação</label>
+            <input type="number" step="0.01" min="0" placeholder="Ex: 600,00"
+              className="input-glass" value={valeAlimentacao} onChange={e => setValeAlimentacao(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white/60 mb-2">Refeição</label>
+            <input type="number" step="0.01" min="0" placeholder="Ex: 400,00"
+              className="input-glass" value={refeicao} onChange={e => setRefeicao(e.target.value)} />
+          </div>
         </div>
         <button type="submit" className="btn-primary flex items-center justify-center gap-2">
           <Save className="w-4 h-4" />
@@ -327,7 +364,7 @@ export default function Configuracoes() {
             <div className="metric-card metric-card-receita">
               <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
               <div className="metric-value text-accent-blue">{formatar(receitasTotal)}</div>
-              <div className="text-xs text-white/30 mt-1">Salário + Extras</div>
+              <div className="text-xs text-white/30 mt-1">Salário Real + Extras + VA + Refeição</div>
             </div>
             <div className="metric-card">
               <div className="metric-label text-white/40 mb-1">Total Investido</div>
