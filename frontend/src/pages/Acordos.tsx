@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Acordo } from '../types'
-import { Handshake, Plus, Trash2, CheckCircle, TrendingDown, AlertCircle } from 'lucide-react'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { Handshake, Plus, Trash2, CheckCircle, TrendingDown, AlertCircle, Pencil, Save } from 'lucide-react'
 
 export default function Acordos() {
   const [acordos, setAcordos] = useState<Acordo[]>([])
@@ -18,6 +15,15 @@ export default function Acordos() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editCredor, setEditCredor] = useState('')
+  const [editDescricao, setEditDescricao] = useState('')
+  const [editValorTotal, setEditValorTotal] = useState('')
+  const [editValorParcela, setEditValorParcela] = useState('')
+  const [editParcelas, setEditParcelas] = useState('')
+  const [editDataInicio, setEditDataInicio] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editErrorMsg, setEditErrorMsg] = useState('')
 
   useEffect(() => { carregar() }, [])
 
@@ -72,6 +78,43 @@ export default function Acordos() {
     carregar()
   }
 
+  function iniciarEdicao(a: Acordo) {
+    setEditandoId(a.id)
+    setEditCredor(a.credor)
+    setEditDescricao(a.descricao || '')
+    setEditValorTotal(String(a.valor_total))
+    setEditValorParcela(String(a.valor_parcela))
+    setEditParcelas(String(a.parcelas))
+    setEditDataInicio(a.data_inicio || '')
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setEditErrorMsg('')
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoId) return
+    setEditLoading(true)
+    setEditErrorMsg('')
+    const { error } = await supabase.from('acordos').update({
+      credor: editCredor,
+      descricao: editDescricao || null,
+      valor_total: parseFloat(editValorTotal),
+      valor_parcela: parseFloat(editValorParcela),
+      parcelas: parseInt(editParcelas),
+      data_inicio: editDataInicio || null,
+    }).eq('id', editandoId)
+    if (error) {
+      setEditErrorMsg(error.message)
+    } else {
+      setEditandoId(null)
+      carregar()
+    }
+    setEditLoading(false)
+  }
+
   const ativos = acordos.filter(a => !a.quitada)
   const totalMensal = ativos.reduce((s, a) => s + Number(a.valor_parcela), 0)
   const totalRestante = ativos.reduce((s, a) => s + (Number(a.parcelas) - Number(a.parcelas_pagas)) * Number(a.valor_parcela), 0)
@@ -92,7 +135,7 @@ export default function Acordos() {
             <TrendingDown className="w-4 h-4" />
             <span className="metric-label">Total em parcelas</span>
           </div>
-          <p className="metric-value text-despesa">{formatar(totalMensal)}/mês</p>
+          <p className="metric-value text-accent-pink">{formatar(totalMensal)}/mês</p>
         </div>
         <div className="metric-card">
           <div className="flex items-center gap-2 text-amber-300 mb-1.5">
@@ -168,44 +211,100 @@ export default function Acordos() {
             {acordos.map(a => {
               const progresso = a.parcelas > 0 ? (a.parcelas_pagas / a.parcelas) * 100 : 0
               return (
-                <div key={a.id} className={`glass-card p-4 ${a.quitada ? 'opacity-50' : ''}`}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium truncate">{a.credor}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {a.descricao && <span className="text-xs text-white/40">{a.descricao}</span>}
-                        {a.data_inicio && <span className="text-xs text-white/30">desde {a.data_inicio}</span>}
-                        <span className={`badge ${a.quitada ? 'badge-receita' : 'badge-despesa'}`}>
-                          {a.quitada ? 'Quitado' : `${a.parcelas_pagas}/${a.parcelas}`}
-                        </span>
+                editandoId === a.id ? (
+                  <div key={a.id} className="glass-card p-4">
+                    <form onSubmit={handleEditSave} className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Credor</label>
+                          <input type="text" required className="input-glass" value={editCredor}
+                            onChange={e => setEditCredor(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Descrição</label>
+                          <input type="text" className="input-glass" value={editDescricao}
+                            onChange={e => setEditDescricao(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Valor total</label>
+                          <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValorTotal}
+                            onChange={e => setEditValorTotal(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Valor da parcela</label>
+                          <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValorParcela}
+                            onChange={e => setEditValorParcela(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Parcelas</label>
+                          <input type="number" required min="1" className="input-glass" value={editParcelas}
+                            onChange={e => setEditParcelas(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Data de início</label>
+                          <input type="date" className="input-glass" value={editDataInicio}
+                            onChange={e => setEditDataInicio(e.target.value)} />
+                        </div>
+                      </div>
+                      {editErrorMsg && (
+                        <p className="text-xs text-accent-pink">{editErrorMsg}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <button type="submit" disabled={editLoading}
+                          className="btn-primary flex-1 flex items-center justify-center gap-2">
+                          <Save className="w-4 h-4" />
+                          {editLoading ? 'Salvando...' : 'Salvar'}
+                        </button>
+                        <button type="button" onClick={cancelarEdicao}
+                          className="btn-outline flex-1">Cancelar</button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div key={a.id} className={`glass-card p-4 ${a.quitada ? 'opacity-50' : ''}`}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">{a.credor}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {a.descricao && <span className="text-xs text-white/40">{a.descricao}</span>}
+                          {a.data_inicio && <span className="text-xs text-white/30">desde {a.data_inicio}</span>}
+                          <span className={`badge ${a.quitada ? 'badge-receita' : 'badge-despesa'}`}>
+                            {a.quitada ? 'Quitado' : `${a.parcelas_pagas}/${a.parcelas}`}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-lg font-bold text-accent-pink -mt-0.5">
+                          {formatar(Number(a.valor_parcela))}
+                        </p>
+                        <p className="text-xs text-white/30">de {formatar(Number(a.valor_total))}</p>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-lg font-bold text-accent-pink -mt-0.5">
-                        {formatar(Number(a.valor_parcela))}
-                      </p>
-                      <p className="text-xs text-white/30">de {formatar(Number(a.valor_total))}</p>
+                    <div className="mt-3 w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-500 ${a.quitada ? 'bg-accent-blue' : 'bg-amber-500'}`}
+                        style={{ width: `${Math.min(progresso, 100)}%` }} />
+                    </div>
+                    <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                      {!a.quitada && (
+                        <button onClick={() => handlePagarParcela(a)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          Pagar parcela
+                        </button>
+                      )}
+                      <button onClick={() => iniciarEdicao(a)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editar
+                      </button>
+                      <button onClick={() => handleDelete(a.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Excluir
+                      </button>
                     </div>
                   </div>
-                  <div className="mt-3 w-full bg-white/5 rounded-full h-2 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-500 ${a.quitada ? 'bg-accent-blue' : 'bg-amber-500'}`}
-                      style={{ width: `${Math.min(progresso, 100)}%` }} />
-                  </div>
-                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
-                    {!a.quitada && (
-                      <button onClick={() => handlePagarParcela(a)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        Pagar parcela
-                      </button>
-                    )}
-                    <button onClick={() => handleDelete(a.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Excluir
-                    </button>
-                  </div>
-                </div>
+                )
               )
             })}
           </div>

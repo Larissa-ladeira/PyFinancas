@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Lembrete } from '../types'
-import { Bell, Plus, Check, Trash2, AlertCircle } from 'lucide-react'
+import { Bell, Plus, Check, Trash2, AlertCircle, Pencil, Save } from 'lucide-react'
 import { MESES_PT } from '../types'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function Lembretes() {
   const [lembretes, setLembretes] = useState<Lembrete[]>([])
@@ -19,6 +16,12 @@ export default function Lembretes() {
   const [filtroAno, setFiltroAno] = useState(new Date().getFullYear())
   const [showForm, setShowForm] = useState(false)
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editDescricao, setEditDescricao] = useState('')
+  const [editValor, setEditValor] = useState('')
+  const [editDataVenc, setEditDataVenc] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editErrorMsg, setEditErrorMsg] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -67,6 +70,37 @@ export default function Lembretes() {
     carregar()
   }
 
+  function iniciarEdicao(l: Lembrete) {
+    setEditandoId(l.id)
+    setEditDescricao(l.descricao)
+    setEditValor(String(l.valor))
+    setEditDataVenc(l.data_vencimento)
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setEditErrorMsg('')
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoId) return
+    setEditLoading(true)
+    setEditErrorMsg('')
+    const { error } = await supabase.from('lembretes').update({
+      descricao: editDescricao,
+      valor: parseFloat(editValor),
+      data_vencimento: editDataVenc,
+    }).eq('id', editandoId)
+    if (error) {
+      setEditErrorMsg(error.message)
+    } else {
+      setEditandoId(null)
+      carregar()
+    }
+    setEditLoading(false)
+  }
+
   const pendentes = lembretes.filter(l => !l.pago)
   const totalPendente = pendentes.reduce((s, l) => s + Number(l.valor), 0)
   const totalPago = lembretes.filter(l => l.pago).reduce((s, l) => s + Number(l.valor), 0)
@@ -96,7 +130,7 @@ export default function Lembretes() {
             <AlertCircle className="w-4 h-4" />
             <span className="metric-label">Pendentes</span>
           </div>
-          <p className="metric-value text-despesa">{formatar(totalPendente)}</p>
+          <p className="metric-value text-accent-pink">{formatar(totalPendente)}</p>
           {vencidos.length > 0 && (
             <p className="text-accent-pink/70 text-xs mt-1">{vencidos.length} vencido(s)</p>
           )}
@@ -148,38 +182,79 @@ export default function Lembretes() {
             {lembretes.map(l => {
               const vencida = !l.pago && new Date(l.data_vencimento) < new Date()
               return (
-                <div key={l.id} className="glass-card p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium truncate">{l.descricao}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs ${vencida ? 'text-accent-pink font-medium' : 'text-white/40'}`}>
-                          {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
-                          {vencida && <span className="ml-1 text-accent-pink">(vencido)</span>}
-                        </span>
+                editandoId === l.id ? (
+                  <div key={l.id} className="glass-card p-4">
+                    <form onSubmit={handleEditSave} className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Descrição</label>
+                        <input type="text" required className="input-glass" value={editDescricao}
+                          onChange={e => setEditDescricao(e.target.value)} />
                       </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Valor</label>
+                          <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValor}
+                            onChange={e => setEditValor(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/40 mb-1">Data de vencimento</label>
+                          <input type="date" required className="input-glass" value={editDataVenc}
+                            onChange={e => setEditDataVenc(e.target.value)} />
+                        </div>
+                      </div>
+                      {editErrorMsg && (
+                        <p className="text-xs text-accent-pink">{editErrorMsg}</p>
+                      )}
+                      <div className="flex gap-2">
+                        <button type="submit" disabled={editLoading}
+                          className="btn-primary flex-1 flex items-center justify-center gap-2">
+                          <Save className="w-4 h-4" />
+                          {editLoading ? 'Salvando...' : 'Salvar'}
+                        </button>
+                        <button type="button" onClick={cancelarEdicao}
+                          className="btn-outline flex-1">Cancelar</button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div key={l.id} className="glass-card p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">{l.descricao}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-xs ${vencida ? 'text-accent-pink font-medium' : 'text-white/40'}`}>
+                            {new Date(l.data_vencimento).toLocaleDateString('pt-BR')}
+                            {vencida && <span className="ml-1 text-accent-pink">(vencido)</span>}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-lg font-bold text-white shrink-0 -mt-0.5">
+                        {formatar(Number(l.valor))}
+                      </p>
                     </div>
-                    <p className="text-lg font-bold text-white shrink-0 -mt-0.5">
-                      {formatar(Number(l.valor))}
-                    </p>
+                    <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                      <button onClick={() => togglePago(l.id, l.pago)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                          l.pago
+                            ? 'bg-accent-blue/20 text-accent-blue'
+                            : 'bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue'
+                        }`}>
+                        <Check className="w-3.5 h-3.5" />
+                        {l.pago ? 'Pago' : 'Pendente'}
+                      </button>
+                      <button onClick={() => iniciarEdicao(l)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editar
+                      </button>
+                      <button onClick={() => handleDelete(l.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Excluir
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
-                    <button onClick={() => togglePago(l.id, l.pago)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                        l.pago
-                          ? 'bg-accent-blue/20 text-accent-blue'
-                          : 'bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue'
-                      }`}>
-                      <Check className="w-3.5 h-3.5" />
-                      {l.pago ? 'Pago' : 'Pendente'}
-                    </button>
-                    <button onClick={() => handleDelete(l.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Excluir
-                    </button>
-                  </div>
-                </div>
+                )
               )
             })}
           </div>

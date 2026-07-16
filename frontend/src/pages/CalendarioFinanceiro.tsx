@@ -1,12 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Lembrete, Divida, Acordo, TransacaoRecorrente } from '../types'
 import { MESES_PT } from '../types'
 import { CalendarDays, ChevronLeft, ChevronRight, Bell, PiggyBank, Handshake, Repeat } from 'lucide-react'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 interface Evento {
   dia: number
@@ -95,7 +92,7 @@ export default function CalendarioFinanceiro() {
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
   const hoje = new Date()
-  const hojeStr = `${hoje.getFullYear()}-${hoje.getMonth() + 1}-${hoje.getDate()}`
+  const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
 
   const totalMes = eventos.reduce((s, e) => s + e.valor, 0)
 

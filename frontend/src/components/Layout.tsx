@@ -1,11 +1,11 @@
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEffect, useState } from 'react'
 import { registerPushNotifications } from '../lib/notifications'
 import {
   LayoutDashboard, ListOrdered, Settings,
   LogOut, Menu, DollarSign, PiggyBank, TrendingDown, TrendingUp, Handshake, Target,
-  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon
+  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon, Repeat, Clock
 } from 'lucide-react'
 
 const links = [
@@ -15,6 +15,8 @@ const links = [
   { to: '/dividas', label: 'Desfudência', icon: PiggyBank },
   { to: '/acordos', label: 'Acordos', icon: Handshake },
   { to: '/metas', label: 'Metas', icon: Target },
+  { to: '/lembretes', label: 'Lembretes', icon: Bell },
+  { to: '/transacoes-recorrentes', label: 'Recorrências', icon: Repeat },
 
   { to: '/investimentos', label: 'Investimentos', icon: InvestmentIcon },
   { to: '/calendario', label: 'Calendário', icon: CalendarDays },
@@ -25,7 +27,6 @@ const links = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
   const location = useLocation()
   const pageTitle = links.find(l => l.to === location.pathname)?.label || 'PyFinanças'
 
@@ -79,7 +80,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    navigate('/login')
   }
 
   return (

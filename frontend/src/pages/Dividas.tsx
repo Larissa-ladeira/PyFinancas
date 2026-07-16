@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Divida } from '../types'
 import {
   PiggyBank, Plus, Trash2, TrendingDown, CheckCircle,
@@ -8,10 +9,6 @@ import {
 import {
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 type Estrategia = 'snowball' | 'avalanche'
 
@@ -38,6 +35,8 @@ export default function Dividas() {
   const [editValorAtual, setEditValorAtual] = useState('')
   const [editPagamentoMinimo, setEditPagamentoMinimo] = useState('')
   const [editDataVenc, setEditDataVenc] = useState('')
+  const [taxaJuros, setTaxaJuros] = useState('')
+  const [editTaxaJuros, setEditTaxaJuros] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -62,6 +61,7 @@ export default function Dividas() {
       descricao,
       valor_original: parseFloat(valorOriginal) || null,
       valor_total: parseFloat(valorAtual || valorOriginal),
+      taxa_juros: parseFloat(taxaJuros) || 0,
       pagamento_minimo: parseFloat(pagamentoMinimo) || 0,
       data_vencimento: dataVenc || null,
     })
@@ -69,7 +69,7 @@ export default function Dividas() {
       setErrorMsg(error.message)
     } else {
       setDescricao(''); setValorOriginal(''); setValorAtual('')
-      setPagamentoMinimo(''); setDataVenc('')
+      setPagamentoMinimo(''); setDataVenc(''); setTaxaJuros('')
       setShowForm(false)
       carregar()
     }
@@ -106,6 +106,7 @@ export default function Dividas() {
     setEditValorAtual(String(d.valor_total))
     setEditPagamentoMinimo(String(d.pagamento_minimo))
     setEditDataVenc(d.data_vencimento || '')
+    setEditTaxaJuros(String(d.taxa_juros || ''))
   }
 
   async function handleEditSave(e: React.FormEvent) {
@@ -116,6 +117,7 @@ export default function Dividas() {
       descricao: editDescricao,
       valor_original: parseFloat(editValorTotal) || null,
       valor_total: parseFloat(editValorAtual || editValorTotal),
+      taxa_juros: parseFloat(editTaxaJuros) || 0,
       pagamento_minimo: parseFloat(editPagamentoMinimo) || 0,
       data_vencimento: editDataVenc || null,
     }).eq('id', editandoId)
@@ -319,7 +321,7 @@ export default function Dividas() {
               {errorMsg}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <input type="text" required placeholder="Descrição"
               className="input-glass" value={descricao} onChange={e => setDescricao(e.target.value)} />
             <input type="number" required min="0.01" step="0.01" placeholder="Valor Original"
@@ -328,6 +330,8 @@ export default function Dividas() {
               className="input-glass" value={valorAtual} onChange={e => setValorAtual(e.target.value)} />
             <input type="number" min="0" step="0.01" placeholder="Pgto mínimo"
               className="input-glass" value={pagamentoMinimo} onChange={e => setPagamentoMinimo(e.target.value)} />
+            <input type="number" min="0" step="0.01" placeholder="% Juros a.m."
+              className="input-glass" value={taxaJuros} onChange={e => setTaxaJuros(e.target.value)} />
             <input type="date" placeholder="Vencimento"
               className="input-glass" value={dataVenc} onChange={e => setDataVenc(e.target.value)} />
           </div>
@@ -435,7 +439,7 @@ export default function Dividas() {
                             {errorMsg}
                           </div>
                         )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                           <input type="text" required placeholder="Descrição"
                             className="input-glass" value={editDescricao}
                             onChange={e => setEditDescricao(e.target.value)} />
@@ -448,6 +452,9 @@ export default function Dividas() {
                           <input type="number" min="0" step="0.01" placeholder="Pgto mínimo"
                             className="input-glass" value={editPagamentoMinimo}
                             onChange={e => setEditPagamentoMinimo(e.target.value)} />
+                          <input type="number" min="0" step="0.01" placeholder="% Juros a.m."
+                            className="input-glass" value={editTaxaJuros}
+                            onChange={e => setEditTaxaJuros(e.target.value)} />
                           <input type="date" placeholder="Vencimento"
                             className="input-glass" value={editDataVenc}
                             onChange={e => setEditDataVenc(e.target.value)} />

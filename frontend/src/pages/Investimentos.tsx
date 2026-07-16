@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Investimento, Conta } from '../types'
 import { TIPOS_INVESTIMENTO } from '../types'
 import { TrendingUp, Plus, Trash2, Pencil, BarChart3, Landmark } from 'lucide-react'
 import EmptyState from '../components/EmptyState'
 import ConfirmDialog from '../components/ConfirmDialog'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function Investimentos() {
   const [items, setItems] = useState<Investimento[]>([])

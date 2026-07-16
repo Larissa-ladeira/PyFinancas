@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao } from '../types'
 import { MESES_PT, CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../types'
 import { Filter, Search, Upload, CheckCircle, AlertCircle, Trash2, ArrowRight, Download } from 'lucide-react'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 interface LinhaPreview {
   data: string
@@ -140,6 +137,11 @@ export default function Extrato() {
     const { data } = await supabase.from('transacoes').select('*')
       .order('data_transacao', { ascending: false })
     setTodas(data || [])
+  }
+
+  async function handleDelete(id: number) {
+    await supabase.from('transacoes').delete().eq('id', id)
+    carregar()
   }
 
   let filtradas = [...todas]
@@ -329,6 +331,13 @@ export default function Extrato() {
                   }`}>
                     {t.tipo.toLowerCase() === 'receita' ? '+' : '-'}{formatar(Number(t.valor))}
                   </p>
+                </div>
+                <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                  <button onClick={() => handleDelete(t.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Excluir
+                  </button>
                 </div>
               </div>
             ))}

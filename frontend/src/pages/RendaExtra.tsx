@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao } from '../types'
 import { MESES_PT } from '../types'
 import {
-  TrendingUp, Trash2, Plus, Save, CheckCircle, AlertCircle
+  TrendingUp, Trash2, Plus, Save, CheckCircle, AlertCircle, Pencil
 } from 'lucide-react'
 
 const CATEGORIAS_EXTRA = ['Freelance', 'Investimentos', 'Presente', 'Renda Extra', 'Outros']
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function RendaExtra() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
@@ -23,6 +20,13 @@ export default function RendaExtra() {
   const [errorMsg, setErrorMsg] = useState('')
   const [mes, setMes] = useState(new Date().getMonth() + 1)
   const [ano, setAno] = useState(new Date().getFullYear())
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editDescricao, setEditDescricao] = useState('')
+  const [editValor, setEditValor] = useState('')
+  const [editCategoria, setEditCategoria] = useState('')
+  const [editData, setEditData] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editErrorMsg, setEditErrorMsg] = useState('')
 
   useEffect(() => { carregar() }, [mes, ano])
 
@@ -64,6 +68,39 @@ export default function RendaExtra() {
   async function handleDelete(id: number) {
     await supabase.from('transacoes').delete().eq('id', id)
     carregar()
+  }
+
+  function iniciarEdicao(t: Transacao) {
+    setEditandoId(t.id)
+    setEditDescricao(t.descricao)
+    setEditValor(String(t.valor))
+    setEditCategoria(t.categoria)
+    setEditData(t.data_transacao)
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setEditErrorMsg('')
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoId) return
+    setEditLoading(true)
+    setEditErrorMsg('')
+    const { error } = await supabase.from('transacoes').update({
+      descricao: editDescricao,
+      valor: parseFloat(editValor),
+      categoria: editCategoria,
+      data_transacao: editData,
+    }).eq('id', editandoId)
+    if (error) {
+      setEditErrorMsg(error.message)
+    } else {
+      setEditandoId(null)
+      carregar()
+    }
+    setEditLoading(false)
   }
 
   const totalExtra = transacoes.reduce((s, t) => s + Number(t.valor), 0)
@@ -146,27 +183,75 @@ export default function RendaExtra() {
         {transacoes.length > 0 ? (
           <div className="space-y-3">
             {transacoes.map(t => (
-              <div key={t.id} className="glass-card p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{t.descricao}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-white/40">{t.data_transacao}</span>
-                      <span className="badge badge-receita">{t.categoria}</span>
+              editandoId === t.id ? (
+                <div key={t.id} className="glass-card p-4">
+                  <form onSubmit={handleEditSave} className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">Descrição</label>
+                      <input type="text" required className="input-glass" value={editDescricao}
+                        onChange={e => setEditDescricao(e.target.value)} />
                     </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Valor</label>
+                        <input type="number" required min="0.01" step="0.01" className="input-glass" value={editValor}
+                          onChange={e => setEditValor(e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Data</label>
+                        <input type="date" required className="input-glass" value={editData}
+                          onChange={e => setEditData(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">Categoria</label>
+                      <select className="select-glass" value={editCategoria}
+                        onChange={e => setEditCategoria(e.target.value)}>
+                        {CATEGORIAS_EXTRA.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    {editErrorMsg && (
+                      <p className="text-xs text-accent-pink">{editErrorMsg}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button type="submit" disabled={editLoading}
+                        className="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <Save className="w-4 h-4" />
+                        {editLoading ? 'Salvando...' : 'Salvar'}
+                      </button>
+                      <button type="button" onClick={cancelarEdicao}
+                        className="btn-outline flex-1">Cancelar</button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div key={t.id} className="glass-card p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium truncate">{t.descricao}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-white/40">{t.data_transacao}</span>
+                        <span className="badge badge-receita">{t.categoria}</span>
+                      </div>
+                    </div>
+                    <p className="text-lg font-bold text-accent-blue shrink-0 -mt-0.5">
+                      +{formatar(Number(t.valor))}
+                    </p>
                   </div>
-                  <p className="text-lg font-bold text-accent-blue shrink-0 -mt-0.5">
-                    +{formatar(Number(t.valor))}
-                  </p>
+                  <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
+                    <button onClick={() => iniciarEdicao(t)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
+                      <Pencil className="w-3.5 h-3.5" />
+                      Editar
+                    </button>
+                    <button onClick={() => handleDelete(t.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Excluir
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
-                  <button onClick={() => handleDelete(t.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Excluir
-                  </button>
-                </div>
-              </div>
+              )
             ))}
           </div>
         ) : (

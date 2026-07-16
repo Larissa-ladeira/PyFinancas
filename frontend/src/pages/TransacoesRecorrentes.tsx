@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { TransacaoRecorrente } from '../types'
 import { CATEGORIAS_RECEITA, CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import { Repeat, Plus, Trash2, Play, Pause, CheckCircle } from 'lucide-react'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function TransacoesRecorrentes() {
   const [recorrentes, setRecorrentes] = useState<TransacaoRecorrente[]>([])

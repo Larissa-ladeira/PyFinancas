@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao, Conta, Investimento } from '../types'
 import { TIPOS_CONTA } from '../types'
 import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function Configuracoes() {
   const [salario, setSalario] = useState('')
@@ -163,7 +160,7 @@ export default function Configuracoes() {
   const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
   const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
   const patrimonioLiquido = totalAtual + saldoBancario
-  const percGasto = salarioNum > 0 ? (totalDesp / salarioNum) * 100 : 0
+  const percGasto = receitasTotal > 0 ? (totalDesp / receitasTotal) * 100 : 0
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -394,7 +391,7 @@ export default function Configuracoes() {
             </div>
             <div className="metric-card metric-card-despesa">
               <div className="metric-label text-accent-pink/60 mb-1">Total Despesas</div>
-              <div className="metric-value text-despesa">{formatar(totalDesp)}</div>
+              <div className="metric-value text-accent-pink">{formatar(totalDesp)}</div>
             </div>
             <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
               <div className={`metric-label mb-1 ${patrimonioLiquido >= 0 ? 'text-accent-blue/60' : 'text-accent-pink/60'}`}>Patrimônio Líquido</div>

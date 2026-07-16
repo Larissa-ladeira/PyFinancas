@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { MetaEconomia } from '../types'
-import { Target, Plus, Trash2, PiggyBank, Calendar } from 'lucide-react'
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { Target, Plus, Trash2, PiggyBank, Calendar, Pencil, Save, X } from 'lucide-react'
 
 export default function MetasEconomia() {
   const [metas, setMetas] = useState<MetaEconomia[]>([])
@@ -16,6 +13,12 @@ export default function MetasEconomia() {
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
+  const [editandoMetaId, setEditandoMetaId] = useState<number | null>(null)
+  const [editMetaDescricao, setEditMetaDescricao] = useState('')
+  const [editMetaValorAlvo, setEditMetaValorAlvo] = useState('')
+  const [editMetaDataAlvo, setEditMetaDataAlvo] = useState('')
+  const [editandoProgressoId, setEditandoProgressoId] = useState<number | null>(null)
+  const [editMetaValor, setEditMetaValor] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -47,13 +50,44 @@ export default function MetasEconomia() {
     carregar()
   }
 
-  async function handleAtualizarProgresso(m: MetaEconomia) {
-    const novo = prompt(`Quanto já guardou para "${m.descricao}"?`, String(m.valor_atual))
-    if (novo === null) return
-    const val = parseFloat(novo.replace(',', '.'))
+  function iniciarEdicaoMeta(m: MetaEconomia) {
+    setEditandoMetaId(m.id)
+    setEditMetaDescricao(m.descricao)
+    setEditMetaValorAlvo(String(m.valor_alvo))
+    setEditMetaDataAlvo(m.data_alvo || '')
+  }
+
+  function cancelarEdicaoMeta() {
+    setEditandoMetaId(null)
+  }
+
+  async function handleEditMetaSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editandoMetaId) return
+    await supabase.from('metas_economia').update({
+      descricao: editMetaDescricao,
+      valor_alvo: parseFloat(editMetaValorAlvo),
+      data_alvo: editMetaDataAlvo || null,
+    }).eq('id', editandoMetaId)
+    setEditandoMetaId(null)
+    carregar()
+  }
+
+  function iniciarEdicaoProgresso(m: MetaEconomia) {
+    setEditandoProgressoId(m.id)
+    setEditMetaValor(String(m.valor_atual))
+  }
+
+  function cancelarEdicaoProgresso() {
+    setEditandoProgressoId(null)
+  }
+
+  async function handleEditProgressoSave(m: MetaEconomia) {
+    const val = parseFloat(editMetaValor.replace(',', '.'))
     if (isNaN(val)) return
     const concluida = val >= m.valor_alvo
     await supabase.from('metas_economia').update({ valor_atual: val, concluida }).eq('id', m.id)
+    setEditandoProgressoId(null)
     carregar()
   }
 
@@ -136,35 +170,83 @@ export default function MetasEconomia() {
               : null
             return (
               <div key={m.id} className="glass-card p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold text-white">{m.descricao}</h4>
-                    {diasRestantes !== null && (
-                      <span className="text-xs text-white/30 flex items-center gap-1 mt-0.5">
-                        <Calendar className="w-3 h-3" /> {diasRestantes} dias restantes
-                      </span>
-                    )}
-                  </div>
-                  <button onClick={() => handleDelete(m.id)}
-                    className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/40">{formatar(m.valor_atual)}</span>
-                  <span className="text-white font-medium">{formatar(m.valor_alvo)}</span>
-                </div>
-                <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden mb-3">
-                  <div className="h-full rounded-full bg-gradient-to-r from-accent-blue to-accent-purple transition-all"
-                    style={{ width: `${Math.min(progresso, 100)}%` }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-white/30">{progresso.toFixed(1)}% concluído</span>
-                  <button onClick={() => handleAtualizarProgresso(m)}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/30 transition-all">
-                    Atualizar
-                  </button>
-                </div>
+                {editandoMetaId === m.id ? (
+                  <form onSubmit={handleEditMetaSave} className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">Descrição</label>
+                      <input type="text" required className="input-glass" value={editMetaDescricao}
+                        onChange={e => setEditMetaDescricao(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Valor alvo</label>
+                        <input type="number" required min="0.01" step="0.01" className="input-glass" value={editMetaValorAlvo}
+                          onChange={e => setEditMetaValorAlvo(e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">Data alvo</label>
+                        <input type="date" className="input-glass" value={editMetaDataAlvo}
+                          onChange={e => setEditMetaDataAlvo(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <Save className="w-4 h-4" /> Salvar
+                      </button>
+                      <button type="button" onClick={cancelarEdicaoMeta}
+                        className="btn-outline flex-1">Cancelar</button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-white">{m.descricao}</h4>
+                        {diasRestantes !== null && (
+                          <span className="text-xs text-white/30 flex items-center gap-1 mt-0.5">
+                            <Calendar className="w-3 h-3" /> {diasRestantes} dias restantes
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => iniciarEdicaoMeta(m)}
+                          className="p-1.5 rounded-lg hover:bg-accent-blue/20 text-white/30 hover:text-accent-blue transition-all">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(m.id)}
+                          className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-white/40">{formatar(m.valor_atual)}</span>
+                      <span className="text-white font-medium">{formatar(m.valor_alvo)}</span>
+                    </div>
+                    <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden mb-3">
+                      <div className="h-full rounded-full bg-gradient-to-r from-accent-blue to-accent-purple transition-all"
+                        style={{ width: `${Math.min(progresso, 100)}%` }} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/30">{progresso.toFixed(1)}% concluído</span>
+                      {editandoProgressoId === m.id ? (
+                        <div className="flex items-center gap-2">
+                          <input type="number" min="0" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-28"
+                            value={editMetaValor} onChange={e => setEditMetaValor(e.target.value)} autoFocus />
+                          <button onClick={() => handleEditProgressoSave(m)}
+                            className="text-xs text-accent-blue hover:text-accent-blue/80">ok</button>
+                          <button onClick={cancelarEdicaoProgresso}
+                            className="text-xs text-white/30 hover:text-white/60">x</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => iniciarEdicaoProgresso(m)}
+                          className="text-xs px-3 py-1.5 rounded-xl bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/30 transition-all">
+                          Atualizar
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )
           })}

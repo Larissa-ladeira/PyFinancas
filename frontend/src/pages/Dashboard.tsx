@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao, Divida, Lembrete, MetaEconomia, MetaOrcamento } from '../types'
 import { MESES_PT } from '../types'
 import { useNavigate } from 'react-router-dom'
@@ -13,10 +14,6 @@ import {
 } from 'recharts'
 
 const COLORS = ['#00D4FF', '#FF2E9A', '#ffffff', '#A855F7', '#00D4FF', '#FF2E9A', '#A855F7', '#f59e0b', '#00D4FF']
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -32,6 +29,7 @@ export default function Dashboard() {
   const [temRefeicao, setTemRefeicao] = useState(true)
   const [refeicao, setRefeicao] = useState(0)
   const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => { carregar() }, [mes, ano])
   useEffect(() => {
@@ -52,8 +50,7 @@ export default function Dashboard() {
     supabase.from('metas_economia').select('*')
       .eq('concluida', false)
       .order('created_at', { ascending: false })
-      .then(({ data }) => setMetas(data || []))
-    gerarRecorrentes()
+      .then(({ data }) => { setMetas(data || []); setLoading(false) })
   }, [])
 
   useEffect(() => {
@@ -61,40 +58,6 @@ export default function Dashboard() {
       .eq('mes', mes).eq('ano', ano)
       .then(({ data }) => setOrcamentos(data || []))
   }, [mes, ano])
-
-  async function gerarRecorrentes() {
-    const hoje = new Date()
-    const mesAtual = hoje.getMonth() + 1
-    const anoAtual = hoje.getFullYear()
-    const { data: recorrentes } = await supabase.from('transacoes_recorrentes').select('*').eq('ativa', true)
-    if (!recorrentes?.length) return
-
-    const inicio = new Date(anoAtual, mesAtual - 1, 1).toISOString().split('T')[0]
-    const fim = mesAtual === 12
-      ? new Date(anoAtual + 1, 0, 1).toISOString().split('T')[0]
-      : new Date(anoAtual, mesAtual, 1).toISOString().split('T')[0]
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: existentes } = await supabase.from('transacoes').select('descricao, valor')
-      .eq('usuario_id', user.id)
-      .gte('data_transacao', inicio).lt('data_transacao', fim)
-
-    for (const r of recorrentes) {
-      const jaExiste = existentes?.some(e =>
-        e.descricao === r.descricao && Math.abs(Number(e.valor) - Number(r.valor)) < 0.01
-      )
-      if (jaExiste) continue
-
-      const diaValido = Math.min(r.dia_vencimento, new Date(anoAtual, mesAtual, 0).getDate())
-      const dataTransacao = new Date(anoAtual, mesAtual - 1, diaValido).toISOString().split('T')[0]
-
-      await supabase.from('transacoes').insert({
-        usuario_id: user.id, descricao: r.descricao, valor: r.valor,
-        tipo: r.tipo, categoria: r.categoria, data_transacao: dataTransacao,
-      })
-    }
-  }
 
   useEffect(() => {
     const inicio = new Date(ano, mes - 1, 1).toISOString().split('T')[0]
@@ -180,6 +143,22 @@ export default function Dashboard() {
 
   const mesesLiberdade = calcularLiberdade()
 
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="metric-card animate-pulse">
+            <div className="h-4 bg-white/10 rounded w-20 mb-2" />
+            <div className="h-8 bg-white/10 rounded w-32" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   const despCat = transacoes.filter(t => t.tipo.toLowerCase() === 'despesa')
     .reduce<Record<string, number>>((acc, t) => {
       acc[t.categoria] = (acc[t.categoria] || 0) + Number(t.valor); return acc
@@ -252,13 +231,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="glass-card p-5">
-        <div className="flex items-center gap-2 text-white/70 mb-4">
-          <Bell className="w-4 h-4" />
-          <h2 className="font-semibold text-sm">Compromissos do Mês</h2>
-        </div>
+      {lembretesMes.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 text-white/70 mb-4">
+            <Bell className="w-4 h-4" />
+            <h2 className="font-semibold text-sm">Compromissos do Mês</h2>
+          </div>
 
-        {(() => {
+          {(() => {
           const pendentes = lembretesMes.filter(l => !l.pago)
           const totalPendente = despesas + pendentes.reduce((s, l) => s + Number(l.valor), 0)
           const compromissoTotal = totalPendente
@@ -341,7 +321,8 @@ export default function Dashboard() {
             </>
           )
         })()}
-      </div>
+        </div>
+      )}
 
       {metas.length > 0 && (
         <div className="glass-card p-5">

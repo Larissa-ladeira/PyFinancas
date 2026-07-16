@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao } from '../types'
 import { MESES_PT } from '../types'
 import {
@@ -11,10 +12,6 @@ import {
 } from 'recharts'
 
 const COLORS = ['#00D4FF', '#FF2E9A', '#A855F7', '#ffffff', '#f59e0b', '#00D4FF', '#FF2E9A', '#A855F7', '#ffffff', '#f59e0b']
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function Relatorios() {
   const [ano, setAno] = useState(new Date().getFullYear())
@@ -89,8 +86,7 @@ export default function Relatorios() {
         </div>
       </div>
 
-      {ano > 0 && (
-        <div className="glass-card p-5">
+      <div className="glass-card p-5">
           <div className="flex items-center gap-2 text-white/70 mb-4">
             <BarChart3 className="w-4 h-4" />
             <h2 className="font-semibold text-sm">Comparativo Mensal</h2>
@@ -111,7 +107,6 @@ export default function Relatorios() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="glass-card p-5">

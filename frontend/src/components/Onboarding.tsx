@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { DollarSign, TrendingDown, Target, Check, ArrowRight, PiggyBank } from 'lucide-react'
+import { DollarSign, TrendingDown, Target, Check, ArrowRight, ArrowLeft, PiggyBank } from 'lucide-react'
 
 interface Props {
   onComplete: () => void
@@ -90,6 +90,10 @@ export default function Onboarding({ onComplete }: Props) {
     }
   }
 
+  function handleBack() {
+    if (step > 0) setStep(s => s - 1)
+  }
+
   function skip() {
     if (step < steps.length - 1) {
       setStep(s => s + 1)
@@ -171,6 +175,11 @@ export default function Onboarding({ onComplete }: Props) {
           )}
 
           <div className="flex gap-3">
+            {step > 0 && (
+              <button onClick={handleBack} className="btn-outline flex-1">
+                <span className="flex items-center gap-2 justify-center"><ArrowLeft className="w-4 h-4" /> Voltar</span>
+              </button>
+            )}
             <button onClick={skip} className="btn-outline flex-1">
               Pular
             </button>

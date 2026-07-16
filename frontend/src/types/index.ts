@@ -8,17 +8,6 @@ export interface Transacao {
   data_transacao: string
 }
 
-export interface Configuracao {
-  id: number
-  usuario_id: string
-  salario_base: number
-  salario_real: number
-  tem_vale_alimentacao: boolean
-  vale_alimentacao: number
-  tem_refeicao: boolean
-  refeicao: number
-}
-
 export interface Lembrete {
   id: number
   usuario_id: string
@@ -51,14 +40,6 @@ export interface Divida {
   data_vencimento: string | null
   quitada: boolean
   created_at: string
-}
-
-export interface TransacaoForm {
-  descricao: string
-  valor: number
-  tipo: 'receita' | 'despesa'
-  categoria: string
-  data_transacao: string
 }
 
 export interface Acordo {
@@ -152,14 +133,6 @@ export const TIPOS_INVESTIMENTO = [
   { value: 'poupanca', label: 'Poupança' },
   { value: 'outros', label: 'Outros' },
 ]
-
-export interface DeviceToken {
-  id: number
-  usuario_id: string
-  token: string
-  platform: string
-  created_at: string
-}
 
 export const TIPOS_CONTA = [
   { value: 'corrente', label: 'Conta Corrente' },

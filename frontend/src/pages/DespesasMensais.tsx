@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { formatar } from '../lib/format'
 import type { Transacao, MetaOrcamento, Lembrete, TransacaoRecorrente } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
@@ -10,10 +11,6 @@ import {
 } from 'recharts'
 
 const COLORS = ['#FF2E9A', '#f59e0b', '#00D4FF', '#A855F7', '#ffffff', '#A855F7', '#FF2E9A', '#A855F7', '#00D4FF', '#FF2E9A', '#00D4FF']
-
-function formatar(val: number) {
-  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
 
 export default function DespesasMensais() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
@@ -48,6 +45,7 @@ export default function DespesasMensais() {
   const [budgetValor, setBudgetValor] = useState('')
   const [lembretes, setLembretes] = useState<Lembrete[]>([])
   const [formRecorrente, setFormRecorrente] = useState(false)
+  const [formLembrete, setFormLembrete] = useState(true)
   const [recorrentesAtivos, setRecorrentesAtivos] = useState<TransacaoRecorrente[]>([])
   const [editandoRecId, setEditandoRecId] = useState<number | null>(null)
   const [editRecDescricao, setEditRecDescricao] = useState('')
@@ -202,13 +200,15 @@ export default function DespesasMensais() {
     if (error) {
       setFormErrorMsg(error.message)
     } else {
-      await supabase.from('lembretes').insert({
-        usuario_id: user.id,
-        descricao: formDescricao,
-        valor: parseFloat(formValor),
-        data_vencimento: formData,
-        pago: false,
-      })
+      if (formLembrete) {
+        await supabase.from('lembretes').insert({
+          usuario_id: user.id,
+          descricao: formDescricao,
+          valor: parseFloat(formValor),
+          data_vencimento: formData,
+          pago: false,
+        })
+      }
       if (formRecorrente) {
         const dia = new Date(formData).getDate()
         const { error: recError } = await supabase.from('transacoes_recorrentes').insert({
@@ -408,6 +408,12 @@ export default function DespesasMensais() {
                   value={formData} onChange={e => setFormData(e.target.value)} />
               </div>
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={formLembrete}
+                onChange={e => setFormLembrete(e.target.checked)}
+                className="w-4 h-4 rounded border-white/20 bg-white/5 accent-accent-blue" />
+              <span className="text-sm text-white/60">Criar lembrete</span>
+            </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={formRecorrente}
                 onChange={e => setFormRecorrente(e.target.checked)}
