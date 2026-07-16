@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
 import type { MetaEconomia } from '../types'
-import { Target, Plus, Trash2, PiggyBank, Calendar, Pencil, Save, X } from 'lucide-react'
+import { Target, Plus, Trash2, PiggyBank, Calendar, Pencil, Save } from 'lucide-react'
 
 export default function MetasEconomia() {
   const [metas, setMetas] = useState<MetaEconomia[]>([])

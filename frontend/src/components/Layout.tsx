@@ -5,7 +5,7 @@ import { registerPushNotifications } from '../lib/notifications'
 import {
   LayoutDashboard, ListOrdered, Settings,
   LogOut, Menu, DollarSign, PiggyBank, TrendingDown, TrendingUp, Handshake, Target,
-  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon, Repeat, Clock
+  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon, Repeat
 } from 'lucide-react'
 
 const links = [

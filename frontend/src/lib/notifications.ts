@@ -6,7 +6,7 @@ export async function registerPushNotifications() {
   if (registered) return
   registered = true
 
-  if (!window.Capacitor) return
+  if (!(window as any).Capacitor) return
 
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications')
