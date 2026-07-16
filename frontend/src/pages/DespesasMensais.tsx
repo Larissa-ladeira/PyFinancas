@@ -321,6 +321,15 @@ export default function DespesasMensais() {
     setPagarError('')
     if (tipoPagamento === 'total') {
       await supabase.from('transacoes').delete().eq('id', t.id)
+      const { data: lembreteMatch } = await supabase.from('lembretes').select('id')
+        .eq('descricao', t.descricao)
+        .eq('data_vencimento', t.data_transacao)
+        .eq('pago', false)
+        .limit(1)
+        .maybeSingle()
+      if (lembreteMatch) {
+        await supabase.from('lembretes').update({ pago: true }).eq('id', lembreteMatch.id)
+      }
     } else {
       const pago = parseFloat(valorPagar) || 0
       if (pago <= 0 || pago > Number(t.valor)) {
@@ -346,6 +355,7 @@ export default function DespesasMensais() {
     setPagandoId(null)
     setValorPagar('')
     carregar()
+    carregarLembretes()
   }
 
   async function toggleLembrete(id: number, pago: boolean) {
