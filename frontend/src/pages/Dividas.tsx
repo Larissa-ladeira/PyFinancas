@@ -203,7 +203,16 @@ export default function Dividas() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-white">Desfudência</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Desfudência</h1>
+          {dividas.length > 0 && (
+            <p className="text-sm text-white/40 mt-1">
+              <span className="text-accent-blue font-semibold">{quitadas.length}</span>
+              <span className="text-white/60">/{dividas.length}</span>
+              {' '}pagas de {dividas.length} no total
+            </p>
+          )}
+        </div>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary">
           <Plus className="w-4 h-4" />
           Nova Dívida

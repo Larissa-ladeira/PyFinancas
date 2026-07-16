@@ -146,6 +146,7 @@ export default function Dashboard() {
   const saldo = receitas - despesas
 
   const ativas = dividas.filter(d => !d.quitada)
+  const quitadas = dividas.filter(d => d.quitada)
   const totalDivida = ativas.reduce((s, d) => s + Number(d.valor_total), 0)
   const totalPago = ativas.reduce((s, d) => s + Number(d.valor_pago), 0)
   const totalRestante = totalDivida - totalPago
@@ -393,6 +394,13 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 text-white/70 mb-4">
             <Target className="w-4 h-4" />
             <h2 className="font-semibold text-sm">Jornada da Desfudência</h2>
+            {dividas.length > 0 && (
+              <span className="text-xs text-white/40 ml-auto">
+                <span className="text-accent-blue font-semibold">{quitadas.length}</span>
+                <span className="text-white/60">/{dividas.length}</span>
+                {' '}pagas
+              </span>
+            )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
