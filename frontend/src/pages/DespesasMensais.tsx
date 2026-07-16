@@ -320,7 +320,8 @@ export default function DespesasMensais() {
   async function handlePagarDespesa(t: Transacao) {
     setPagarError('')
     if (tipoPagamento === 'total') {
-      await supabase.from('transacoes').delete().eq('id', t.id)
+      const { error } = await supabase.from('transacoes').delete().eq('id', t.id)
+      if (error) { setPagarError('Erro ao quitar: ' + error.message); return }
       const { data: lembreteMatch } = await supabase.from('lembretes').select('id')
         .eq('descricao', t.descricao)
         .eq('data_vencimento', t.data_transacao)
@@ -337,7 +338,8 @@ export default function DespesasMensais() {
         return
       }
       const restante = Number(t.valor) - pago
-      await supabase.from('transacoes').update({ valor: pago }).eq('id', t.id)
+      const { error } = await supabase.from('transacoes').update({ valor: pago }).eq('id', t.id)
+      if (error) { setPagarError('Erro ao pagar: ' + error.message); return }
       if (restante > 0.01) {
         const { data: { user } } = await supabase.auth.getUser()
         const proxMes = mes === 12 ? 1 : mes + 1

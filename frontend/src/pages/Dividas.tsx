@@ -77,6 +77,7 @@ export default function Dividas() {
   }
 
   async function handlePagar(divida: Divida) {
+    setErrorMsg('')
     const restante = Number(divida.valor_total) - Number(divida.valor_pago)
     const valorPago = tipoPagamento === 'total' ? restante : (parseFloat(valorPagamento) || 0)
     if (valorPago <= 0) return
@@ -84,7 +85,7 @@ export default function Dividas() {
     const novoPago = Number(divida.valor_pago) + pagamentoFinal
     const quitada = novoPago >= Number(divida.valor_total)
     const updateData: Record<string, any> = {
-      valor_pago: quitada ? divida.valor_total : novoPago,
+      valor_pago: quitada ? Number(divida.valor_total) : novoPago,
       quitada,
     }
     if (!quitada) {
@@ -93,10 +94,13 @@ export default function Dividas() {
       updateData.data_vencimento = dataAtual.toISOString().split('T')[0]
     }
     const { error } = await supabase.from('dividas').update(updateData).eq('id', divida.id)
-    if (error) setErrorMsg(error.message)
+    if (error) {
+      setErrorMsg('Erro ao salvar pagamento: ' + error.message)
+      return
+    }
     setPagandoId(null)
     setValorPagamento('')
-    carregar()
+    await carregar()
   }
 
   function iniciarEdicao(d: Divida) {
@@ -514,7 +518,7 @@ export default function Dividas() {
                           style={{ width: `${Math.min(progresso, 100)}%` }} />
                       </div>
                       <span className="text-xs text-white/30 w-10 text-right">{progresso.toFixed(0)}%</span>
-                      <button onClick={() => { setPagandoId(pagandoId === d.id ? null : d.id); setValorPagamento('') }}
+                      <button onClick={() => { setPagandoId(pagandoId === d.id ? null : d.id); setValorPagamento(''); setTipoPagamento('total') }}
                         className="btn-primary text-xs px-3 py-1.5">
                         Pagar
                       </button>
@@ -530,6 +534,11 @@ export default function Dividas() {
                     {pagandoId === d.id && (
                       <form onSubmit={(e) => { e.preventDefault(); handlePagar(d) }}
                         className="mt-3 space-y-3 pt-3 border-t border-white/10">
+                        {errorMsg && (
+                          <div className="bg-accent-pink/10 border border-accent-pink/20 text-accent-pink text-sm rounded-xl p-3">
+                            {errorMsg}
+                          </div>
+                        )}
                         <div className="flex gap-2">
                           <button type="button" onClick={() => { setTipoPagamento('total'); setValorPagamento('') }}
                             className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all
