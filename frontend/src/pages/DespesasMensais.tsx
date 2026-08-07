@@ -118,12 +118,20 @@ export default function DespesasMensais() {
       .eq('usuario_id', user.id).eq('tipo', 'despesa')
       .gte('data_transacao', inicio).lt('data_transacao', fim)
 
+    const { data: pagosMes } = await supabase.from('lembretes').select('descricao, valor')
+      .eq('usuario_id', user.id).eq('pago', true)
+      .gte('data_vencimento', inicio).lt('data_vencimento', fim)
+
     for (const r of recorrentes) {
       if (r.tipo !== 'despesa') continue
       const jaExiste = existentes?.some(e =>
         e.descricao === r.descricao && Math.abs(Number(e.valor) - Number(r.valor)) < 0.01
       )
       if (jaExiste) continue
+      const jaPago = pagosMes?.some(l =>
+        l.descricao === r.descricao && Math.abs(Number(l.valor) - Number(r.valor)) < 0.01
+      )
+      if (jaPago) continue
       const diaValido = Math.min(r.dia_vencimento, new Date(ano, mes, 0).getDate())
       const dataTransacao = new Date(ano, mes - 1, diaValido).toISOString().split('T')[0]
       await supabase.from('transacoes').insert({
@@ -338,6 +346,19 @@ export default function DespesasMensais() {
         .maybeSingle()
       if (lembreteMatch) {
         await supabase.from('lembretes').update({ pago: true }).eq('id', lembreteMatch.id)
+      } else if (recorrentesAtivos.some(r =>
+        r.descricao === t.descricao && Math.abs(Number(r.valor) - Number(t.valor)) < 0.01
+      )) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('lembretes').insert({
+            usuario_id: user.id,
+            descricao: t.descricao,
+            valor: t.valor,
+            data_vencimento: t.data_transacao,
+            pago: true,
+          })
+        }
       }
     } else {
       const pago = parseFloat(valorPagar) || 0
