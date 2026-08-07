@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase, setRememberMe } from '../lib/supabase'
-import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound } from 'lucide-react'
+import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound, ShieldCheck } from 'lucide-react'
 
 const AVATARES = [
   { value: 'menina-branca', label: 'Menina Branca', img: '/avatars/menina-branca.jpg' },
@@ -23,7 +23,7 @@ const GoogleIcon = () => (
 )
 
 export default function Login({ onAuth }: LoginProps) {
-  const [view, setView] = useState<'login' | 'signup' | 'forgot'>('login')
+  const [view, setView] = useState<'login' | 'signup' | 'forgot' | 'mfa'>('login')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,6 +34,8 @@ export default function Login({ onAuth }: LoginProps) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [emailAlreadyExists, setEmailAlreadyExists] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
 
   const switchToLogin = (emailToUse?: string) => {
     if (emailToUse) setEmail(emailToUse)
@@ -45,7 +47,37 @@ export default function Login({ onAuth }: LoginProps) {
     setLoading(true); setError('')
     setRememberMe(rememberMe)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError(error.message); else onAuth()
+    if (error) {
+      if (error.message.toLowerCase().includes('mfa_verification_required')) {
+        const authError = error as { factors?: { id: string; factor_type: string }[] }
+        const factorId = authError.factors?.find(f => f.factor_type === 'totp')?.id
+        if (factorId) {
+          setMfaFactorId(factorId)
+          setMfaCode('')
+          setView('mfa')
+          setError('')
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError(error.message)
+      }
+    } else {
+      onAuth()
+    }
+    setLoading(false)
+  }
+
+  const handleMfaVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!mfaFactorId) return
+    setLoading(true); setError('')
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: mfaFactorId, code: mfaCode })
+    if (error) {
+      setError(error.message)
+    } else {
+      onAuth()
+    }
     setLoading(false)
   }
 
@@ -254,6 +286,33 @@ export default function Login({ onAuth }: LoginProps) {
             </button>
 
             <button type="button" onClick={() => { setView('login'); setError(''); setSuccess('') }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
+                bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para login
+            </button>
+          </form>
+        ) : view === 'mfa' ? (
+          <form onSubmit={handleMfaVerify} className="space-y-3">
+            <div className="text-center mb-2">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl
+                bg-accent-blue/15 border border-accent-blue/30 mb-3">
+                <ShieldCheck className="w-6 h-6 text-accent-blue" />
+              </div>
+              <p className="text-sm text-white/60">Digite o código de 6 dígitos do seu aplicativo autenticador.</p>
+            </div>
+            <input type="text" inputMode="numeric" autoFocus required maxLength={6} placeholder="000000"
+              className="input-glass text-center tracking-[0.5em] text-lg" value={mfaCode}
+              onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+            <button type="submit" disabled={loading || mfaCode.length !== 6}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
+                bg-gradient-to-r from-[var(--accent-pink)] to-[var(--accent-purple)] text-white
+                hover:from-[#FF2E9A] hover:to-[#A855F7] transition-all duration-200
+                disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]">
+              <ShieldCheck className="w-4 h-4" />
+              {loading ? 'Verificando...' : 'Verificar código'}
+            </button>
+            <button type="button" onClick={() => { setView('login'); setError(''); setMfaCode('') }}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium
                 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 transition-all duration-200 border border-white/10">
               <ArrowLeft className="w-4 h-4" />

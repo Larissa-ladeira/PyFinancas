@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
 import type { Transacao, Conta, Investimento } from '../types'
 import { TIPOS_CONTA } from '../types'
-import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign } from 'lucide-react'
+import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign, ShieldCheck, ShieldOff } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Configuracoes() {
@@ -45,6 +45,16 @@ export default function Configuracoes() {
   const [contaEditId, setContaEditId] = useState<number | null>(null)
   const [deleteContaId, setDeleteContaId] = useState<number | null>(null)
 
+  const [mfaStatus, setMfaStatus] = useState<'loading' | 'off' | 'on' | 'enrolling'>('loading')
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
+  const [mfaEnrollId, setMfaEnrollId] = useState<string | null>(null)
+  const [mfaQr, setMfaQr] = useState('')
+  const [mfaSecret, setMfaSecret] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaMsg, setMfaMsg] = useState('')
+  const [mfaError, setMfaError] = useState('')
+  const [confirmMfaDisable, setConfirmMfaDisable] = useState(false)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -76,6 +86,15 @@ export default function Configuracoes() {
     })
     carregarContas()
     supabase.from('investimentos').select('*').then(({ data }) => setInvestimentos(data || []))
+    supabase.auth.mfa.listFactors().then(({ data }) => {
+      const verified = data?.all?.find(f => f.factor_type === 'totp' && f.status === 'verified')
+      if (verified) {
+        setMfaFactorId(verified.id)
+        setMfaStatus('on')
+      } else {
+        setMfaStatus('off')
+      }
+    })
   }, [])
 
   async function carregarContas() {
@@ -147,6 +166,39 @@ export default function Configuracoes() {
     else await supabase.from('notificacoes').insert({ ...payload, usuario_id: usuarioId })
     setNotifSaved(true)
     setTimeout(() => setNotifSaved(false), 2000)
+  }
+
+  async function handleMfaEnroll() {
+    setMfaError(''); setMfaMsg('')
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+    if (error) { setMfaError(error.message); return }
+    setMfaEnrollId(data.id)
+    setMfaQr(data.totp.qr_code)
+    setMfaSecret(data.totp.secret)
+    setMfaCode('')
+    setMfaStatus('enrolling')
+  }
+
+  async function handleMfaVerifyEnroll() {
+    if (!mfaEnrollId) return
+    setMfaError(''); setMfaMsg('')
+    const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: mfaEnrollId, code: mfaCode })
+    if (error) { setMfaError(error.message); return }
+    setMfaFactorId(mfaEnrollId)
+    setMfaStatus('on')
+    setMfaQr(''); setMfaSecret(''); setMfaCode('')
+    setMfaMsg('Autenticação em duas etapas ativada!')
+  }
+
+  async function handleMfaDisable() {
+    if (!mfaFactorId) return
+    setMfaError(''); setMfaMsg('')
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId })
+    if (error) { setMfaError(error.message); return }
+    setMfaFactorId(null)
+    setMfaStatus('off')
+    setConfirmMfaDisable(false)
+    setMfaMsg('Autenticação em duas etapas desativada.')
   }
 
   const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
@@ -382,6 +434,88 @@ export default function Configuracoes() {
           {notifSaved ? 'Salvo!' : 'Salvar Notificações'}
         </button>
       </form>
+
+      <div className="glass-card p-6 space-y-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5" /> Segurança
+        </h2>
+
+        {mfaError && (
+          <div className="bg-accent-pink/10 border border-accent-pink/20 text-accent-pink text-sm rounded-xl p-3">
+            {mfaError}
+          </div>
+        )}
+        {mfaMsg && (
+          <div className="bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm rounded-xl p-3">
+            {mfaMsg}
+          </div>
+        )}
+
+        {mfaStatus === 'loading' && <p className="text-sm text-white/40">Verificando...</p>}
+
+        {mfaStatus === 'off' && (
+          <div>
+            <p className="text-sm text-white/60 mb-3">
+              Proteja sua conta exigindo um código do aplicativo autenticador (ex: Google Authenticator)
+              além da senha na hora do login.
+            </p>
+            <button type="button" onClick={handleMfaEnroll}
+              className="btn-primary flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4" /> Ativar 2 etapas
+            </button>
+          </div>
+        )}
+
+        {mfaStatus === 'enrolling' && (
+          <div className="space-y-4">
+            <p className="text-sm text-white/60">
+              Escaneie o QR code com seu aplicativo autenticador (ou digite a chave manualmente) e depois
+              digite o código de 6 dígitos:
+            </p>
+            {mfaQr && (
+              <div className="flex justify-center bg-white p-3 rounded-xl w-fit mx-auto">
+                <img src={mfaQr} alt="QR code do autenticador" className="w-48 h-48" />
+              </div>
+            )}
+            {mfaSecret && (
+              <p className="text-center text-xs text-white/40">
+                Chave: <span className="font-mono text-white/70">{mfaSecret}</span>
+              </p>
+            )}
+            <input type="text" inputMode="numeric" autoFocus maxLength={6} placeholder="000000"
+              className="input-glass text-center tracking-[0.5em] text-lg" value={mfaCode}
+              onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+            <div className="flex gap-2">
+              <button type="button"
+                onClick={() => { setMfaStatus('off'); setMfaQr(''); setMfaSecret(''); setMfaCode(''); setMfaError('') }}
+                className="btn-outline text-sm flex-1">Cancelar</button>
+              <button type="button" disabled={mfaCode.length !== 6} onClick={handleMfaVerifyEnroll}
+                className="btn-primary text-sm flex-1">Confirmar código</button>
+            </div>
+          </div>
+        )}
+
+        {mfaStatus === 'on' && (
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-white">Autenticação em duas etapas</p>
+              <p className="text-xs text-white/40 mt-0.5">Ativa · exige código do autenticador no login</p>
+            </div>
+            <button type="button" onClick={() => setConfirmMfaDisable(true)}
+              className="btn-outline text-sm flex items-center gap-2 shrink-0">
+              <ShieldOff className="w-4 h-4" /> Desativar
+            </button>
+          </div>
+        )}
+
+        <ConfirmDialog
+          open={confirmMfaDisable}
+          title="Desativar 2 etapas?"
+          message="Sua conta ficará protegida apenas pela senha."
+          onConfirm={handleMfaDisable}
+          onCancel={() => setConfirmMfaDisable(false)}
+        />
+      </div>
 
       {salarioNum > 0 && todas.length > 0 && (
         <>
