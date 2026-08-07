@@ -223,9 +223,13 @@ export default function Configuracoes() {
     setTimeout(() => setMfaCopied(false), 2000)
   }
 
-  const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
   const mesAtual = new Date().getMonth() + 1
   const anoAtual = new Date().getFullYear()
+  const totalRec = todas.filter(t =>
+    t.tipo.toLowerCase() === 'receita' &&
+    new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
+    new Date(t.data_transacao).getFullYear() === anoAtual
+  ).reduce((s, t) => s + Number(t.valor), 0)
   const despesasMes = todas.filter(t =>
     t.tipo.toLowerCase() === 'despesa' &&
     new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
@@ -581,9 +585,9 @@ export default function Configuracoes() {
       <>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="metric-card metric-card-receita">
-              <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
+              <div className="metric-label text-accent-blue/60 mb-1">Total Receitas (mês)</div>
               <div className="metric-value !text-2xl text-accent-blue">{formatar(receitasTotal)}</div>
-              <div className="text-xs text-white/30 mt-1">Salário Real + Extras + VA + Refeição</div>
+              <div className="text-xs text-white/30 mt-1">Salário Real + Extras (mês) + VA + Refeição</div>
             </div>
             <div className="metric-card">
               <div className="metric-label text-white/40 mb-1">Total Investido</div>
