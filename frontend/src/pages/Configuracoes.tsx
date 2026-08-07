@@ -231,7 +231,6 @@ export default function Configuracoes() {
     new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
     new Date(t.data_transacao).getFullYear() === anoAtual
   ).reduce((s, t) => s + Number(t.valor), 0)
-  const salarioNum = parseFloat(salario) || 0
   const salarioRealNum = parseFloat(salarioReal) || 0
   const valeAlimentacaoNum = temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0
   const refeicaoNum = temRefeicao ? (parseFloat(refeicao) || 0) : 0
@@ -579,9 +578,8 @@ export default function Configuracoes() {
         />
       </div>
 
-      {salarioNum > 0 && todas.length > 0 && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="metric-card metric-card-receita">
               <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
               <div className="metric-value !text-2xl text-accent-blue">{formatar(receitasTotal)}</div>
@@ -622,7 +620,6 @@ export default function Configuracoes() {
             </p>
           </div>
         </>
-      )}
     </div>
   )
 }
