@@ -466,7 +466,10 @@ export default function Configuracoes() {
             <ol className="space-y-2 mb-4">
               <li className="flex items-start gap-2 text-sm text-white/50">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">1</span>
-                <span>Instale o <strong className="text-white/70">Google Authenticator</strong> (ou Authy) no seu celular.</span>
+                <span>Instale o <a href="https://play.google.com/store/apps/details?id=com.totp.twofa.authenticator.authenticate"
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-accent-blue underline decoration-accent-blue/40 hover:text-accent-blue/80 font-semibold">
+                  Authenticator App: Secure 2FA</a> (grátis) no seu celular.</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-white/50">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">2</span>
@@ -493,7 +496,10 @@ export default function Configuracoes() {
             <ol className="space-y-2">
               <li className="flex items-start gap-2 text-sm text-white/50">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">1</span>
-                <span>No celular, abra o app autenticador e toque em <strong className="text-white/70">+ → Escanear código QR</strong>.</span>
+                <span>No celular, abra o <a href="https://play.google.com/store/apps/details?id=com.totp.twofa.authenticator.authenticate"
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-accent-blue underline decoration-accent-blue/40 hover:text-accent-blue/80 font-semibold">
+                  app autenticador</a> e toque em <strong className="text-white/70">+ → Escanear código QR</strong>.</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-white/50">
                 <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">2</span>
