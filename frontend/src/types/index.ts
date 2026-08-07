@@ -6,6 +6,7 @@ export interface Transacao {
   tipo: 'receita' | 'despesa'
   categoria: string
   data_transacao: string
+  pago?: boolean
 }
 
 export interface Lembrete {

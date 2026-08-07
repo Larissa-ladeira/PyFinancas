@@ -4,7 +4,7 @@ import { formatar } from '../lib/format'
 import type { Transacao, MetaOrcamento, Lembrete, TransacaoRecorrente } from '../types'
 import { CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import {
-  TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign, Bell, Repeat, Pause
+  TrendingDown, Wallet, Trash2, PieChart, Pencil, Save, Plus, CheckCircle, AlertCircle, DollarSign, Bell, Repeat, Pause, Check
 } from 'lucide-react'
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer
@@ -114,24 +114,17 @@ export default function DespesasMensais() {
       ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
       : new Date(ano, mes, 1).toISOString().split('T')[0]
 
-    const { data: existentes } = await supabase.from('transacoes').select('descricao, valor')
+    const { data: existentes } = await supabase.from('transacoes').select('descricao, valor, pago')
       .eq('usuario_id', user.id).eq('tipo', 'despesa')
       .gte('data_transacao', inicio).lt('data_transacao', fim)
-
-    const { data: pagosMes } = await supabase.from('lembretes').select('descricao, valor')
-      .eq('usuario_id', user.id).eq('pago', true)
-      .gte('data_vencimento', inicio).lt('data_vencimento', fim)
 
     for (const r of recorrentes) {
       if (r.tipo !== 'despesa') continue
       const jaExiste = existentes?.some(e =>
-        e.descricao === r.descricao && Math.abs(Number(e.valor) - Number(r.valor)) < 0.01
+        e.descricao === r.descricao &&
+        (Math.abs(Number(e.valor) - Number(r.valor)) < 0.01 || e.pago === true)
       )
       if (jaExiste) continue
-      const jaPago = pagosMes?.some(l =>
-        l.descricao === r.descricao && Math.abs(Number(l.valor) - Number(r.valor)) < 0.01
-      )
-      if (jaPago) continue
       const diaValido = Math.min(r.dia_vencimento, new Date(ano, mes, 0).getDate())
       const dataTransacao = new Date(ano, mes - 1, diaValido).toISOString().split('T')[0]
       await supabase.from('transacoes').insert({
@@ -336,7 +329,7 @@ export default function DespesasMensais() {
   async function handlePagarDespesa(t: Transacao) {
     setPagarError('')
     if (tipoPagamento === 'total') {
-      const { error } = await supabase.from('transacoes').delete().eq('id', t.id)
+      const { error } = await supabase.from('transacoes').update({ pago: true }).eq('id', t.id)
       if (error) { setPagarError('Erro ao quitar: ' + error.message); return }
       const { data: lembreteMatch } = await supabase.from('lembretes').select('id')
         .eq('descricao', t.descricao)
@@ -346,19 +339,6 @@ export default function DespesasMensais() {
         .maybeSingle()
       if (lembreteMatch) {
         await supabase.from('lembretes').update({ pago: true }).eq('id', lembreteMatch.id)
-      } else if (recorrentesAtivos.some(r =>
-        r.descricao === t.descricao && Math.abs(Number(r.valor) - Number(t.valor)) < 0.01
-      )) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          await supabase.from('lembretes').insert({
-            usuario_id: user.id,
-            descricao: t.descricao,
-            valor: t.valor,
-            data_vencimento: t.data_transacao,
-            pago: true,
-          })
-        }
       }
     } else {
       const pago = parseFloat(valorPagar) || 0
@@ -367,7 +347,7 @@ export default function DespesasMensais() {
         return
       }
       const restante = Number(t.valor) - pago
-      const { error } = await supabase.from('transacoes').update({ valor: pago }).eq('id', t.id)
+      const { error } = await supabase.from('transacoes').update({ valor: pago, pago: true }).eq('id', t.id)
       if (error) { setPagarError('Erro ao pagar: ' + error.message); return }
       if (restante > 0.01) {
         const { data: { user } } = await supabase.auth.getUser()
@@ -619,6 +599,11 @@ export default function DespesasMensais() {
                             <Repeat className="w-3 h-3" /> recorre
                           </span>
                         )}
+                        {t.pago && (
+                          <span className="badge !bg-emerald-500/15 !text-emerald-400 !border-emerald-500/25 flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Pago
+                          </span>
+                        )}
                       </div>
                     </div>
                     <p className="text-lg font-bold text-accent-pink shrink-0 -mt-0.5">
@@ -627,10 +612,13 @@ export default function DespesasMensais() {
                   </div>
                   <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
                     <button onClick={() => { setPagandoId(pagandoId === t.id ? null : t.id); setValorPagar(''); setTipoPagamento('total'); setPagarError('') }}
+                      disabled={t.pago}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                        pagandoId === t.id
-                          ? 'bg-accent-blue/20 text-accent-blue'
-                          : 'bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue'
+                        t.pago
+                          ? 'bg-white/5 text-white/25 cursor-not-allowed'
+                          : pagandoId === t.id
+                            ? 'bg-accent-blue/20 text-accent-blue'
+                            : 'bg-white/5 text-white/50 hover:bg-accent-blue/20 hover:text-accent-blue'
                       }`}>
                       <DollarSign className="w-3.5 h-3.5" />
                       Pagar

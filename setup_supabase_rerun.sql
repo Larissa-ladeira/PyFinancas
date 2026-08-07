@@ -3,6 +3,9 @@
 -- 1. Coluna de categoria
 ALTER TABLE transacoes ADD COLUMN IF NOT EXISTS categoria TEXT;
 
+-- 1b. Coluna de status de pagamento
+ALTER TABLE transacoes ADD COLUMN IF NOT EXISTS pago BOOLEAN NOT NULL DEFAULT false;
+
 -- 2. RLS
 ALTER TABLE IF EXISTS transacoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS configuracoes ENABLE ROW LEVEL SECURITY;

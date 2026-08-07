@@ -1,6 +1,9 @@
 -- 1. Adicionar coluna de categoria
 ALTER TABLE transacoes ADD COLUMN IF NOT EXISTS categoria TEXT;
 
+-- 1b. Adicionar coluna de status de pagamento
+ALTER TABLE transacoes ADD COLUMN IF NOT EXISTS pago BOOLEAN NOT NULL DEFAULT false;
+
 -- 2. Ativar RLS nas tabelas (se ainda não estiver)
 ALTER TABLE transacoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
