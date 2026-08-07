@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase, setRememberMe } from '../lib/supabase'
 import { LogIn, UserPlus, Sparkles, ArrowLeft, KeyRound, ShieldCheck } from 'lucide-react'
 
@@ -11,6 +11,7 @@ const AVATARES = [
 
 interface LoginProps {
   onAuth: () => void
+  mfaRequired?: boolean
 }
 
 const GoogleIcon = () => (
@@ -22,7 +23,7 @@ const GoogleIcon = () => (
   </svg>
 )
 
-export default function Login({ onAuth }: LoginProps) {
+export default function Login({ onAuth, mfaRequired }: LoginProps) {
   const [view, setView] = useState<'login' | 'signup' | 'forgot' | 'mfa'>('login')
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -37,9 +38,49 @@ export default function Login({ onAuth }: LoginProps) {
   const [mfaCode, setMfaCode] = useState('')
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (!mfaRequired) return
+    let cancelled = false
+    setError('')
+    supabase.auth.mfa.listFactors().then(({ data, error }) => {
+      if (cancelled) return
+      if (error) {
+        setError(error.message)
+        return
+      }
+      const totp = data?.totp[0] ?? data?.all?.find(f => f.factor_type === 'totp' && f.status === 'verified')
+      if (totp) {
+        setMfaFactorId(totp.id)
+        setMfaCode('')
+        setView('mfa')
+      } else {
+        setError('Nenhum fator de autenticação verificado encontrado.')
+      }
+    })
+    return () => { cancelled = true }
+  }, [mfaRequired])
+
   const switchToLogin = (emailToUse?: string) => {
     if (emailToUse) setEmail(emailToUse)
     setView('login'); setError(''); setSuccess(''); setEmailAlreadyExists('')
+  }
+
+  const resolveTotpFactor = async (): Promise<string | null> => {
+    const { data, error } = await supabase.auth.mfa.listFactors()
+    if (error) return null
+    return data?.totp[0]?.id ?? data?.all?.find(f => f.factor_type === 'totp' && f.status === 'verified')?.id ?? null
+  }
+
+  const showMfaScreen = async () => {
+    const factorId = await resolveTotpFactor()
+    if (factorId) {
+      setMfaFactorId(factorId)
+      setMfaCode('')
+      setView('mfa')
+      setError('')
+    } else {
+      setError('Autenticação em duas etapas necessária.')
+    }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -48,22 +89,27 @@ export default function Login({ onAuth }: LoginProps) {
     setRememberMe(rememberMe)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      if (error.message.toLowerCase().includes('mfa_verification_required')) {
-        const authError = error as { factors?: { id: string; factor_type: string }[] }
-        const factorId = authError.factors?.find(f => f.factor_type === 'totp')?.id
-        if (factorId) {
-          setMfaFactorId(factorId)
-          setMfaCode('')
-          setView('mfa')
-          setError('')
-        } else {
-          setError(error.message)
-        }
+      if (error.code === 'mfa_verification_required' || /mfa_verification_required/i.test(error.message)) {
+        await showMfaScreen()
       } else {
         setError(error.message)
       }
     } else {
-      onAuth()
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aalData?.currentLevel === 'aal1' && aalData?.nextLevel === 'aal2') {
+        await showMfaScreen()
+      } else {
+        const { data: factors } = await supabase.auth.mfa.listFactors()
+        const hasVerifiedFactor =
+          (factors?.totp.length ?? 0) +
+          (factors?.phone.length ?? 0) +
+          (factors?.webauthn.length ?? 0) > 0
+        if (hasVerifiedFactor) {
+          await showMfaScreen()
+        } else {
+          onAuth()
+        }
+      }
     }
     setLoading(false)
   }
@@ -74,7 +120,9 @@ export default function Login({ onAuth }: LoginProps) {
     setLoading(true); setError('')
     const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: mfaFactorId, code: mfaCode })
     if (error) {
-      setError(error.message)
+      if (error.code === 'mfa_verification_failed') setError('Código inválido. Tente novamente.')
+      else if (error.code === 'mfa_challenge_expired') setError('Código expirado. Gere um novo código.')
+      else setError(error.message)
     } else {
       onAuth()
     }

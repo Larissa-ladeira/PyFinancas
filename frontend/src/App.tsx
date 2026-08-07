@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import type { AuthSession } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import Login from './pages/Login'
 import Layout from './components/Layout'
@@ -21,41 +22,74 @@ import CalendarioFinanceiro from './pages/CalendarioFinanceiro'
 import Relatorios from './pages/Relatorios'
 import Investimentos from './pages/Investimentos'
 
-export default function App() {
-  const [authed, setAuthed] = useState<boolean | null>(null)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+type AuthState = 'loading' | 'loggedOut' | 'mfa' | 'authed'
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthed(!!session)
-      if (session) {
-        supabase.from('configuracoes').select('salario_base').single()
-          .then(({ data }) => {
-            if (!data || !data.salario_base) {
-              supabase.from('transacoes').select('id').limit(1).then(({ data: tx }) => {
-                if (!tx?.length) setShowOnboarding(true)
-              })
-            }
+export default function App() {
+  const [authState, setAuthState] = useState<AuthState>('loading')
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const onboardingChecked = useRef(false)
+
+  const checkOnboarding = useCallback(() => {
+    if (onboardingChecked.current) return
+    onboardingChecked.current = true
+    supabase.from('configuracoes').select('salario_base').single()
+      .then(({ data }) => {
+        if (!data || !data.salario_base) {
+          supabase.from('transacoes').select('id').limit(1).then(({ data: tx }) => {
+            if (!tx?.length) setShowOnboarding(true)
           })
-      }
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthed(!!session)
-      if (session) {
-        supabase.from('configuracoes').select('salario_base').single()
-          .then(({ data }) => {
-            if (!data || !data.salario_base) {
-              supabase.from('transacoes').select('id').limit(1).then(({ data: tx }) => {
-                if (!tx?.length) setShowOnboarding(true)
-              })
-            }
-          })
-      }
-    })
-    return () => subscription.unsubscribe()
+        }
+      })
   }, [])
 
-  if (authed === null) return (
+  const refreshAuthState = useCallback(async (session: AuthSession | null) => {
+    if (!session) {
+      setAuthState('loggedOut')
+      return
+    }
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aal?.currentLevel === 'aal2') {
+        setAuthState('authed')
+        checkOnboarding()
+        return
+      }
+      if (aal?.nextLevel === 'aal2') {
+        setAuthState('mfa')
+        return
+      }
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const hasVerifiedFactor =
+        (factors?.totp.length ?? 0) +
+        (factors?.phone.length ?? 0) +
+        (factors?.webauthn.length ?? 0) > 0
+      if (hasVerifiedFactor) {
+        setAuthState('mfa')
+      } else {
+        setAuthState('authed')
+        checkOnboarding()
+      }
+    } catch {
+      setAuthState('authed')
+      checkOnboarding()
+    }
+  }, [checkOnboarding])
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled) refreshAuthState(session)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      refreshAuthState(session)
+    })
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
+  }, [refreshAuthState])
+
+  if (authState === 'loading') return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-accent-blue border-t-transparent" />
@@ -64,7 +98,9 @@ export default function App() {
     </div>
   )
 
-  if (!authed) return <Login onAuth={() => setAuthed(true)} />
+  if (authState === 'loggedOut') return <Login onAuth={() => setAuthState('authed')} />
+
+  if (authState === 'mfa') return <Login onAuth={() => setAuthState('authed')} mfaRequired />
 
   if (showOnboarding) return <Onboarding onComplete={() => setShowOnboarding(false)} />
 
