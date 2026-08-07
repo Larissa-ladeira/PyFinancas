@@ -4,6 +4,7 @@ import { formatar } from '../lib/format'
 import type { Transacao } from '../types'
 import { MESES_PT, CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../types'
 import { Filter, Search, Upload, CheckCircle, AlertCircle, Trash2, ArrowRight, Download } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface LinhaPreview {
   data: string
@@ -28,6 +29,7 @@ export default function Extrato() {
   const [msg, setMsg] = useState('')
   const [erro, setErro] = useState('')
   const [arrastando, setArrastando] = useState(false)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
     supabase.from('transacoes').select('*')
@@ -139,8 +141,10 @@ export default function Extrato() {
     setTodas(data || [])
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('transacoes').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('transacoes').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -333,7 +337,7 @@ export default function Extrato() {
                   </p>
                 </div>
                 <div className="flex gap-1.5 mt-3 pt-3 border-t border-white/5">
-                  <button onClick={() => handleDelete(t.id)}
+                  <button onClick={() => setDeleteId(t.id)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                     <Trash2 className="w-3.5 h-3.5" />
                     Excluir
@@ -365,6 +369,14 @@ export default function Extrato() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir transação?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

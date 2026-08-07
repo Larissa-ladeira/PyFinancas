@@ -9,6 +9,7 @@ import {
 import {
   PieChart as RePieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const COLORS = ['#FF2E9A', '#f59e0b', '#00D4FF', '#A855F7', '#ffffff', '#A855F7', '#FF2E9A', '#A855F7', '#00D4FF', '#FF2E9A', '#00D4FF']
 
@@ -53,6 +54,9 @@ export default function DespesasMensais() {
   const [editRecCategoria, setEditRecCategoria] = useState('')
   const [editRecDia, setEditRecDia] = useState('')
   const [editRecorrente, setEditRecorrente] = useState(false)
+  const [deleteDespesaId, setDeleteDespesaId] = useState<number | null>(null)
+  const [deleteLembreteId, setDeleteLembreteId] = useState<number | null>(null)
+  const [deleteRecId, setDeleteRecId] = useState<number | null>(null)
 
   useEffect(() => {
     supabase.from('configuracoes').select('*').single()
@@ -140,8 +144,10 @@ export default function DespesasMensais() {
     carregarRecorrentes()
   }
 
-  async function deleteRecorrente(id: number) {
-    await supabase.from('transacoes_recorrentes').delete().eq('id', id)
+  async function deleteRecorrente() {
+    if (!deleteRecId) return
+    await supabase.from('transacoes_recorrentes').delete().eq('id', deleteRecId)
+    setDeleteRecId(null)
     carregarRecorrentes()
   }
 
@@ -312,8 +318,10 @@ export default function DespesasMensais() {
     setLoading(false)
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('transacoes').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteDespesaId) return
+    await supabase.from('transacoes').delete().eq('id', deleteDespesaId)
+    setDeleteDespesaId(null)
     carregar()
   }
 
@@ -365,8 +373,10 @@ export default function DespesasMensais() {
     carregarLembretes()
   }
 
-  async function deleteLembrete(id: number) {
-    await supabase.from('lembretes').delete().eq('id', id)
+  async function deleteLembrete() {
+    if (!deleteLembreteId) return
+    await supabase.from('lembretes').delete().eq('id', deleteLembreteId)
+    setDeleteLembreteId(null)
     carregarLembretes()
   }
 
@@ -609,7 +619,7 @@ export default function DespesasMensais() {
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
                     </button>
-                    <button onClick={() => handleDelete(t.id)}
+                    <button onClick={() => setDeleteDespesaId(t.id)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                       Excluir
@@ -696,7 +706,7 @@ export default function DespesasMensais() {
                     title="Marcar como pago">
                     <CheckCircle className="w-4 h-4" />
                   </button>
-                  <button onClick={() => deleteLembrete(l.id)}
+                  <button onClick={() => setDeleteLembreteId(l.id)}
                     className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-pink/20 hover:text-accent-pink transition-all"
                     title="Excluir lembrete">
                     <Trash2 className="w-4 h-4" />
@@ -761,7 +771,7 @@ export default function DespesasMensais() {
                       title="Pausar repetição">
                       <Pause className="w-4 h-4" />
                     </button>
-                    <button onClick={() => deleteRecorrente(r.id)}
+                    <button onClick={() => setDeleteRecId(r.id)}
                       className="p-1.5 rounded-lg bg-white/5 text-white/40 hover:bg-accent-pink/20 hover:text-accent-pink transition-all"
                       title="Excluir repetição">
                       <Trash2 className="w-4 h-4" />
@@ -844,6 +854,28 @@ export default function DespesasMensais() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteDespesaId !== null}
+        title="Excluir despesa?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDespesaId(null)}
+      />
+      <ConfirmDialog
+        open={deleteLembreteId !== null}
+        title="Excluir lembrete?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={deleteLembrete}
+        onCancel={() => setDeleteLembreteId(null)}
+      />
+      <ConfirmDialog
+        open={deleteRecId !== null}
+        title="Excluir repetição?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={deleteRecorrente}
+        onCancel={() => setDeleteRecId(null)}
+      />
     </div>
   )
 }

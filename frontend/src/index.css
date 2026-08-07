@@ -48,7 +48,6 @@ html.light [class*="bg-white/"] { background: rgba(0,0,0,0.03) !important; }
     min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    padding: 20px;
   }
 
   ::selection { background: rgba(168, 85, 247, 0.3); }

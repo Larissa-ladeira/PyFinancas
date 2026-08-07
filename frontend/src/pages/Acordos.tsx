@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
 import type { Acordo } from '../types'
 import { Handshake, Plus, Trash2, CheckCircle, TrendingDown, AlertCircle, Pencil, Save } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Acordos() {
   const [acordos, setAcordos] = useState<Acordo[]>([])
@@ -24,6 +25,7 @@ export default function Acordos() {
   const [editDataInicio, setEditDataInicio] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const [editErrorMsg, setEditErrorMsg] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -73,8 +75,10 @@ export default function Acordos() {
     carregar()
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('acordos').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('acordos').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -297,7 +301,7 @@ export default function Acordos() {
                         <Pencil className="w-3.5 h-3.5" />
                         Editar
                       </button>
-                      <button onClick={() => handleDelete(a.id)}
+                      <button onClick={() => setDeleteId(a.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                         <Trash2 className="w-3.5 h-3.5" />
                         Excluir
@@ -312,6 +316,14 @@ export default function Acordos() {
           <p className="text-white/30 text-sm py-8 text-center">Nenhum acordo cadastrado</p>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir acordo?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

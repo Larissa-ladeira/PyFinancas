@@ -150,7 +150,13 @@ export default function Configuracoes() {
   }
 
   const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
-  const totalDesp = todas.filter(t => t.tipo.toLowerCase() === 'despesa').reduce((s, t) => s + Number(t.valor), 0)
+  const mesAtual = new Date().getMonth() + 1
+  const anoAtual = new Date().getFullYear()
+  const despesasMes = todas.filter(t =>
+    t.tipo.toLowerCase() === 'despesa' &&
+    new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
+    new Date(t.data_transacao).getFullYear() === anoAtual
+  ).reduce((s, t) => s + Number(t.valor), 0)
   const salarioNum = parseFloat(salario) || 0
   const salarioRealNum = parseFloat(salarioReal) || 0
   const valeAlimentacaoNum = temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0
@@ -160,7 +166,7 @@ export default function Configuracoes() {
   const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
   const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
   const patrimonioLiquido = totalAtual + saldoBancario
-  const percGasto = receitasTotal > 0 ? (totalDesp / receitasTotal) * 100 : 0
+  const percGasto = receitasTotal > 0 ? (despesasMes / receitasTotal) * 100 : 0
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -382,20 +388,20 @@ export default function Configuracoes() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="metric-card metric-card-receita">
               <div className="metric-label text-accent-blue/60 mb-1">Total Receitas</div>
-              <div className="metric-value text-accent-blue">{formatar(receitasTotal)}</div>
+              <div className="metric-value !text-2xl text-accent-blue">{formatar(receitasTotal)}</div>
               <div className="text-xs text-white/30 mt-1">Salário Real + Extras + VA + Refeição</div>
             </div>
             <div className="metric-card">
               <div className="metric-label text-white/40 mb-1">Total Investido</div>
-              <div className="metric-value text-white">{formatar(totalInvestido)}</div>
+              <div className="metric-value !text-2xl text-white">{formatar(totalInvestido)}</div>
             </div>
             <div className="metric-card metric-card-despesa">
-              <div className="metric-label text-accent-pink/60 mb-1">Total Despesas</div>
-              <div className="metric-value text-accent-pink">{formatar(totalDesp)}</div>
+              <div className="metric-label text-accent-pink/60 mb-1">Total Despesas (mês)</div>
+              <div className="metric-value !text-2xl text-accent-pink">{formatar(despesasMes)}</div>
             </div>
             <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
               <div className={`metric-label mb-1 ${patrimonioLiquido >= 0 ? 'text-accent-blue/60' : 'text-accent-pink/60'}`}>Patrimônio Líquido</div>
-              <div className={`metric-value ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
+              <div className={`metric-value !text-2xl ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
                 {formatar(patrimonioLiquido)}
               </div>
             </div>
@@ -406,6 +412,14 @@ export default function Configuracoes() {
             <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 100 ? 'bg-accent-pink' : 'bg-accent-blue'}`}
                 style={{ width: `${Math.min(percGasto, 100)}%` }} />
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-white/50">Gasto no mês</span>
+              <span className="text-sm font-semibold text-white">{formatar(despesasMes)}</span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-white/50">Salário + benefícios</span>
+              <span className="text-sm font-semibold text-white">{formatar(receitasTotal)}</span>
             </div>
             <p className="text-sm text-white/40 mt-2">
               Você já gastou <strong className="text-white/70">{percGasto.toFixed(1)}%</strong> do seu salário em despesas

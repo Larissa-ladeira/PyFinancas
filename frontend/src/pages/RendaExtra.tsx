@@ -6,6 +6,7 @@ import { MESES_PT } from '../types'
 import {
   TrendingUp, Trash2, Plus, Save, CheckCircle, AlertCircle, Pencil
 } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const CATEGORIAS_EXTRA = ['Freelance', 'Investimentos', 'Presente', 'Renda Extra', 'Outros']
 
@@ -27,6 +28,7 @@ export default function RendaExtra() {
   const [editData, setEditData] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const [editErrorMsg, setEditErrorMsg] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => { carregar() }, [mes, ano])
 
@@ -65,8 +67,10 @@ export default function RendaExtra() {
     setLoading(false)
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('transacoes').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('transacoes').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -244,7 +248,7 @@ export default function RendaExtra() {
                       <Pencil className="w-3.5 h-3.5" />
                       Editar
                     </button>
-                    <button onClick={() => handleDelete(t.id)}
+                    <button onClick={() => setDeleteId(t.id)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                       <Trash2 className="w-3.5 h-3.5" />
                       Excluir
@@ -258,6 +262,14 @@ export default function RendaExtra() {
           <p className="text-white/30 text-sm py-4 text-center">Nenhuma renda extra neste mês</p>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir renda extra?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

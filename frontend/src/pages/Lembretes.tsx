@@ -4,6 +4,7 @@ import { formatar } from '../lib/format'
 import type { Lembrete } from '../types'
 import { Bell, Plus, Check, Trash2, AlertCircle, Pencil, Save } from 'lucide-react'
 import { MESES_PT } from '../types'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Lembretes() {
   const [lembretes, setLembretes] = useState<Lembrete[]>([])
@@ -22,6 +23,7 @@ export default function Lembretes() {
   const [editDataVenc, setEditDataVenc] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const [editErrorMsg, setEditErrorMsg] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -65,8 +67,10 @@ export default function Lembretes() {
     carregar()
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('lembretes').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('lembretes').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -247,7 +251,7 @@ export default function Lembretes() {
                         <Pencil className="w-3.5 h-3.5" />
                         Editar
                       </button>
-                      <button onClick={() => handleDelete(l.id)}
+                      <button onClick={() => setDeleteId(l.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                         <Trash2 className="w-3.5 h-3.5" />
                         Excluir
@@ -265,6 +269,14 @@ export default function Lembretes() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir lembrete?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

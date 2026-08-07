@@ -6,6 +6,7 @@ import {
   PiggyBank, Plus, Trash2, TrendingDown, CheckCircle,
   Brain, Calculator, Calendar, Pencil, X, Tag
 } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 import {
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts'
@@ -37,6 +38,7 @@ export default function Dividas() {
   const [editDataVenc, setEditDataVenc] = useState('')
   const [taxaJuros, setTaxaJuros] = useState('')
   const [editTaxaJuros, setEditTaxaJuros] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -138,8 +140,10 @@ export default function Dividas() {
     setEditandoId(null)
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('dividas').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('dividas').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -526,7 +530,7 @@ export default function Dividas() {
                         className="p-1.5 rounded-lg hover:bg-accent-blue/20 text-white/30 hover:text-accent-blue transition-all">
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(d.id)}
+                      <button onClick={() => setDeleteId(d.id)}
                         className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -626,6 +630,14 @@ export default function Dividas() {
           </div>
         </details>
       )}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir dívida?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

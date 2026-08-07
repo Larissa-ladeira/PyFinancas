@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
 import type { MetaEconomia } from '../types'
 import { Target, Plus, Trash2, PiggyBank, Calendar, Pencil, Save } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function MetasEconomia() {
   const [metas, setMetas] = useState<MetaEconomia[]>([])
@@ -19,6 +20,7 @@ export default function MetasEconomia() {
   const [editMetaDataAlvo, setEditMetaDataAlvo] = useState('')
   const [editandoProgressoId, setEditandoProgressoId] = useState<number | null>(null)
   const [editMetaValor, setEditMetaValor] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -91,8 +93,10 @@ export default function MetasEconomia() {
     carregar()
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('metas_economia').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('metas_economia').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -213,7 +217,7 @@ export default function MetasEconomia() {
                           className="p-1.5 rounded-lg hover:bg-accent-blue/20 text-white/30 hover:text-accent-blue transition-all">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(m.id)}
+                        <button onClick={() => setDeleteId(m.id)}
                           className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -267,7 +271,7 @@ export default function MetasEconomia() {
                     <h4 className="font-semibold text-white">{m.descricao}</h4>
                     <span className="text-xs text-accent-blue">Meta concluída!</span>
                   </div>
-                  <button onClick={() => handleDelete(m.id)}
+                  <button onClick={() => setDeleteId(m.id)}
                     className="p-1.5 rounded-lg hover:bg-accent-pink/20 text-white/30 hover:text-accent-pink transition-all">
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -278,6 +282,14 @@ export default function MetasEconomia() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir meta?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

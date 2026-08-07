@@ -4,6 +4,7 @@ import { formatar } from '../lib/format'
 import type { TransacaoRecorrente } from '../types'
 import { CATEGORIAS_RECEITA, CATEGORIAS_DESPESA, MESES_PT } from '../types'
 import { Repeat, Plus, Trash2, Play, Pause, CheckCircle } from 'lucide-react'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function TransacoesRecorrentes() {
   const [recorrentes, setRecorrentes] = useState<TransacaoRecorrente[]>([])
@@ -16,6 +17,7 @@ export default function TransacoesRecorrentes() {
   const [showForm, setShowForm] = useState(false)
   const [msg, setMsg] = useState('')
   const [gerando, setGerando] = useState(false)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -45,8 +47,10 @@ export default function TransacoesRecorrentes() {
     carregar()
   }
 
-  async function handleDelete(id: number) {
-    await supabase.from('transacoes_recorrentes').delete().eq('id', id)
+  async function handleDelete() {
+    if (!deleteId) return
+    await supabase.from('transacoes_recorrentes').delete().eq('id', deleteId)
+    setDeleteId(null)
     carregar()
   }
 
@@ -213,7 +217,7 @@ export default function TransacoesRecorrentes() {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-amber-300/70 hover:bg-amber-500/20 hover:text-amber-300 transition-all">
                       <Pause className="w-3.5 h-3.5" /> Pausar
                     </button>
-                    <button onClick={() => handleDelete(r.id)}
+                    <button onClick={() => setDeleteId(r.id)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                       <Trash2 className="w-3.5 h-3.5" /> Excluir
                     </button>
@@ -242,7 +246,7 @@ export default function TransacoesRecorrentes() {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-accent-blue/70 hover:bg-accent-blue/20 hover:text-accent-blue transition-all">
                       <Play className="w-3.5 h-3.5" /> Reativar
                     </button>
-                    <button onClick={() => handleDelete(r.id)}
+                    <button onClick={() => setDeleteId(r.id)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-white/50 hover:bg-accent-pink/20 hover:text-accent-pink transition-all">
                       <Trash2 className="w-3.5 h-3.5" /> Excluir
                     </button>
@@ -253,6 +257,14 @@ export default function TransacoesRecorrentes() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Excluir recorrência?"
+        message="Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }
