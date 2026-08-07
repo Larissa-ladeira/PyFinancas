@@ -30,8 +30,21 @@ export default function Dashboard() {
   const [refeicao, setRefeicao] = useState(0)
   const [lembretesMes, setLembretesMes] = useState<Lembrete[]>([])
   const [loading, setLoading] = useState(true)
+  const [dadosAno, setDadosAno] = useState<{ mes: number; Receitas: number; Despesas: number }[]>([])
 
   useEffect(() => { carregar() }, [mes, ano])
+  useEffect(() => {
+    carregarAno().then(lista => {
+      const agrupado: Record<number, { Receitas: number; Despesas: number }> = {}
+      for (let i = 1; i <= 12; i++) agrupado[i] = { Receitas: 0, Despesas: 0 }
+      for (const t of lista) {
+        const m = new Date(t.data_transacao).getMonth() + 1
+        if (t.tipo.toLowerCase() === 'receita') agrupado[m].Receitas += Number(t.valor)
+        else agrupado[m].Despesas += Number(t.valor)
+      }
+      setDadosAno(Object.entries(agrupado).map(([m, v]) => ({ mes: Number(m), ...v })))
+    })
+  }, [ano])
   useEffect(() => {
     supabase.from('dividas').select('*')
       .order('quitada', { ascending: true })
@@ -164,20 +177,6 @@ export default function Dashboard() {
       acc[t.categoria] = (acc[t.categoria] || 0) + Number(t.valor); return acc
     }, {})
   const pieData = Object.entries(despCat).map(([name, value]) => ({ name, value }))
-
-  const [dadosAno, setDadosAno] = useState<{ mes: number; Receitas: number; Despesas: number }[]>([])
-  useEffect(() => {
-    carregarAno().then(lista => {
-      const agrupado: Record<number, { Receitas: number; Despesas: number }> = {}
-      for (let i = 1; i <= 12; i++) agrupado[i] = { Receitas: 0, Despesas: 0 }
-      for (const t of lista) {
-        const m = new Date(t.data_transacao).getMonth() + 1
-        if (t.tipo.toLowerCase() === 'receita') agrupado[m].Receitas += Number(t.valor)
-        else agrupado[m].Despesas += Number(t.valor)
-      }
-      setDadosAno(Object.entries(agrupado).map(([m, v]) => ({ mes: Number(m), ...v })))
-    })
-  }, [ano])
 
   const TooltipCustom = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null
