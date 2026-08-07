@@ -456,9 +456,26 @@ export default function Configuracoes() {
         {mfaStatus === 'off' && (
           <div>
             <p className="text-sm text-white/60 mb-3">
-              Proteja sua conta exigindo um código do aplicativo autenticador (ex: Google Authenticator)
-              além da senha na hora do login.
+              Proteja sua conta exigindo um código do aplicativo autenticador além da senha na hora do login.
             </p>
+            <ol className="space-y-2 mb-4">
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">1</span>
+                <span>Instale o <strong className="text-white/70">Google Authenticator</strong> (ou Authy) no seu celular.</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">2</span>
+                <span>Toque em <strong className="text-white/70">Ativar 2 etapas</strong> — vai aparecer um QR code na tela.</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">3</span>
+                <span>No app do celular, toque em <strong className="text-white/70">+ → Escanear código QR</strong> e aponte a câmera para a tela do computador.</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">4</span>
+                <span>Digite no site o código de <strong className="text-white/70">6 dígitos</strong> que o app mostrar. Pronto!</span>
+              </li>
+            </ol>
             <button type="button" onClick={handleMfaEnroll}
               className="btn-primary flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4" /> Ativar 2 etapas
@@ -468,10 +485,20 @@ export default function Configuracoes() {
 
         {mfaStatus === 'enrolling' && (
           <div className="space-y-4">
-            <p className="text-sm text-white/60">
-              Escaneie o QR code com seu aplicativo autenticador (ou digite a chave manualmente) e depois
-              digite o código de 6 dígitos:
-            </p>
+            <ol className="space-y-2">
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">1</span>
+                <span>No celular, abra o app autenticador e toque em <strong className="text-white/70">+ → Escanear código QR</strong>.</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">2</span>
+                <span>Aponte a câmera para o QR code abaixo (ou digite a chave manualmente).</span>
+              </li>
+              <li className="flex items-start gap-2 text-sm text-white/50">
+                <span className="shrink-0 w-5 h-5 rounded-full bg-accent-blue/15 text-accent-blue text-xs font-bold flex items-center justify-center mt-0.5">3</span>
+                <span>Digite o código de <strong className="text-white/70">6 dígitos</strong> do app e toque em <strong className="text-white/70">Confirmar código</strong>.</span>
+              </li>
+            </ol>
             {mfaQr && (
               <div className="flex justify-center bg-white p-3 rounded-xl w-fit mx-auto">
                 <img src={mfaQr} alt="QR code do autenticador" className="w-48 h-48" />
