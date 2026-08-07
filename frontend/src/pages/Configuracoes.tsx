@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
 import type { Transacao, Conta, Investimento } from '../types'
 import { TIPOS_CONTA } from '../types'
-import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign, ShieldCheck, ShieldOff } from 'lucide-react'
+import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign, ShieldCheck, ShieldOff, Copy, Check } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Configuracoes() {
@@ -53,6 +53,7 @@ export default function Configuracoes() {
   const [mfaCode, setMfaCode] = useState('')
   const [mfaMsg, setMfaMsg] = useState('')
   const [mfaError, setMfaError] = useState('')
+  const [mfaCopied, setMfaCopied] = useState(false)
   const [confirmMfaDisable, setConfirmMfaDisable] = useState(false)
 
   useEffect(() => {
@@ -204,6 +205,22 @@ export default function Configuracoes() {
     setMfaStatus('off')
     setConfirmMfaDisable(false)
     setMfaMsg('Autenticação em duas etapas desativada.')
+  }
+
+  function handleMfaCopySecret() {
+    if (!mfaSecret) return
+    try {
+      navigator.clipboard.writeText(mfaSecret)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = mfaSecret
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setMfaCopied(true)
+    setTimeout(() => setMfaCopied(false), 2000)
   }
 
   const totalRec = todas.filter(t => t.tipo.toLowerCase() === 'receita').reduce((s, t) => s + Number(t.valor), 0)
@@ -516,9 +533,16 @@ export default function Configuracoes() {
               </div>
             )}
             {mfaSecret && (
-              <p className="text-center text-xs text-white/40">
-                Chave: <span className="font-mono text-white/70">{mfaSecret}</span>
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-xs text-white/40">
+                  Chave: <span className="font-mono text-white/70 break-all">{mfaSecret}</span>
+                </p>
+                <button type="button" onClick={handleMfaCopySecret}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-accent-blue transition-colors shrink-0"
+                  title="Copiar chave">
+                  {mfaCopied ? <Check className="w-3.5 h-3.5 text-accent-blue" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             )}
             <input type="text" inputMode="numeric" autoFocus maxLength={6} placeholder="000000"
               className="input-glass text-center tracking-[0.5em] text-lg" value={mfaCode}
