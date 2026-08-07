@@ -170,6 +170,11 @@ export default function Configuracoes() {
 
   async function handleMfaEnroll() {
     setMfaError(''); setMfaMsg('')
+    const { data: factorsData } = await supabase.auth.mfa.listFactors()
+    const stale = factorsData?.all?.filter(f => f.factor_type === 'totp' && f.status === 'unverified') ?? []
+    for (const f of stale) {
+      await supabase.auth.mfa.unenroll({ factorId: f.id })
+    }
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
     if (error) { setMfaError(error.message); return }
     setMfaEnrollId(data.id)
