@@ -352,6 +352,13 @@ export default function Login({ onAuth, mfaRequired }: LoginProps) {
             <input type="text" inputMode="numeric" autoFocus required maxLength={6} placeholder="000000"
               className="input-glass text-center tracking-[0.5em] text-lg" value={mfaCode}
               onChange={e => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+            <p className="text-xs text-white/40 text-center">
+              Não tem o aplicativo? Baixe o{' '}
+              <a href="https://play.google.com/store/apps/details?id=com.totp.twofa.authenticator.authenticate"
+                target="_blank" rel="noopener noreferrer"
+                className="text-accent-blue underline decoration-accent-blue/40 hover:text-accent-blue/80 font-semibold">
+                Authenticator App: Secure 2FA</a> (grátis).
+            </p>
             <button type="submit" disabled={loading || mfaCode.length !== 6}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold
                 bg-gradient-to-r from-[var(--accent-pink)] to-[var(--accent-purple)] text-white
