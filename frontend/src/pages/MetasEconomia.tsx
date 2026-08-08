@@ -190,6 +190,9 @@ export default function MetasEconomia() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {pendentes.map(m => {
             const progresso = (m.valor_atual / m.valor_alvo) * 100
+            const addVal = parseFloat(adicionarValor.replace(',', '.'))
+            const novoValor = m.valor_atual + (isNaN(addVal) ? 0 : addVal)
+            const faltaDepois = Math.max(0, m.valor_alvo - novoValor)
             const diasRestantes = m.data_alvo
               ? Math.max(0, Math.ceil((new Date(m.data_alvo).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
               : null
@@ -253,9 +256,15 @@ export default function MetasEconomia() {
                         style={{ width: `${Math.min(progresso, 100)}%` }} />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/30">
-                        {progresso.toFixed(1)}% concluído · faltam {formatar(Math.max(0, m.valor_alvo - m.valor_atual))}
-                      </span>
+                      {adicionandoId === m.id ? (
+                        <span className="text-xs text-accent-blue">
+                          {formatar(m.valor_atual)} + {formatar(isNaN(addVal) ? 0 : addVal)} → faltará {formatar(faltaDepois)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-white/30">
+                          {progresso.toFixed(1)}% concluído · faltam {formatar(Math.max(0, m.valor_alvo - m.valor_atual))}
+                        </span>
+                      )}
                       {editandoProgressoId === m.id ? (
                         <div className="flex items-center gap-2">
                           <input type="number" min="0" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-28"
