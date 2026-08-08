@@ -20,6 +20,8 @@ export default function MetasEconomia() {
   const [editMetaDataAlvo, setEditMetaDataAlvo] = useState('')
   const [editandoProgressoId, setEditandoProgressoId] = useState<number | null>(null)
   const [editMetaValor, setEditMetaValor] = useState('')
+  const [adicionandoId, setAdicionandoId] = useState<number | null>(null)
+  const [adicionarValor, setAdicionarValor] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
   useEffect(() => {
@@ -90,6 +92,25 @@ export default function MetasEconomia() {
     const concluida = val >= m.valor_alvo
     await supabase.from('metas_economia').update({ valor_atual: val, concluida }).eq('id', m.id)
     setEditandoProgressoId(null)
+    carregar()
+  }
+
+  function iniciarAdicionarProgresso(m: MetaEconomia) {
+    setAdicionandoId(m.id)
+    setAdicionarValor('')
+  }
+
+  function cancelarAdicionarProgresso() {
+    setAdicionandoId(null)
+  }
+
+  async function handleAdicionarProgressoSave(m: MetaEconomia) {
+    const val = parseFloat(adicionarValor.replace(',', '.'))
+    if (isNaN(val) || val <= 0) return
+    const novoValor = m.valor_atual + val
+    const concluida = novoValor >= m.valor_alvo
+    await supabase.from('metas_economia').update({ valor_atual: novoValor, concluida }).eq('id', m.id)
+    setAdicionandoId(null)
     carregar()
   }
 
@@ -232,7 +253,9 @@ export default function MetasEconomia() {
                         style={{ width: `${Math.min(progresso, 100)}%` }} />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-white/30">{progresso.toFixed(1)}% concluído</span>
+                      <span className="text-xs text-white/30">
+                        {progresso.toFixed(1)}% concluído · faltam {formatar(Math.max(0, m.valor_alvo - m.valor_atual))}
+                      </span>
                       {editandoProgressoId === m.id ? (
                         <div className="flex items-center gap-2">
                           <input type="number" min="0" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-28"
@@ -242,11 +265,29 @@ export default function MetasEconomia() {
                           <button onClick={cancelarEdicaoProgresso}
                             className="text-xs text-white/30 hover:text-white/60">x</button>
                         </div>
+                      ) : adicionandoId === m.id ? (
+                        <div className="flex items-center gap-2">
+                          <input type="number" min="0.01" step="0.01" className="input-glass !py-1 !px-2 !text-xs w-32"
+                            placeholder="Quanto adicionar?" value={adicionarValor}
+                            onChange={e => setAdicionarValor(e.target.value)} autoFocus
+                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdicionarProgressoSave(m) } }} />
+                          <button onClick={() => handleAdicionarProgressoSave(m)}
+                            className="text-xs text-accent-blue hover:text-accent-blue/80">ok</button>
+                          <button onClick={cancelarAdicionarProgresso}
+                            className="text-xs text-white/30 hover:text-white/60">x</button>
+                        </div>
                       ) : (
-                        <button onClick={() => iniciarEdicaoProgresso(m)}
-                          className="text-xs px-3 py-1.5 rounded-xl bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/30 transition-all">
-                          Atualizar
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => iniciarAdicionarProgresso(m)}
+                            className="text-xs px-3 py-1.5 rounded-xl bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/30 transition-all">
+                            Adicionar
+                          </button>
+                          <button onClick={() => iniciarEdicaoProgresso(m)}
+                            className="p-1.5 rounded-xl bg-white/10 text-white/30 hover:bg-white/20 hover:text-white/70 transition-all"
+                            title="Definir valor atual">
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </>
