@@ -7,35 +7,34 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY são obrigatórias')
 }
 
-const STORAGE_KEY = 'pyfinancas_remember'
+const memoryStore = new Map<string, string>()
 
-function isRememberMe(): boolean {
-  return localStorage.getItem(STORAGE_KEY) !== 'false'
+function clearLegacyAuthStorage() {
+  for (const storage of [localStorage, sessionStorage]) {
+    try {
+      for (let i = storage.length - 1; i >= 0; i--) {
+        const key = storage.key(i)
+        if (key && (key.startsWith('sb-') || key === 'pyfinancas_remember')) {
+          storage.removeItem(key)
+        }
+      }
+    } catch {
+      // armazenamento indisponível — ignora
+    }
+  }
 }
 
-export function setRememberMe(val: boolean) {
-  localStorage.setItem(STORAGE_KEY, String(val))
-}
+clearLegacyAuthStorage()
 
 const authStorage = {
   getItem(key: string) {
-    const remember = isRememberMe()
-    if (remember) {
-      return localStorage.getItem(key) ?? sessionStorage.getItem(key)
-    }
-    return sessionStorage.getItem(key) ?? localStorage.getItem(key)
+    return memoryStore.get(key) ?? null
   },
   setItem(key: string, value: string) {
-    const remember = isRememberMe()
-    if (remember) {
-      localStorage.setItem(key, value)
-    } else {
-      sessionStorage.setItem(key, value)
-    }
+    memoryStore.set(key, value)
   },
   removeItem(key: string) {
-    localStorage.removeItem(key)
-    sessionStorage.removeItem(key)
+    memoryStore.delete(key)
   },
 }
 

@@ -3,9 +3,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 serve(async (req) => {
   try {
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+    const authorization = req.headers.get('authorization') ?? ''
+    const apikey = req.headers.get('apikey') ?? ''
+    const isAuthorized =
+      !!serviceRoleKey &&
+      (authorization === `Bearer ${serviceRoleKey}` || apikey === serviceRoleKey)
+
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: 'Não autorizado' }), { status: 401 })
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      serviceRoleKey
     )
 
     const amanha = new Date()
@@ -69,6 +81,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ sent: totalSent }), { status: 200 })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 })
+    console.error('Erro no envio de lembretes:', err)
+    return new Response(JSON.stringify({ error: 'Erro interno' }), { status: 500 })
   }
 })
