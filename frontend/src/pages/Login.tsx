@@ -212,11 +212,11 @@ export default function Login({ onAuth, mfaRequired }: LoginProps) {
         )}
 
         {view === 'login' ? (
-          <form onSubmit={handleLogin} className="space-y-3">
-            <input type="email" required placeholder="Seu email"
+          <form onSubmit={handleLogin} autoComplete="off" className="space-y-3">
+            <input type="email" required placeholder="Seu email" autoComplete="off"
               className="input-glass" value={email}
               onChange={e => setEmail(e.target.value)} />
-            <input type="password" required placeholder="Senha"
+            <input type="password" required placeholder="Senha" autoComplete="new-password"
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
             <div className="flex items-center justify-between -mt-2">
@@ -258,14 +258,14 @@ export default function Login({ onAuth, mfaRequired }: LoginProps) {
             </button>
           </form>
         ) : view === 'signup' ? (
-          <form onSubmit={handleSignup} className="space-y-3">
-            <input type="text" required placeholder="Seu nome"
+          <form onSubmit={handleSignup} autoComplete="off" className="space-y-3">
+            <input type="text" required placeholder="Seu nome" autoComplete="off"
               className="input-glass" value={nome}
               onChange={e => setNome(e.target.value)} />
-            <input type="email" required placeholder="Seu email"
+            <input type="email" required placeholder="Seu email" autoComplete="off"
               className="input-glass" value={email}
               onChange={e => setEmail(e.target.value)} />
-            <input type="password" required placeholder="Senha"
+            <input type="password" required placeholder="Senha" autoComplete="new-password"
               className="input-glass" value={password}
               onChange={e => setPassword(e.target.value)} />
             <div>
@@ -365,9 +365,9 @@ export default function Login({ onAuth, mfaRequired }: LoginProps) {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleForgotPassword} className="space-y-3">
+          <form onSubmit={handleForgotPassword} autoComplete="off" className="space-y-3">
             <p className="text-sm text-white/50 mb-2">Digite seu email para receber o link de redefinição de senha.</p>
-            <input type="email" required placeholder="Seu email"
+            <input type="email" required placeholder="Seu email" autoComplete="off"
               className="input-glass" value={email}
               onChange={e => setEmail(e.target.value)} />
             <button type="submit" disabled={loading}
