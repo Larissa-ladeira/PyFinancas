@@ -15,6 +15,7 @@ const COLORS = ['#FF2E9A', '#f59e0b', '#00D4FF', '#A855F7', '#ffffff', '#A855F7'
 
 export default function DespesasMensais() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
+  const [receitas, setReceitas] = useState<Transacao[]>([])
   const [salarioReal, setSalarioReal] = useState(0)
   const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
   const [valeAlimentacao, setValeAlimentacao] = useState(0)
@@ -59,16 +60,21 @@ export default function DespesasMensais() {
   const [deleteRecId, setDeleteRecId] = useState<number | null>(null)
 
   useEffect(() => {
-    supabase.from('configuracoes').select('*').single()
-      .then(({ data }) => {
-        if (data) {
-          setSalarioReal(Number(data.salario_real ?? 0))
-          setTemValeAlimentacao(data.tem_vale_alimentacao ?? true)
-          setValeAlimentacao(Number(data.vale_alimentacao ?? 0))
-          setTemRefeicao(data.tem_refeicao ?? true)
-          setRefeicao(Number(data.refeicao ?? 0))
-        }
-      })
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase.from('configuracoes').select('*')
+        .eq('usuario_id', user.id).limit(1)
+        .then(({ data }) => {
+          const cfg = data?.[0]
+          if (!cfg) return
+          const real = Number(cfg.salario_real ?? 0)
+          setSalarioReal(real > 0 ? real : Number(cfg.salario_base ?? 0))
+          setTemValeAlimentacao(cfg.tem_vale_alimentacao ?? true)
+          setValeAlimentacao(Number(cfg.vale_alimentacao ?? 0))
+          setTemRefeicao(cfg.tem_refeicao ?? true)
+          setRefeicao(Number(cfg.refeicao ?? 0))
+        })
+    })
   }, [])
 
   useEffect(() => { carregar(); carregarOrcamento(); carregarLembretes(); carregarRecorrentes() }, [mes, ano])
@@ -184,10 +190,11 @@ export default function DespesasMensais() {
       ? new Date(ano + 1, 0, 1).toISOString().split('T')[0]
       : new Date(ano, mes, 1).toISOString().split('T')[0]
     const { data } = await supabase.from('transacoes').select('*')
-      .eq('tipo', 'despesa')
       .gte('data_transacao', inicio).lt('data_transacao', fim)
       .order('data_transacao', { ascending: false })
-    setTransacoes(data || [])
+    const todas = data || []
+    setTransacoes(todas.filter(t => t.tipo?.toLowerCase() === 'despesa'))
+    setReceitas(todas.filter(t => t.tipo?.toLowerCase() === 'receita'))
   }
 
   async function handleFormSubmit(e: React.FormEvent) {
@@ -244,9 +251,10 @@ export default function DespesasMensais() {
   }
 
   const totalDespesas = transacoes.reduce((s, t) => s + Number(t.valor), 0)
+  const receitasTransacoes = receitas.reduce((s, t) => s + Number(t.valor), 0)
   const va = temValeAlimentacao ? valeAlimentacao : 0
   const ref = temRefeicao ? refeicao : 0
-  const receitasTotal = salarioReal + va + ref
+  const receitasTotal = salarioReal + receitasTransacoes + va + ref
   const percGasto = receitasTotal > 0 ? (totalDespesas / receitasTotal) * 100 : 0
   const saldoLivre = receitasTotal - totalDespesas
 
@@ -811,7 +819,7 @@ export default function DespesasMensais() {
               <ResponsiveContainer width="100%" height={190}>
                 <RePieChart>
                   <Pie data={[
-                    { name: 'Gasto', value: totalDespesas },
+                    { name: 'Gasto', value: Math.min(totalDespesas, receitasTotal) },
                     { name: 'Disponível', value: Math.max(saldoLivre, 0) },
                   ]} dataKey="value" innerRadius={55} outerRadius={80}
                     startAngle={90} endAngle={-270}>
@@ -827,20 +835,43 @@ export default function DespesasMensais() {
             </div>
           </div>
           <div className="space-y-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm text-white/50">Gasto / Receitas</span>
-              <span className="text-sm font-semibold text-white">
-                {formatar(totalDespesas)} / {formatar(receitasTotal)}
-              </span>
-            </div>
-            {receitasTotal > 0 && (
-              <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(percGasto, 100)}%`,
-                    background: 'linear-gradient(90deg, #FF2E9A, #A855F7, #00D4FF)',
-                  }} />
+            {receitasTotal <= 0 ? (
+              <div className="text-center py-4">
+                <AlertCircle className="w-8 h-8 text-accent-pink mx-auto mb-2" />
+                <p className="text-sm text-white/80">Nenhuma receita configurada para {MESES_PT[mes - 1]}/{ano}</p>
+                <p className="text-xs text-white/40 mt-1">
+                  Cadastre seu salário em Configurações e adicione receitas do mês para calcular a relação.
+                </p>
               </div>
+            ) : (
+              <>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm text-white/50">Gasto / Receitas</span>
+                  <span className="text-sm font-semibold text-white">
+                    {formatar(totalDespesas)} / {formatar(receitasTotal)}
+                  </span>
+                </div>
+                <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(percGasto, 100)}%`,
+                      background: 'linear-gradient(90deg, #FF2E9A, #A855F7, #00D4FF)',
+                    }} />
+                </div>
+                <div className="space-y-1 pt-1">
+                  {[
+                    { label: 'Salário', valor: salarioReal },
+                    { label: 'Receitas do mês', valor: receitasTransacoes },
+                    { label: 'Vale alimentação', valor: va },
+                    { label: 'Refeição', valor: ref },
+                  ].filter(r => r.valor > 0).map(r => (
+                    <div key={r.label} className="flex items-baseline justify-between text-xs">
+                      <span className="text-white/50">{r.label}</span>
+                      <span className="text-white/70">{formatar(r.valor)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <div className="text-center">
