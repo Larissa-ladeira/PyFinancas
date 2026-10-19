@@ -65,6 +65,8 @@ export default function Receitas() {
   const [salario, setSalario] = useState('')
   const [salarioReal, setSalarioReal] = useState('')
   const [pagoPorQuinzena, setPagoPorQuinzena] = useState(false)
+  const [valor5, setValor5] = useState('')
+  const [valor20, setValor20] = useState('')
   const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
   const [valeAlimentacao, setValeAlimentacao] = useState('')
   const [temRefeicao, setTemRefeicao] = useState(true)
@@ -92,6 +94,8 @@ export default function Receitas() {
         setSalario(String(data.salario_base ?? ''))
         setSalarioReal(String(data.salario_real ?? ''))
         setPagoPorQuinzena(data.pago_por_quinzena ?? false)
+        setValor5(String(data.valor_quinzena_5_dia_util ?? ''))
+        setValor20(String(data.valor_quinzena_dia_20 ?? ''))
         setTemValeAlimentacao(data.tem_vale_alimentacao ?? true)
         setValeAlimentacao(String(data.vale_alimentacao ?? ''))
         setTemRefeicao(data.tem_refeicao ?? true)
@@ -139,6 +143,8 @@ export default function Receitas() {
       salario_base: parseFloat(salario) || 0,
       salario_real: parseFloat(salarioReal) || 0,
       pago_por_quinzena: pagoPorQuinzena,
+      valor_quinzena_5_dia_util: pagoPorQuinzena ? (parseFloat(valor5) || 0) : 0,
+      valor_quinzena_dia_20: pagoPorQuinzena ? (parseFloat(valor20) || 0) : 0,
       tem_vale_alimentacao: temValeAlimentacao,
       vale_alimentacao: temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0,
       tem_refeicao: temRefeicao,
@@ -164,19 +170,22 @@ export default function Receitas() {
   ).reduce((s, t) => s + Number(t.valor), 0)
   const salarioBaseNum = parseFloat(salario) || 0
   const salarioRealNum = parseFloat(salarioReal) || 0
+  const valor5Num = parseFloat(valor5) || 0
+  const valor20Num = parseFloat(valor20) || 0
+  const somaQuinzena = valor5Num + valor20Num
+  const salarioComponente = pagoPorQuinzena && somaQuinzena > 0 ? somaQuinzena : salarioRealNum
   const va = temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0
   const ref = temRefeicao ? (parseFloat(refeicao) || 0) : 0
-  const receitasTotal = salarioRealNum + totalRec + va + ref
+  const receitasTotal = salarioComponente + totalRec + va + ref
   const totalInvestido = investimentos.reduce((s, i) => s + Number(i.valor_investido), 0)
   const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
   const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
   const patrimonioLiquido = totalAtual + saldoBancario
   const percGasto = receitasTotal > 0 ? (despesasMes / receitasTotal) * 100 : 0
 
-  const salarioEfetivo = salarioRealNum > 0 ? salarioRealNum : salarioBaseNum
-  const valorQuinzena = salarioEfetivo / 2
   const dataPrimeiraQuinzena = quintoDiaUtil(anoAtual, mesAtual)
-  const dataSegundaQuinzena = new Date(anoAtual, mesAtual - 1, 21)
+  const dataSegundaQuinzena = new Date(anoAtual, mesAtual - 1, 20)
+  const totalQuinzena = somaQuinzena > 0 ? somaQuinzena : (salarioRealNum > 0 ? salarioRealNum : salarioBaseNum)
 
   return (
     <div className="space-y-6">
@@ -205,10 +214,25 @@ export default function Receitas() {
               <span className="text-sm font-medium text-white/60">Recebo por quinzena (2x no mês)</span>
             </label>
             <p className="text-xs text-white/30">
-              {pagoPorQuinzena ? 'O salário é dividido em duas parcelas iguais: 5º dia útil e dia 21.' : 'Salário pago em uma única vez no mês.'}
+              {pagoPorQuinzena ? 'Salário no 5º dia útil e adiantamento no dia 20.' : 'Salário pago em uma única vez no mês.'}
             </p>
           </div>
-          <div className="hidden sm:block" />
+          {pagoPorQuinzena ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-2">Salário (5º dia útil)</label>
+                <input type="number" step="0.01" min="0" placeholder="Ex: 2000,00"
+                  className="input-glass" value={valor5} onChange={e => setValor5(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/60 mb-2">Adiantamento (dia 20)</label>
+                <input type="number" step="0.01" min="0" placeholder="Ex: 1000,00"
+                  className="input-glass" value={valor20} onChange={e => setValor20(e.target.value)} />
+              </div>
+            </>
+          ) : (
+            <div className="hidden sm:block" />
+          )}
           <div>
             <label className="flex items-center gap-2 mb-2">
               <input type="checkbox" checked={temValeAlimentacao}
@@ -250,19 +274,19 @@ export default function Receitas() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-xs text-white/40 mb-1">1ª quinzena — 5º dia útil</p>
-              <p className="text-lg font-bold text-accent-blue">{formatar(valorQuinzena)}</p>
+              <p className="text-xs text-white/40 mb-1">Salário — 5º dia útil</p>
+              <p className="text-lg font-bold text-accent-blue">{formatar(valor5Num)}</p>
               <p className="text-xs text-white/30 mt-1">{dataPrimeiraQuinzena.toLocaleDateString('pt-BR')}</p>
             </div>
             <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-xs text-white/40 mb-1">2ª quinzena — dia 21</p>
-              <p className="text-lg font-bold text-accent-blue">{formatar(valorQuinzena)}</p>
+              <p className="text-xs text-white/40 mb-1">Adiantamento — dia 20</p>
+              <p className="text-lg font-bold text-accent-blue">{formatar(valor20Num)}</p>
               <p className="text-xs text-white/30 mt-1">{dataSegundaQuinzena.toLocaleDateString('pt-BR')}</p>
             </div>
           </div>
           <div className="flex items-center justify-between text-sm mt-4 pt-4 border-t border-white/5">
             <span className="text-white/50">Total por mês</span>
-            <span className="font-semibold text-white">{formatar(salarioEfetivo)}</span>
+            <span className="font-semibold text-white">{formatar(totalQuinzena)}</span>
           </div>
         </div>
       )}
@@ -339,7 +363,7 @@ export default function Receitas() {
         <div className="metric-card metric-card-receita">
           <div className="metric-label text-accent-blue/60 mb-1">Total Receitas (mês)</div>
           <div className="metric-value !text-2xl text-accent-blue">{formatar(receitasTotal)}</div>
-          <div className="text-xs text-white/30 mt-1">Salário Real + Extras (mês) + VA + Refeição</div>
+          <div className="text-xs text-white/30 mt-1">Salário + Extras (mês) + VA + Refeição</div>
         </div>
         <div className="metric-card">
           <div className="metric-label text-white/40 mb-1">Total Investido</div>
