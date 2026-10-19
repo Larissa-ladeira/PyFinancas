@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatar } from '../lib/format'
-import type { Transacao, Conta, Investimento } from '../types'
+import type { Conta } from '../types'
 import { TIPOS_CONTA } from '../types'
-import { Save, Bell, User, Building2, Plus, Trash2, Pencil, DollarSign, ShieldCheck, ShieldOff, Copy, Check } from 'lucide-react'
+import { Bell, User, Building2, Plus, Trash2, Pencil, ShieldCheck, ShieldOff, Copy, Check } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Configuracoes() {
-  const [salario, setSalario] = useState('')
-  const [salarioReal, setSalarioReal] = useState('')
-  const [temValeAlimentacao, setTemValeAlimentacao] = useState(true)
-  const [valeAlimentacao, setValeAlimentacao] = useState('')
-  const [temRefeicao, setTemRefeicao] = useState(true)
-  const [refeicao, setRefeicao] = useState('')
-  const [configId, setConfigId] = useState<number | null>(null)
-  const [todas, setTodas] = useState<Transacao[]>([])
-  const [saved, setSaved] = useState(false)
   const [usuarioId, setUsuarioId] = useState<string | null>(null)
 
   const [notifAtivo, setNotifAtivo] = useState(false)
@@ -37,7 +28,6 @@ export default function Configuracoes() {
   ]
 
   const [contas, setContas] = useState<Conta[]>([])
-  const [investimentos, setInvestimentos] = useState<Investimento[]>([])
   const [showContaForm, setShowContaForm] = useState(false)
   const [contaNome, setContaNome] = useState('')
   const [contaTipo, setContaTipo] = useState('corrente')
@@ -65,18 +55,6 @@ export default function Configuracoes() {
         setGenero((data.user.user_metadata?.genero as string) || 'menina-negra')
       }
     })
-    supabase.from('configuracoes').select('*').single().then(({ data }) => {
-      if (data) {
-        setSalario(String(data.salario_base))
-        setSalarioReal(String(data.salario_real ?? ''))
-        setTemValeAlimentacao(data.tem_vale_alimentacao ?? true)
-        setValeAlimentacao(String(data.vale_alimentacao ?? ''))
-        setTemRefeicao(data.tem_refeicao ?? true)
-        setRefeicao(String(data.refeicao ?? ''))
-        setConfigId(data.id)
-      }
-    })
-    supabase.from('transacoes').select('*').then(({ data }) => setTodas(data || []))
     supabase.from('notificacoes').select('*').single().then(({ data }) => {
       if (data) {
         setNotifAtivo(data.ativo)
@@ -86,7 +64,6 @@ export default function Configuracoes() {
       }
     })
     carregarContas()
-    supabase.from('investimentos').select('*').then(({ data }) => setInvestimentos(data || []))
     supabase.auth.mfa.listFactors().then(({ data }) => {
       const verified = data?.all?.find(f => f.factor_type === 'totp' && f.status === 'verified')
       if (verified) {
@@ -125,22 +102,6 @@ export default function Configuracoes() {
   function editConta(c: Conta) {
     setContaNome(c.nome); setContaTipo(c.tipo); setContaSaldo(String(c.saldo))
     setContaEditId(c.id); setShowContaForm(true)
-  }
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const payload = {
-      salario_base: parseFloat(salario) || 0,
-      salario_real: parseFloat(salarioReal) || 0,
-      tem_vale_alimentacao: temValeAlimentacao,
-      vale_alimentacao: temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0,
-      tem_refeicao: temRefeicao,
-      refeicao: temRefeicao ? (parseFloat(refeicao) || 0) : 0,
-    }
-    if (configId) await supabase.from('configuracoes').update(payload).eq('id', configId)
-    else await supabase.from('configuracoes').insert({ ...payload, usuario_id: usuarioId })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   const handleProfileSave = async (e: React.FormEvent) => {
@@ -223,28 +184,6 @@ export default function Configuracoes() {
     setTimeout(() => setMfaCopied(false), 2000)
   }
 
-  const mesAtual = new Date().getMonth() + 1
-  const anoAtual = new Date().getFullYear()
-  const totalRec = todas.filter(t =>
-    t.tipo.toLowerCase() === 'receita' &&
-    new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
-    new Date(t.data_transacao).getFullYear() === anoAtual
-  ).reduce((s, t) => s + Number(t.valor), 0)
-  const despesasMes = todas.filter(t =>
-    t.tipo.toLowerCase() === 'despesa' &&
-    new Date(t.data_transacao).getMonth() + 1 === mesAtual &&
-    new Date(t.data_transacao).getFullYear() === anoAtual
-  ).reduce((s, t) => s + Number(t.valor), 0)
-  const salarioRealNum = parseFloat(salarioReal) || 0
-  const valeAlimentacaoNum = temValeAlimentacao ? (parseFloat(valeAlimentacao) || 0) : 0
-  const refeicaoNum = temRefeicao ? (parseFloat(refeicao) || 0) : 0
-  const receitasTotal = salarioRealNum + totalRec + valeAlimentacaoNum + refeicaoNum
-  const totalInvestido = investimentos.reduce((s, i) => s + Number(i.valor_investido), 0)
-  const totalAtual = investimentos.reduce((s, i) => s + Number(i.valor_atual), 0)
-  const saldoBancario = contas.reduce((s, c) => s + Number(c.saldo), 0)
-  const patrimonioLiquido = totalAtual + saldoBancario
-  const percGasto = receitasTotal > 0 ? (despesasMes / receitasTotal) * 100 : 0
-
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold text-white">Configurações</h1>
@@ -306,54 +245,6 @@ export default function Configuracoes() {
         <button type="submit" className="btn-primary flex items-center justify-center gap-2">
           <User className="w-4 h-4" />
           {profileSaved ? 'Salvo!' : 'Salvar Perfil'}
-        </button>
-      </form>
-
-      <form onSubmit={handleSave} className="glass-card p-6 space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <DollarSign className="w-5 h-5" /> Rendimentos
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-white/60 mb-2">Salário Base</label>
-            <input type="number" step="0.01" min="0" placeholder="Ex: 5000,00"
-              className="input-glass" value={salario} onChange={e => setSalario(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-white/60 mb-2">Salário Real</label>
-            <input type="number" step="0.01" min="0" placeholder="Ex: 4500,00"
-              className="input-glass" value={salarioReal} onChange={e => setSalarioReal(e.target.value)} />
-          </div>
-          <div>
-            <label className="flex items-center gap-2 mb-2">
-              <input type="checkbox" checked={temValeAlimentacao}
-                onChange={e => setTemValeAlimentacao(e.target.checked)}
-                className="w-4 h-4 accent-accent-blue" />
-              <span className="text-sm font-medium text-white/60">Vale Alimentação</span>
-            </label>
-            {temValeAlimentacao && (
-              <input type="number" step="0.01" min="0" placeholder="Ex: 600,00"
-                className="input-glass" value={valeAlimentacao}
-                onChange={e => setValeAlimentacao(e.target.value)} />
-            )}
-          </div>
-          <div>
-            <label className="flex items-center gap-2 mb-2">
-              <input type="checkbox" checked={temRefeicao}
-                onChange={e => setTemRefeicao(e.target.checked)}
-                className="w-4 h-4 accent-accent-blue" />
-              <span className="text-sm font-medium text-white/60">Refeição</span>
-            </label>
-            {temRefeicao && (
-              <input type="number" step="0.01" min="0" placeholder="Ex: 400,00"
-                className="input-glass" value={refeicao}
-                onChange={e => setRefeicao(e.target.value)} />
-            )}
-          </div>
-        </div>
-        <button type="submit" className="btn-primary flex items-center justify-center gap-2">
-          <Save className="w-4 h-4" />
-          {saved ? 'Salvo!' : 'Salvar'}
         </button>
       </form>
 
@@ -581,49 +472,6 @@ export default function Configuracoes() {
           onCancel={() => setConfirmMfaDisable(false)}
         />
       </div>
-
-      <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="metric-card metric-card-receita">
-              <div className="metric-label text-accent-blue/60 mb-1">Total Receitas (mês)</div>
-              <div className="metric-value !text-2xl text-accent-blue">{formatar(receitasTotal)}</div>
-              <div className="text-xs text-white/30 mt-1">Salário Real + Extras (mês) + VA + Refeição</div>
-            </div>
-            <div className="metric-card">
-              <div className="metric-label text-white/40 mb-1">Total Investido</div>
-              <div className="metric-value !text-2xl text-white">{formatar(totalInvestido)}</div>
-            </div>
-            <div className="metric-card metric-card-despesa">
-              <div className="metric-label text-accent-pink/60 mb-1">Total Despesas (mês)</div>
-              <div className="metric-value !text-2xl text-accent-pink">{formatar(despesasMes)}</div>
-            </div>
-            <div className={`metric-card ${patrimonioLiquido >= 0 ? 'metric-card-receita' : 'metric-card-despesa'}`}>
-              <div className={`metric-label mb-1 ${patrimonioLiquido >= 0 ? 'text-accent-blue/60' : 'text-accent-pink/60'}`}>Patrimônio Líquido</div>
-              <div className={`metric-value !text-2xl ${patrimonioLiquido >= 0 ? 'text-accent-blue' : 'text-accent-pink'}`}>
-                {formatar(patrimonioLiquido)}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-5">
-            <h3 className="font-semibold text-white/70 mb-3">📊 Gastos vs Salário</h3>
-            <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${percGasto > 100 ? 'bg-accent-pink' : 'bg-accent-blue'}`}
-                style={{ width: `${Math.min(percGasto, 100)}%` }} />
-            </div>
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm text-white/50">Gasto no mês</span>
-              <span className="text-sm font-semibold text-white">{formatar(despesasMes)}</span>
-            </div>
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm text-white/50">Salário + benefícios</span>
-              <span className="text-sm font-semibold text-white">{formatar(receitasTotal)}</span>
-            </div>
-            <p className="text-sm text-white/40 mt-2">
-              Você já gastou <strong className="text-white/70">{percGasto.toFixed(1)}%</strong> do seu salário em despesas
-            </p>
-          </div>
-        </>
     </div>
   )
 }
