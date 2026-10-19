@@ -5,11 +5,12 @@ import { registerPushNotifications } from '../lib/notifications'
 import {
   LayoutDashboard, ListOrdered, Settings,
   LogOut, Menu, DollarSign, PiggyBank, TrendingDown, TrendingUp, Handshake, Target,
-  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon, Repeat
+  CalendarDays, BarChart3, TrendingUp as InvestmentIcon, Bell, X, Sun, Moon, Repeat, Banknote
 } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/receitas', label: 'Receitas', icon: Banknote },
   { to: '/despesas', label: 'Despesas', icon: TrendingDown },
   { to: '/renda-extra', label: 'Renda Extra', icon: TrendingUp },
   { to: '/dividas', label: 'Desfudência', icon: PiggyBank },

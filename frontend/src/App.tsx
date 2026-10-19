@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import Dashboard from './pages/Dashboard'
 import Extrato from './pages/Extrato'
 import Configuracoes from './pages/Configuracoes'
+import Receitas from './pages/Receitas'
 
 import Dividas from './pages/Dividas'
 import DespesasMensais from './pages/DespesasMensais'
@@ -111,6 +112,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/extrato" element={<Extrato />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/receitas" element={<Receitas />} />
 
           <Route path="/dividas" element={<Dividas />} />
           <Route path="/despesas" element={<DespesasMensais />} />
