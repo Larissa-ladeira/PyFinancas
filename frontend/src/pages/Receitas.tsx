@@ -6,6 +6,61 @@ import { TIPOS_CONTA } from '../types'
 import { Save, Building2, Plus, Trash2, Pencil, CalendarClock, Wallet, Banknote } from 'lucide-react'
 import ConfirmDialog from '../components/ConfirmDialog'
 
+function paraISO(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function calcularPascoa(ano: number) {
+  const a = ano % 19
+  const b = Math.floor(ano / 100)
+  const c = ano % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const mes = Math.floor((h + l - 7 * m + 114) / 31)
+  const dia = ((h + l - 7 * m + 114) % 31) + 1
+  return new Date(ano, mes - 1, dia)
+}
+
+function feriadosNacionais(ano: number) {
+  const feriados = new Set([
+    `${ano}-01-01`,
+    `${ano}-04-21`,
+    `${ano}-05-01`,
+    `${ano}-09-07`,
+    `${ano}-10-12`,
+    `${ano}-11-02`,
+    `${ano}-11-15`,
+    `${ano}-11-20`,
+    `${ano}-12-25`,
+  ])
+  const sextaSanta = calcularPascoa(ano)
+  sextaSanta.setDate(sextaSanta.getDate() - 2)
+  feriados.add(paraISO(sextaSanta))
+  return feriados
+}
+
+function quintoDiaUtil(ano: number, mes: number) {
+  const feriados = feriadosNacionais(ano)
+  let dia = 1
+  let uteis = 0
+  while (true) {
+    const data = new Date(ano, mes - 1, dia)
+    const diaSemana = data.getDay()
+    if (diaSemana !== 0 && diaSemana !== 6 && !feriados.has(paraISO(data))) {
+      uteis++
+      if (uteis === 5) return data
+    }
+    dia++
+  }
+}
+
 export default function Receitas() {
   const [salario, setSalario] = useState('')
   const [salarioReal, setSalarioReal] = useState('')
@@ -120,7 +175,8 @@ export default function Receitas() {
 
   const salarioEfetivo = salarioRealNum > 0 ? salarioRealNum : salarioBaseNum
   const valorQuinzena = salarioEfetivo / 2
-  const ultimoDiaMes = new Date(anoAtual, mesAtual, 0).getDate()
+  const dataPrimeiraQuinzena = quintoDiaUtil(anoAtual, mesAtual)
+  const dataSegundaQuinzena = new Date(anoAtual, mesAtual - 1, 21)
 
   return (
     <div className="space-y-6">
@@ -149,7 +205,7 @@ export default function Receitas() {
               <span className="text-sm font-medium text-white/60">Recebo por quinzena (2x no mês)</span>
             </label>
             <p className="text-xs text-white/30">
-              {pagoPorQuinzena ? 'O salário é dividido em duas parcelas iguais.' : 'Salário pago em uma única vez no mês.'}
+              {pagoPorQuinzena ? 'O salário é dividido em duas parcelas iguais: 5º dia útil e dia 21.' : 'Salário pago em uma única vez no mês.'}
             </p>
           </div>
           <div className="hidden sm:block" />
@@ -194,12 +250,14 @@ export default function Receitas() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-xs text-white/40 mb-1">1ª quinzena — dia 15</p>
+              <p className="text-xs text-white/40 mb-1">1ª quinzena — 5º dia útil</p>
               <p className="text-lg font-bold text-accent-blue">{formatar(valorQuinzena)}</p>
+              <p className="text-xs text-white/30 mt-1">{dataPrimeiraQuinzena.toLocaleDateString('pt-BR')}</p>
             </div>
             <div className="bg-white/5 rounded-xl p-4">
-              <p className="text-xs text-white/40 mb-1">2ª quinzena — dia {ultimoDiaMes}</p>
+              <p className="text-xs text-white/40 mb-1">2ª quinzena — dia 21</p>
               <p className="text-lg font-bold text-accent-blue">{formatar(valorQuinzena)}</p>
+              <p className="text-xs text-white/30 mt-1">{dataSegundaQuinzena.toLocaleDateString('pt-BR')}</p>
             </div>
           </div>
           <div className="flex items-center justify-between text-sm mt-4 pt-4 border-t border-white/5">
